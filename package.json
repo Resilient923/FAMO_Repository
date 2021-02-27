@@ -1,5 +1,5 @@
 {
-  "name": "api-server-node",
+  "name": "pk-default",
   "version": "1.0.0",
   "description": "Node.js API Server",
   "main": "index.js",
@@ -21,9 +21,10 @@
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
-    "mysql2": "^2.0.0",
+    "mysql2": "^2.2.5",
     "regex-email": "^1.0.2",
-    "winston": "^3.2.1",
+    "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.2.1"
-  }
+  },
+  "devDependencies": {}
 }

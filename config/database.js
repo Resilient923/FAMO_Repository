@@ -1,12 +1,13 @@
 const mysql = require('mysql2/promise');
+const databaseInfo = require('./databasepwd');
 const {logger} = require('./winston');
 
 const pool = mysql.createPool({
     host: '127.0.0.1',
-    user: 'root',
+    user: 'soi',
     port: 3306,
-    password: '111111',
-    database: 'test'
+    password: databaseInfo.pwd,
+    database: 'myportfoliodb'
 });
 
 module.exports = {
