@@ -6,10 +6,8 @@ exports.default = async function (req, res) {
         const connection = await pool.getConnection(async conn => conn);
         try {
             const [rows] = await connection.query(
-                `
-                SELECT id, email, nickname, createdAt, updatedAt 
-                FROM UserInfo
-                `
+                `SELECT id, email, nickname, createdAt, updatedAt 
+                FROM UserInfo`
             );
             connection.release();
             return res.json(rows);

@@ -9,6 +9,7 @@ exports.default = async function (req, res) {
         try {
             const [rows] = await indexDao.defaultDao();
             return res.json(rows);
+            
         } catch (err) {
             logger.error(`example non transaction Query error\n: ${JSON.stringify(err)}`);
             connection.release();
