@@ -64,12 +64,13 @@ exports.signUp = async function (req, res) {
 
             // TRANSACTION : advanced
            // await connection.beginTransaction(); // START TRANSACTION
-            const passwordHash = crypto.createHash('sha512').update(password).digest('hex');
-            const insertUserInfoParams = [loginID, passwordHash, nickname, phoneNumber, 'F'];
-            
-            const insertUserRowsId = await userDao.insertUserInfo(insertUserInfoParams);
-            
+            const passwordSalt = crypto.randomBytes(64).toString('base64');
+            const passwordHash = crypto.pbkdf2Sync(password, passwordSalt, 101024, 64, 'sha512').toString('base64');
 
+            const insertUserInfoParams = [loginID, passwordHash, passwordSalt, nickname, phoneNumber, 'F'];
+            const insertUserRowsId = await userDao.insertUserInfo(insertUserInfoParams);
+            const [userInfoRows] = await userDao.selectUserInfo(loginID);
+            
             let token = jwt.sign({
                 userID: insertUserRowsId,
                 method: 'F'
@@ -83,14 +84,14 @@ exports.signUp = async function (req, res) {
            //  await connection.commit(); // COMMIT
            // connection.release();
             return res.json({
+                nickname: userInfoRows[0].nickname,
                 jwt: token,
                 isSuccess: true,
                 code: 100,
                 message: "회원가입 성공"
             });
         } catch (err) {
-           // await connection.rollback(); // ROLLBACK
-            
+           // await connection.rollback(); // ROLLBACK           
             logger.error(`App - SignUp Query error\n: ${err.message}`);
             connection.release();
             return res.status(500).send(`Error: ${err.message}`);
@@ -101,74 +102,74 @@ exports.signUp = async function (req, res) {
     }
 };
 
+/* 로그인 API */
 exports.signIn = async function (req, res) {
     const {
         loginID, password
     } = req.body;
 
-    if (!loginID) return res.json({isSuccess: false, code: 301, message: "이메일을 입력해주세요."});
-    if (email.length > 30) return res.json({
-        isSuccess: false,
-        code: 302,
-        message: "이메일은 30자리 미만으로 입력해주세요."
+    if (!loginID) return res.json({
+        isSuccess: false, 
+        code: 201, 
+        message: "아이디를 입력해주세요."
     });
 
-    if (!regexEmail.test(email)) return res.json({isSuccess: false, code: 303, message: "이메일을 형식을 정확하게 입력해주세요."});
+    if (!password) return res.json({
+        isSuccess: false, 
+        code: 202, 
+        message: "비밀번호를 입력해주세요."
+    });
 
-    if (!password) return res.json({isSuccess: false, code: 304, message: "비밀번호를 입력 해주세요."});
+    try {
+        const connection = await pool.getConnection(async conn => conn);
         try {
-            const [userInfoRows] = await userDao.selectUserInfo(email)
+            const [userInfoRows] = await userDao.selectUserInfo(loginID);
 
-            if (userInfoRows.length < 1) {
+            if (userInfoRows.length == 0) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
-                    code: 310,
+                    code: 303,
                     message: "아이디를 확인해주세요."
                 });
             }
 
-            const hashedPassword = await crypto.createHash('sha512').update(password).digest('hex');
-            if (userInfoRows[0].pswd !== hashedPassword) {
+            const passwordHash = crypto.pbkdf2Sync(password, userInfoRows[0].passwordSalt, 101024, 64, 'sha512').toString('base64');
+            
+            if (userInfoRows[0].password !== passwordHash) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
-                    code: 311,
+                    code: 304,
                     message: "비밀번호를 확인해주세요."
                 });
             }
-            if (userInfoRows[0].status === "INACTIVE") {
+            if (userInfoRows[0].status === 0) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
-                    code: 312,
-                    message: "비활성화 된 계정입니다. 고객센터에 문의해주세요."
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
                 });
-            } else if (userInfoRows[0].status === "DELETED") {
-                connection.release();
-                return res.json({
-                    isSuccess: false,
-                    code: 313,
-                    message: "탈퇴 된 계정입니다. 고객센터에 문의해주세요."
-                });
-            }
+            };
+
             //토큰 생성
-            let token = await jwt.sign({
+            let token = jwt.sign({
                     id: userInfoRows[0].userID,
                     method: userInfoRows[0].method
                 }, // 토큰의 내용(payload)
                 secret_config.jwtsecret, // 비밀 키
                 {
-                    expiresIn: '365d',
+                    expiresIn: '14d',
                     subject: 'userInfo',
-                } // 유효 시간은 365일
+                } // 유효 시간은 14일
             );
 
             res.json({
-                userInfo: userInfoRows[0],
+                nickname: userInfoRows[0].nickname,
                 jwt: token,
                 isSuccess: true,
-                code: 200,
+                code: 100,
                 message: "로그인 성공"
             });
 
@@ -178,12 +179,12 @@ exports.signIn = async function (req, res) {
             connection.release();
             return false;
         }
+     } catch (err) {
+        logger.error(`non transaction DB Connection error\n: ${JSON.stringify(err)}`);
+        return false;
+     }
 };
 
-/**
- update : 2019.09.23
- 03.check API = token 검증
- **/
 exports.check = async function (req, res) {
     res.json({
         isSuccess: true,

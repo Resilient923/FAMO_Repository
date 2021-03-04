@@ -27,7 +27,7 @@ const jwtMiddleware = (req, res, next) => {
         res.status(403).json({
             isSuccess:false,
             code: 403,
-            message:"검증 실패"
+            message:"jwt 토큰 검증 실패"
         });
     };
 

@@ -2,13 +2,16 @@ const {pool} = require('../../../config/database');
 const {logger} = require('../../../config/winston');
 
 const indexDao = require('../dao/indexDao');
+const jwtMiddleware = require('../../../config/jwtMiddleware');
 
 exports.default = async function (req, res) {
     try {
         const connection = await pool.getConnection(async conn => conn);
         try {
-            const userIDInToken = jwt.decode(verifiedToken);
+            const userIDInToken = req.verifiedToken.userID;
+            const loginMethod = req.verifiedToken.method;
             const [rows] = await indexDao.defaultDao(userIDInToken);
+
             return res.json(rows);
             
         } catch (err) {

@@ -37,9 +37,10 @@ async function checkPhoneNumber(phoneNumber) {
 async function insertUserInfo(insertUserInfoParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertUserInfoQuery = `
-  INSERT INTO user (loginID, password, nickname, phoneNumber, method)
-  VALUES (?, ?, ?, ?, ?);
+    INSERT INTO user (loginID, password, passwordSalt, nickname, phoneNumber, method) 
+    VALUES (?, ?, ?, ?, ?, ?);
     `;
+  
   const insertUserInfoRow = await connection.query(
     insertUserInfoQuery,
     insertUserInfoParams
@@ -49,15 +50,16 @@ async function insertUserInfo(insertUserInfoParams) {
 }
 
 //SignIn
-async function selectUserInfo(email) {
+async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
-                SELECT id, email , pswd, nickname, status 
-                FROM UserInfo 
-                WHERE email = ?;
+                SELECT userID, password, passwordSalt, nickname, phoneNumber, profileImage, 
+                method, kakaoAccessToken, status 
+                FROM user
+                WHERE loginID = ?;
                 `;
 
-  let selectUserInfoParams = [email];
+  let selectUserInfoParams = [loginID];
   const [userInfoRows] = await connection.query(
     selectUserInfoQuery,
     selectUserInfoParams
