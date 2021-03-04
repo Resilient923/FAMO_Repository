@@ -1,51 +1,51 @@
 const { pool } = require("../../../config/database");
 
 // Signup
-async function userEmailCheck(email) {
+async function checkUserLoginID(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const selectEmailQuery = `
-                SELECT email, nickname 
-                FROM UserInfo 
-                WHERE email = ?;
+  const existLoginIDQuery = `
+                SELECT EXISTS ( 
+                SELECT * FROM user WHERE loginID = ?) 
+                AS exist;
                 `;
-  const selectEmailParams = [email];
-  const [emailRows] = await connection.query(
-    selectEmailQuery,
-    selectEmailParams
+  let loginIDParams = [loginID];
+  const [loginIDRows] = await connection.query(
+    existLoginIDQuery,
+    loginIDParams
   );
   connection.release();
 
-  return emailRows;
+  return loginIDRows;
 }
 
-async function userNicknameCheck(nickname) {
+async function checkPhoneNumber(phoneNumber) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const selectNicknameQuery = `
-                SELECT email, nickname 
-                FROM UserInfo 
-                WHERE nickname = ?;
+  const existPhoneNumberQuery = `
+                SELECT EXISTS ( 
+                SELECT * FROM user WHERE phoneNumber = ?) 
+                AS exist;
                 `;
-  const selectNicknameParams = [nickname];
-  const [nicknameRows] = await connection.query(
-    selectNicknameQuery,
-    selectNicknameParams
+  let phoneNumberParams = [phoneNumber];
+  const [phoneNumberRows] = await connection.query(
+    existPhoneNumberQuery,
+    phoneNumberParams
   );
   connection.release();
-  return nicknameRows;
+  return phoneNumberRows;
 }
 
 async function insertUserInfo(insertUserInfoParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertUserInfoQuery = `
-        INSERT INTO UserInfo(email, pswd, nickname)
-        VALUES (?, ?, ?);
+  INSERT INTO user (loginID, password, nickname, phoneNumber, method)
+  VALUES (?, ?, ?, ?, ?);
     `;
   const insertUserInfoRow = await connection.query(
     insertUserInfoQuery,
     insertUserInfoParams
   );
   connection.release();
-  return insertUserInfoRow;
+  return insertUserInfoRow[0].insertId;
 }
 
 //SignIn
@@ -66,8 +66,9 @@ async function selectUserInfo(email) {
 }
 
 module.exports = {
-  userEmailCheck,
-  userNicknameCheck,
+  checkUserLoginID,
+  checkPhoneNumber,
   insertUserInfo,
   selectUserInfo,
 };
+
