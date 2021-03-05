@@ -1,16 +1,25 @@
 const { pool } = require("../../../config/database");
 
-// index
-async function defaultDao() {
+// 일정생성
+async function insertscheduleInfo(insertscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const selectEmailQuery = `SELECT id, email, nickname, createdAt, updatedAt FROM UserInfo `;
+  const insertscheduleQuery = `
+  insert into schedule(userID, scheduleName, scheduleDate,
+    scheduleCategoryID, scheduleMemo, scheduleStatus,
+    scheduleDelete,scheduleCreatedAt,scheduleUpdatedAt,schedulePick)
+    values(?,?,?,?,?,default,default,default,default
+           ,default)
+  `;
 
-  const [rows] = await connection.query(selectEmailQuery);
+  const [insertschedulerows] = await connection.query(
+    insertscheduleQuery,
+    insertscheduleParams
+  );
   connection.release();
 
-  return rows;
+  return  insertschedulerows;
 }
 
 module.exports = {
-  defaultDao
+  insertscheduleInfo
 };

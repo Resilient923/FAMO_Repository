@@ -22,9 +22,10 @@
     "jsonwebtoken": "^8.5.1",
     "method-override": "^3.0.0",
     "mysql2": "^2.2.5",
+    "promise": "^8.1.0",
     "regex-email": "^1.0.2",
     "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.2.1"
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "devDependencies": {}
 }
