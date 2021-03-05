@@ -20,6 +20,15 @@ const pool = mysql.createPool({
 //     database: 'famodb'
 // });
 
+/*steady local test DB*/
+// const pool = mysql.createPool({
+//     host: '127.0.0.1',
+//     user: 'root',
+//     port: 3306,
+//     password: databaseInfo.steadypwd,
+//     database: 'famo'
+// });
+
 module.exports = {
     pool: pool
 };
