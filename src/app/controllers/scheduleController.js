@@ -31,7 +31,7 @@ exports.insertschedule = async function (req, res) {
     try {
         // 일정생성
         const insertscheduleParams = [userID, scheduleName, scheduleDate, scheduleCategoryID,scheduleMemo];
-        const insertStoryInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
+        const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
 
         return res.json({
             isSuccess: true,
