@@ -9,6 +9,11 @@ const secret_config = require('../../../config/secret');
 const userDao = require('../dao/userDao');
 const { constants } = require('buffer');
 
+process.env.AWS_SDK_LOAD_CONFIG = true;
+const AWS = require('aws-sdk');
+const fs = require('fs');
+const path = require('path');
+
 /* 회원가입 API */
 exports.signUp = async function (req, res) {
     const {
@@ -77,13 +82,14 @@ exports.signUp = async function (req, res) {
               }, // 토큰의 내용(payload)
                 secret_config.jwtsecret, // 비밀 키
               {
-                expiresIn: '14d',
+                expiresIn: '365d',
                 subject: 'userInfo'
-              } // 유효 시간은 14일
+              } // 유효 시간은 365일
             );
            //  await connection.commit(); // COMMIT
            // connection.release();
             return res.json({
+                userID: userInfoRows[0].userID,
                 nickname: userInfoRows[0].nickname,
                 jwt: token,
                 isSuccess: true,
@@ -160,12 +166,13 @@ exports.signIn = async function (req, res) {
                 }, // 토큰의 내용(payload)
                 secret_config.jwtsecret, // 비밀 키
                 {
-                    expiresIn: '14d',
+                    expiresIn: '365d',
                     subject: 'userInfo',
                 } // 유효 시간은 14일
             );
 
             res.json({
+                userID: userInfoRows[0].userID,
                 nickname: userInfoRows[0].nickname,
                 jwt: token,
                 isSuccess: true,
@@ -193,3 +200,29 @@ exports.check = async function (req, res) {
         info: req.verifiedToken
     })
 };
+
+// exports.addProfileImage = async function (req, res) {
+//     const s3 = new AWS.S3({apiVersion: '2006-03-01'});
+//     const uploadParams = {Bucket: 'soibucket/' , Key: '', Body: ''};
+
+//     const {
+//         profileImage
+//     } = req.body;
+
+//     const fileStream = fs.createReadStream(profileImage);
+//     fileStream.on('error', function(err){
+//         console.log('File Error', err);
+//     })
+
+//     uploadParams.Body = fileStream;
+//     uploadParams.Key = path.basename(profileImage);
+
+//     s3.upload (uploadParams, function (err, data) {
+//       if (err) {
+//           console.log("Upload Error", err);
+//       }  if (data) {
+//           console.log("Upload Success", data.Location);
+//       }
+//     });
+//
+//}
