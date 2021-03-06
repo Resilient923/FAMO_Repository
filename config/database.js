@@ -20,13 +20,13 @@ const {logger} = require('./winston');
 //     database: 'famodb'
 // });
 
-/* steady local test DB */
+/* steady test DB */
 const pool = mysql.createPool({
-    host: '127.0.0.1',
-     user: 'root',
+    host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
+     user: 'steady',
      port: 3306,
-     password: databaseInfo.steadypwd,
-     database: 'famo'
+     password: databaseInfo.rdspwd,
+     database: 'famo_steady'
  });
 
 module.exports = {
