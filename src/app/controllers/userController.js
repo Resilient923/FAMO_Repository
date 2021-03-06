@@ -9,11 +9,6 @@ const secret_config = require('../../../config/secret');
 const userDao = require('../dao/userDao');
 const { constants } = require('buffer');
 
-process.env.AWS_SDK_LOAD_CONFIG = true;
-const AWS = require('aws-sdk');
-const fs = require('fs');
-const path = require('path');
-
 /* 회원가입 API */
 exports.signUp = async function (req, res) {
     const {
@@ -195,34 +190,16 @@ exports.signIn = async function (req, res) {
 exports.check = async function (req, res) {
     res.json({
         isSuccess: true,
-        code: 200,
+        code: 100,
         message: "검증 성공",
         info: req.verifiedToken
     })
 };
 
-// exports.addProfileImage = async function (req, res) {
-//     const s3 = new AWS.S3({apiVersion: '2006-03-01'});
-//     const uploadParams = {Bucket: 'soibucket/' , Key: '', Body: ''};
-
-//     const {
-//         profileImage
-//     } = req.body;
-
-//     const fileStream = fs.createReadStream(profileImage);
-//     fileStream.on('error', function(err){
-//         console.log('File Error', err);
-//     })
-
-//     uploadParams.Body = fileStream;
-//     uploadParams.Key = path.basename(profileImage);
-
-//     s3.upload (uploadParams, function (err, data) {
-//       if (err) {
-//           console.log("Upload Error", err);
-//       }  if (data) {
-//           console.log("Upload Success", data.Location);
-//       }
-//     });
-//
-//}
+exports.uploadProfileImage = async function (req, res) {
+    res.json({
+        isSuccess: true,
+        code: 100,
+        message: "프로필 사진 업로드 성공"
+    })
+};
