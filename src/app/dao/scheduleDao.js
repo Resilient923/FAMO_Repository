@@ -42,7 +42,7 @@ async function updatescheduleInfo(updatescheduleParams) {
   return updatescheduleRow;
 }
 //일정 조회
-async function getscheduleInfo(updatescheduleParams) {
+async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updatescheduleQuery = `
         
@@ -52,7 +52,7 @@ async function getscheduleInfo(updatescheduleParams) {
        scheduleName,
        scheduleMemo,
        schedulePick
-    from schedule where scheduleDelete = 1;
+    from schedule where scheduleDelete = 1 and where userID ='${userID}';
     
     `;
   
