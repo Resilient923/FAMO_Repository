@@ -4,6 +4,7 @@ const {logger} = require('../../../config/winston');
 const jwt = require('jsonwebtoken');
 const regexEmail = require('regex-email');
 const crypto = require('crypto');
+const request = require('request');
 const secret_config = require('../../../config/secret');
 
 const userDao = require('../dao/userDao');
@@ -187,15 +188,86 @@ exports.signIn = async function (req, res) {
      }
 };
 
-exports.check = async function (req, res) {
+/* 카카오 로그인 동의 화면 출력 API */
+exports.kakao = async function (req, res) {
+    const clientID = secret_config.kakaoClientID;
+    const url = 'http://localhost:3000/kakao/oauth'
+    res.redirect(`https://kauth.kakao.com/oauth/authorize?client_id=${clientID}&redirect_uri=${url}&response_type=code`);
+};
+
+/* 카카오 access token 발급 API */
+
+var accessToken;
+var nickname;
+var profileImage;
+var email;
+
+exports.kakaoOauth = async function (req, res){
+    const code = req.query.code;
+    const clientID = secret_config.kakaoClientID;
+    const url = 'http://localhost:3000/kakao/oauth';
+    var dataString = `grant_type=authorization_code&client_id=${clientID}&redirect_uri=${url}&code=${code}`;
+    
+    var options = {
+        url: 'https://kauth.kakao.com/oauth/token',
+        method: 'POST',
+        headers: {
+            'Host': 'kauth.kakao.com',
+            'Content-type': 'application/x-www-form-urlencoded; charset=utf-8;'
+        },
+        body: dataString,
+    };
+
+    async function callback(err, res, body) {
+        if(!err){
+            const json = JSON.parse(body);
+            accessToken = json.access_token;
+        }else{
+            logger.error(`App - Kakao Callback error\n: ${JSON.stringify(err)}`);
+        }
+    };
+    
+    request(options, callback);
+
+    var headers = {
+        'Authorization': `Bearer ${accessToken}`
+    };
+
+    var dataString = 'property_keys=["properties.thumbnail_image"]';
+
+    var options = {
+        url: 'https://kapi.kakao.com/v2/user/me',
+        method: 'POST',
+        headers: headers,
+        body: dataString
+    };
+
+    async function callbackUserInfo(err, res, body) {
+        const json = JSON.parse(body);
+        console.log(json);
+    };
+
+    request(options, callbackUserInfo);
+
     res.json({
         isSuccess: true,
         code: 100,
-        message: "검증 성공",
-        info: req.verifiedToken
+        message: "카카오톡 로그인 성공"
     })
 };
 
+/* JWT 토큰 검증 API */
+exports.check = async function (req, res) {
+    res.json({
+        userID: req.verifiedToken.userID,
+        loginMethod: req.verifiedToken.method,
+        isSuccess: true,
+        code: 100,
+        message: "jwt 토큰 검증 성공"
+    })
+};
+
+/* 프로필 사진 업로드 API */
 exports.uploadProfileImage = async function (req, res) {
     const userIDInToken = req.verifiedToken.userID;
     res.json({
