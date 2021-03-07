@@ -12,13 +12,22 @@ module.exports = function () {
     app.use(express.urlencoded({extended: true}));
 
     app.use(methodOverride());
-
     app.use(cors());
+
     // app.use(express.static(process.cwd() + '/public'));
 
     /* App (Android, iOS) */
     require('../src/app/routes/indexRoute')(app);
     require('../src/app/routes/userRoute')(app);
+    
+    
+    
+    
+    
+    
+    
+    
+    require('../src/app/routes/scheduleRoute')(app);
 
     /* Web */
     // require('../src/web/routes/indexRoute')(app);

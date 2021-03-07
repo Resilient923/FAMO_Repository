@@ -26,11 +26,12 @@
     "multer": "^1.4.2",
     "multer-s3": "^2.9.0",
     "mysql2": "^2.2.5",
+    "promise": "^8.1.0",
     "path": "^0.12.7",
     "regex-email": "^1.0.2",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
-    "winston-daily-rotate-file": "^4.2.1"
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "devDependencies": {}
 }
