@@ -9,7 +9,7 @@ const {logger} = require('./winston');
     port: 3306,
     password: databaseInfo.rdspwd,
     database: 'famodb'
-}) */
+     });
 
 /*soi local test DB*/
 // const pool = mysql.createPool({

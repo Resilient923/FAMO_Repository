@@ -1,11 +1,16 @@
 const { pool } = require("../../../config/database");
 
 // index
-async function defaultDao() {
+async function defaultDao(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const selectEmailQuery = `SELECT id, email, nickname, createdAt, updatedAt FROM UserInfo `;
+  const selectUserInfoQuery = `SELECT userID, loginID, nickname FROM user WHERE userID = ?;`;
 
-  const [rows] = await connection.query(selectEmailQuery);
+  let selectUserInfoParams = [userID];
+  const [rows] = await connection.query(
+    selectUserInfoQuery,
+    selectUserInfoParams
+  );
+  
   connection.release();
 
   return rows;
