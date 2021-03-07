@@ -96,11 +96,11 @@ exports.updateschedule = async function (req, res) {
 };
 //일정 조회
 exports.getschedule = async function (req, res) {
-    //const userID = req.t
+    const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getschedulerows = await scheduleDao.getscheduleInfo();
+        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
 
         if (getschedulerows) {
 
