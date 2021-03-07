@@ -3,13 +3,13 @@ const databaseInfo = require('./databasepwd');
 const {logger} = require('./winston');
 
 /*rds dev DB*/
-/* const pool = mysql.createPool({
+const pool = mysql.createPool({
     host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
     user: 'steady',
     port: 3306,
     password: databaseInfo.rdspwd,
     database: 'famodb'
-     });
+});
 
 /*soi local test DB*/
 // const pool = mysql.createPool({
@@ -21,13 +21,13 @@ const {logger} = require('./winston');
 // });
 
 /* steady test DB */
-const pool = mysql.createPool({
-    host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
-     user: 'steady',
-     port: 3306,
-     password: databaseInfo.rdspwd,
-     database: 'famo_steady'
- });
+// const pool = mysql.createPool({
+//     host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
+//      user: 'steady',
+//      port: 3306,
+//      password: databaseInfo.rdspwd,
+//      database: 'famo_steady'
+//  });
 
 module.exports = {
     pool: pool
