@@ -156,14 +156,14 @@ exports.signIn = async function (req, res) {
 
             //토큰 생성
             let token = jwt.sign({
-                    id: userInfoRows[0].userID,
+                    userID: userInfoRows[0].userID,
                     method: userInfoRows[0].method
                 }, // 토큰의 내용(payload)
                 secret_config.jwtsecret, // 비밀 키
                 {
                     expiresIn: '365d',
                     subject: 'userInfo',
-                } // 유효 시간은 14일
+                } // 유효 시간은 365일
             );
 
             res.json({
@@ -197,7 +197,9 @@ exports.check = async function (req, res) {
 };
 
 exports.uploadProfileImage = async function (req, res) {
+    const userIDInToken = req.verifiedToken.userID;
     res.json({
+        userID: userIDInToken,
         isSuccess: true,
         code: 100,
         message: "프로필 사진 업로드 성공"
