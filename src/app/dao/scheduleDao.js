@@ -47,12 +47,12 @@ async function getscheduleInfo(updatescheduleParams) {
   const updatescheduleQuery = `
         
   select 
-  userID,
+  scheduleID,
   date_format(scheduleDate,'%e %b') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick
-    from schedule
+    from schedule where scheduleDelete = 1;
     
     `;
   
