@@ -56,12 +56,12 @@ async function getscheduleInfo(userID) {
     
     `;
   
-  const updatescheduleRow = await connection.query(
+  const getscheduleRow = await connection.query(
     updatescheduleQuery, 
     //updatescheduleParams 
   );
   connection.release();
-  return updatescheduleRow;
+  return getscheduleRow;
 }
 //일정삭제
 async function deletescheduleInfo(scheduleID) {
