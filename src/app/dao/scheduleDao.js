@@ -44,24 +44,56 @@ async function updatescheduleInfo(updatescheduleParams) {
 //일정 조회
 async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const updatescheduleQuery = `
+  const getscheduleQuery = `
         
-  select 
-  scheduleID,
-  date_format(scheduleDate,'%e %b') as 'scheduleDate',
+  select scheduleID,
+       date_format(scheduleDate, ' %e %b'),
        scheduleName,
        scheduleMemo,
-       schedulePick
-    from schedule where scheduleDelete = 1 and userID ='${userID}';
+       schedulePick,
+       colorInfo
+from schedule
+         inner join category on schedule.userID = category.userID
+         inner join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+  and schedule.userID = '${userID}';
     
     `;
   
   const getscheduleRow = await connection.query(
-    updatescheduleQuery, 
+    getscheduleQuery, 
     //updatescheduleParams 
   );
   connection.release();
   return getscheduleRow;
+}
+//카테고리별 일정 조회
+async function getschedulebycategoryInfo(userID,categoryID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getschedulebycategoryQuery = `
+        
+  select scheduleID,
+  date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  scheduleName,
+  scheduleMemo,
+  schedulePick,
+  colorInfo
+from schedule
+    inner join category on schedule.userID = category.userID
+    inner join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+and schedule.userID = '${userID}'
+and scheduleCategoryID = '${categoryID}';
+
+    
+    `;
+  
+  const getschedulebycategoryRow = await connection.query(
+    getschedulebycategoryQuery, 
+    //updatescheduleParams 
+  );
+  connection.release();
+  return getschedulebycategoryRow;
 }
 //일정삭제
 async function deletescheduleInfo(scheduleID) {
@@ -86,5 +118,6 @@ module.exports = {
   insertscheduleInfo,
   updatescheduleInfo,
   getscheduleInfo,
+  getschedulebycategoryInfo,
   deletescheduleInfo
 };

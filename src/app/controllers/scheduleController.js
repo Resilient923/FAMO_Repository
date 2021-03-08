@@ -72,29 +72,30 @@ exports.updateschedule = async function (req, res) {
             code: 208, 
             message: "일정 고유번호를 입력해주세요" });
     }
-    if (length(req.body.scheduleMemo) >= 100){
+    if (scheduleID <= 0) {
         return res.json({
             isSuccess: false,
-            code: 309,
-            message: "메모최대길이는 100자입니다"
-        });
-    }
-    if (length(req.body.scheduleName)>=50) {
-        return res.json({
-            isSuccess: false,
-            code: 310,
-            message: "일정제목길이는 최대 50자입니다."
+            code: 209,
+            message: "정확한일정 고유번호를 확인해주세요"
         });
     }
     try {
-        if (scheduleID <= 0) {
+        
+        const updateschedule = await scheduleDao.updatescheduleInfo(updatescheduleParams,scheduleID);
+        if (length(req.body.scheduleMemo) >= 100){
             return res.json({
                 isSuccess: false,
-                code: 209,
-                message: "정확한일정 고유번호를 확인해주세요"
+                code: 309,
+                message: "메모최대길이는 100자입니다"
             });
         }
-        const updateschedule = await scheduleDao.updatescheduleInfo(updatescheduleParams,scheduleID);
+        if (length(req.body.scheduleName)>=50) {
+            return res.json({
+                isSuccess: false,
+                code: 310,
+                message: "일정제목길이는 최대 50자입니다."
+            });
+        }
         if (updateschedule[0].affectedRows == 1) {
             return res.json({
                 isSuccess: true,
@@ -144,6 +145,39 @@ exports.getschedule = async function (req, res) {
     } catch (err) {
 
         logger.error(`일정 조회\n ${err.message}`);
+        return res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//카테고리별일정조회
+exports.getschedulebycategory = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const categoryID = req.query
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,categoryID);
+
+        if (getschedulebycategoryrows) {
+
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저"+ categoryID+"번 카테고리 일정 조회 성공",
+                data : getschedulebycategoryrows[0]
+                
+
+            });
+
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 311,
+                message: "카테고리별 일정 조회 실패"
+            });
+        }
+    } catch (err) {
+
+        logger.error(`카테고리별 일정 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
 };
