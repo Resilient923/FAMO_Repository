@@ -4,32 +4,43 @@ const scheduleDao = require('../dao/scheduleDao');
 //일정생성
 exports.insertschedule = async function (req, res) {
    const {
-        userID, scheduleName, scheduleDate,scheduleCategoryID,scheduleMemo
+        scheduleName, scheduleDate,scheduleCategoryID,scheduleMemo
     } = req.body
 
-    if (!userID) {
-        return res.json({
-            isSuccess: false,
-            code: 205,
-            message: "유저고유번호를 입력해주세요."
-        });
-    }
     if (!scheduleName) {
         return res.json({
             isSuccess: false,
             code: 206,
             message: "일정제목을 입력해주세요."
         });
-    }  
+    }
+    if (scheduleName.length >=50) {
+        return res.json({
+            isSuccess: false,
+            code: 310,
+            message: "일정제목길이는 최대 50자입니다."
+        });
+    } 
     if (!scheduleDate) {
         return res.json({
             isSuccess: false,
             code: 207,
             message: "일정 날짜를 입력해주세요"
         });
+    }
+    if(scheduleMemo){
+        if (scheduleMemo.length >= 100){
+            return res.json({
+                isSuccess: false,
+                code: 309,
+                message: "메모최대길이는 100자입니다"
+            });
+        }
     }  
+
     try {
         // 일정생성
+        const userID = req.verifiedToken.userID;
         const insertscheduleParams = [userID, scheduleName, scheduleDate, scheduleCategoryID,scheduleMemo];
         const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
 
@@ -64,7 +75,20 @@ exports.updateschedule = async function (req, res) {
             code: 208, 
             message: "일정 고유번호를 입력해주세요" });
     }
-
+    if (length(req.body.scheduleMemo) >= 100){
+        return res.json({
+            isSuccess: false,
+            code: 309,
+            message: "메모최대길이는 100자입니다"
+        });
+    }
+    if (length(req.body.scheduleName)>=50) {
+        return res.json({
+            isSuccess: false,
+            code: 310,
+            message: "일정제목길이는 최대 50자입니다."
+        });
+    }
     try {
         if (scheduleID <= 0) {
             return res.json({
@@ -96,18 +120,18 @@ exports.updateschedule = async function (req, res) {
 };
 //일정 조회
 exports.getschedule = async function (req, res) {
-    //const userID = req.t
+    const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getschedulerows = await scheduleDao.getscheduleInfo();
+        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
 
         if (getschedulerows) {
 
             return res.json({
                 isSuccess: true,
                 code: 100,
-                message:"일정 조회 성공",
+                message: userID + "번 유저 일정 조회 성공",
                 data : getschedulerows[0]
                 
 
