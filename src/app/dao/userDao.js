@@ -64,6 +64,7 @@ async function selectUserInfo(loginID) {
     selectUserInfoQuery,
     selectUserInfoParams
   );
+  connection.release();
   return [userInfoRows];
 }
 
