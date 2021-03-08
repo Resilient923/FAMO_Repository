@@ -52,16 +52,16 @@ async function getscheduleInfo(userID) {
        scheduleName,
        scheduleMemo,
        schedulePick
-    from schedule where scheduleDelete = 1 and where userID ='${userID}';
+    from schedule where scheduleDelete = 1 and userID ='${userID}';
     
     `;
   
-  const updatescheduleRow = await connection.query(
+  const getscheduleRow = await connection.query(
     updatescheduleQuery, 
-    updatescheduleParams 
+    //updatescheduleParams 
   );
   connection.release();
-  return updatescheduleRow;
+  return getscheduleRow;
 }
 //일정삭제
 async function deletescheduleInfo(scheduleID) {

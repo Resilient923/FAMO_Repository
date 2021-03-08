@@ -128,7 +128,7 @@ exports.getschedule = async function (req, res) {
             return res.json({
                 isSuccess: true,
                 code: 100,
-                message:"일정 조회 성공",
+                message: userID + "번 유저 일정 조회 성공",
                 data : getschedulerows[0]
                 
 
