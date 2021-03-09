@@ -149,18 +149,18 @@ exports.getschedule = async function (req, res) {
 //카테고리별일정조회
 exports.getschedulebycategory = async function (req, res) {
     const userID = req.verifiedToken.userID;
-    const categoryID = req.query
+    const schedulecategoryID = req.query.scheduleCategoryID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,categoryID);
+        const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID);
 
         if (getschedulebycategoryrows) {
 
             return res.json({
                 isSuccess: true,
                 code: 100,
-                message: userID + "번 유저"+ categoryID+"번 카테고리 일정 조회 성공",
+                message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 일정 조회 성공",
                 data : getschedulebycategoryrows[0]
                 
 
