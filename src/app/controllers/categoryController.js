@@ -10,23 +10,30 @@ exports.insertcategory = async function (req, res) {
     if (!categoryName) {
         return res.json({
             isSuccess: false,
-            code: 206,
+            code: 212,
             message: "카테고리제목을 입력해주세요."
         });
     }
     if (categoryName.length>=10) {
         return res.json({
             isSuccess: false,
-            code: 310,
+            code: 312,
             message: "카테고리제목길이는 최대 10자입니다."
         });
-    } 
+    }
+    if(!categoryColor){
+        return res.json({
+            isSuccess : false,
+            code : 214,
+            message : "카테고리 색상을 선택해주세요"
+        });
+    }
     try {
         const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName);
         if (insertcategoryCheckRows.length > 0){
             return res.json({
                 isSuccess: false,
-                code: 3012,
+                code: 403,
                 message: "중복된 카테고리 이름입니다"
             });
         }
@@ -56,28 +63,28 @@ exports.updatecategory = async function(req,res){
     if(!categoryID){
         return res.json({
             isSuccess : false,
-            code : 11111,
+            code : 213,
             message : "카테고리 고유번호를 입력해주세요"
         });
     }
     if(!categoryColor){
         return res.json({
             isSuccess : false,
-            code : 11111,
+            code : 214,
             message : "카테고리 색상을 선택해주세요"
         });
     }
     if(!categoryName){
         return res.json({
             isSuccess : false,
-            code : 11111,
+            code : 212,
             message : "카테고리 제목을 입력해주세요"
         });
     }
     if (categoryName.length>=10) {
         return res.json({
             isSuccess: false,
-            code: 310,
+            code: 312,
             message: "카테고리제목길이는 최대 10자입니다."
         });
     } 
@@ -86,7 +93,7 @@ exports.updatecategory = async function(req,res){
         if (updatecategoryCheckRows.length > 0){
             return res.json({
                 isSuccess: false,
-                code: 3012,
+                code: 403,
                 message: "중복된 카테고리 이름입니다"
             });
         }
@@ -111,7 +118,7 @@ exports.deletecategory = async function (req, res) {
     if (!categoryID) {
         return res.json({ 
             isSuccess: false, 
-            code: 208,
+            code: 213,
             message: "카테고리고유번호를 입력해주세요" 
         });
     }
@@ -129,7 +136,7 @@ exports.deletecategory = async function (req, res) {
         }else{
             return res.json({
                 isSuccess: false,
-                code: 308,
+                code: 313,
                 message: "카테고리 삭제 실패"
             });
         }
@@ -161,7 +168,7 @@ exports.getcategory = async function (req, res) {
         }else{
             return res.json({
                 isSuccess: false,
-                code: 307,
+                code: 314,
                 message: userID + "번 유저 카테고리 조회 실패"
             });
         }
