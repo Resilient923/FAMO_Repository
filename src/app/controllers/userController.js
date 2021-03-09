@@ -38,7 +38,19 @@ exports.signUp = async function (req, res) {
         isSuccess: false,
         code: 204,
         message: "핸드폰 번호를 입력해주세요."
-    })
+    });
+
+    if(loginID.length > 320) return res.json({
+        isSuccess: false,
+        code: 301,
+        message: "아이디는 최대 320자입니다."
+    });
+
+    if(nickname.length > 20) return res.json({
+        isSuccess: false,
+        code: 302,
+        message: "닉네임은 최대 20자입니다."
+    });
 
     try {
         const connection = await pool.getConnection(async conn => conn);
@@ -48,7 +60,7 @@ exports.signUp = async function (req, res) {
 
                 return res.json({
                     isSuccess: false,
-                    code: 301,
+                    code: 401,
                     message: "중복된 아이디입니다."
                 });
             }
@@ -58,7 +70,7 @@ exports.signUp = async function (req, res) {
 
                 return res.json({
                     isSuccess: false,
-                    code: 302,
+                    code: 402,
                     message: "중복된 휴대폰 번호입니다."
                 });
             }
@@ -195,65 +207,174 @@ exports.kakao = async function (req, res) {
     res.redirect(`https://kauth.kakao.com/oauth/authorize?client_id=${clientID}&redirect_uri=${url}&response_type=code`);
 };
 
-/* 카카오 access token 발급 API */
-
-var accessToken;
-var nickname;
-var profileImage;
-var email;
-
+/* 카카오 access token, refresh token 발급 및 로그인 API */
 exports.kakaoOauth = async function (req, res){
     const code = req.query.code;
     const clientID = secret_config.kakaoClientID;
     const url = 'http://localhost:3000/kakao/oauth';
-    var dataString = `grant_type=authorization_code&client_id=${clientID}&redirect_uri=${url}&code=${code}`;
     
-    var options = {
+    const options = {
         url: 'https://kauth.kakao.com/oauth/token',
         method: 'POST',
         headers: {
             'Host': 'kauth.kakao.com',
             'Content-type': 'application/x-www-form-urlencoded; charset=utf-8;'
         },
-        body: dataString,
+        body: `grant_type=authorization_code&client_id=${clientID}&redirect_uri=${url}&code=${code}`
     };
 
-    async function callback(err, res, body) {
-        if(!err){
-            const json = JSON.parse(body);
-            accessToken = json.access_token;
-        }else{
-            logger.error(`App - Kakao Callback error\n: ${JSON.stringify(err)}`);
+    var nickname;
+    var profileImage;
+    var email;
+    var refreshToken;
+
+    const p = new Promise(
+        (resolve, reject) => {
+            request(options, function(err, res, body){
+                if(err){
+                    reject(err);
+                }
+                const json = JSON.parse(body);
+                const accessToken = json.access_token;
+                refreshToken = json.refresh_token;
+
+                resolve(accessToken)
+            })
+        }
+    );
+
+    const onError = (error) => {
+        res.status(403).json({
+            isSuccess:false,
+            code: 215,
+            message:"KaKao API Callback error"
+        });
+    };
+
+    const insertKakaoUserInfo = async function (email, nickname, refreshToken, profileImage){
+        try{
+            const connection = await pool.getConnection(async conn => conn);
+            try{
+                //console.log(email, nickname, refreshToken, profileImage);
+                const loginIDRows = await userDao.checkUserLoginID(email);
+        
+                if (loginIDRows[0].exist == 1) {
+                    const userInfoRows = await userDao.selectUserInfo(email);
+        
+                    let token = jwt.sign({
+                        userID: userInfoRows[0].userID,
+                        method: userInfoRows[0].method
+                    }, // 토큰의 내용(payload)
+                    secret_config.jwtsecret, // 비밀 키
+                    {
+                        expiresIn: '365d',
+                        subject: 'userInfo',
+                    } // 유효 시간은 365일
+                );
+        
+                res.json({
+                    userID: userInfoRows[0].userID,
+                    nickname: userInfoRows[0].nickname,
+                    jwt: token,
+                    isSuccess: true,
+                    code: 100,
+                    message: "카카오 계정으로 로그인 성공"
+                })
+        
+                }else{
+                    const insertUserInfoParams = [email, nickname, refreshToken, 'K'];
+                    const insertUserRowsId = await userDao.insertKakaoUserInfo(insertUserInfoParams);
+                    const [userInfoRows] = await userDao.selectUserInfo(email);
+                    const insertProfileImageParams = [insertUserRowsId, profileImage];
+                    await userDao.insertProfileImage(insertProfileImageParams);
+        
+                    let token = jwt.sign({
+                        userID: insertUserRowsId,
+                        method: 'K'
+                      }, // 토큰의 내용(payload)
+                        secret_config.jwtsecret, // 비밀 키
+                      {
+                        expiresIn: '365d',
+                        subject: 'userInfo'
+                      } // 유효 시간은 365일
+                    );
+                    // await connection.commit(); // COMMIT
+                    // connection.release();
+                    return res.json({
+                        userID: userInfoRows[0].userID,
+                        nickname: userInfoRows[0].nickname,
+                        jwt: token,
+                        isSuccess: true,
+                        code: 100,
+                        message: "카카오 계정으로 첫 로그인 성공"
+                    });
+                }
+            }catch (err) {
+            connection.release();
+            logger.error(`KAKAO Login Query error\n: ${JSON.stringify(err)}`);
+            return false;
+            }
+        }catch (err) {
+            logger.error(`KAKAO Login DB connection error\n: ${JSON.stringify(err)}`);
+            return false;
         }
     };
     
-    request(options, callback);
+    p.then((accessToken)=>{
 
-    var headers = {
-        'Authorization': `Bearer ${accessToken}`
-    };
+        const optionTwo = {
+            url: 'https://kapi.kakao.com/v2/user/me',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: 'property_keys=["properties.thumbnail_image"]'
+        };
+    
+        const k = new Promise(
+            (resolve, reject) => {
+                request(optionTwo, (err, res, body) => {
 
-    var dataString = 'property_keys=["properties.thumbnail_image"]';
+                    if(err){
+                        reject(err);
+                    }
+                    
+                    const json = JSON.parse(body);
+                    nickname = json.properties.nickname;
+                    
+                    if(json.kakao_account.profile.thumbnail_image_url){
+                        profileImage = json.kakao_account.profile.thumbnail_image_url;
+                    }else{
+                        profileImage = null;
+                    }
+                    
+                    if(json.kakao_account.has_email === true){
+                        email = json.kakao_account.email;
+                    }else{
+                        res.status(403).json({
+                            isSuccess:false,
+                            code: 315,
+                            message:"카카오 계정에 이메일 설정이 되어있지 않습니다."
+                        })
+                    }
+                    resolve()
+                })
+            }
+        );
 
-    var options = {
-        url: 'https://kapi.kakao.com/v2/user/me',
-        method: 'POST',
-        headers: headers,
-        body: dataString
-    };
+        const upError = (error) => {
+            res.status(403).json({
+                isSuccess:false,
+                code: 216,
+                message:"KaKao API Call UserInfo error"
+            });
+        };
 
-    async function callbackUserInfo(err, res, body) {
-        const json = JSON.parse(body);
-        console.log(json);
-    };
-
-    request(options, callbackUserInfo);
-
-    res.json({
-        isSuccess: true,
-        code: 100,
-        message: "카카오톡 로그인 성공"
-    })
+        k.then(()=>{
+            //console.log(email, nickname, profileImage);
+            insertKakaoUserInfo(email, nickname, refreshToken, profileImage);
+        }).catch(upError)
+    }).catch(onError)
 };
 
 /* JWT 토큰 검증 API */

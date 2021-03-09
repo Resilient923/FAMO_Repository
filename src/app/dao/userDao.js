@@ -1,6 +1,6 @@
 const { pool } = require("../../../config/database");
 
-// Signup
+/* 회원가입 */
 async function checkUserLoginID(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const existLoginIDQuery = `
@@ -14,7 +14,6 @@ async function checkUserLoginID(loginID) {
     loginIDParams
   );
   connection.release();
-
   return loginIDRows;
 }
 
@@ -49,13 +48,25 @@ async function insertUserInfo(insertUserInfoParams) {
   return insertUserInfoRow[0].insertId;
 }
 
-//SignIn
+async function insertKakaoUserInfo(insertUserInfoParams){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertKakaoUserInfoQuery = `
+  INSERT INTO user (loginID, nickname, kakaoRefreshToken, method) VALUES (?, ?, ?, ?);
+  `;
+  
+  const insertKakaoUserInfoRow = await connection.query(
+    insertKakaoUserInfoQuery,
+    insertUserInfoParams
+  );
+  connection.release();
+  return insertKakaoUserInfoRow[0].insertId;
+}
+
+/* 로그인 */
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
-                SELECT userID, password, passwordSalt, nickname, phoneNumber, 
-                method, kakaoAccessToken, status
-                FROM user
+                SELECT * FROM user
                 WHERE loginID = ?;
                 `;
 
@@ -68,10 +79,25 @@ async function selectUserInfo(loginID) {
   return [userInfoRows];
 }
 
+/* 프로필 사진 */
+async function insertProfileImage(insertProfileImageParams){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertProfileImageQuery = `
+  INSERT INTO profile (userID, profileImageURL) VALUES (?, ?);
+  `;
+  await connection.query(
+    insertProfileImageQuery,
+    insertProfileImageParams
+  );
+  connection.release();
+}
+
 module.exports = {
   checkUserLoginID,
   checkPhoneNumber,
   insertUserInfo,
+  insertKakaoUserInfo,
   selectUserInfo,
+  insertProfileImage,
 };
 
