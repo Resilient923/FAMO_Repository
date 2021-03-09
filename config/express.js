@@ -28,7 +28,7 @@ module.exports = function () {
     
     
     require('../src/app/routes/scheduleRoute')(app);
-
+    require('../src/app/routes/categoryRoute')(app);
     /* Web */
     // require('../src/web/routes/indexRoute')(app);
 

@@ -53,8 +53,12 @@ async function insertUserInfo(insertUserInfoParams) {
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
+
+              
+
                 SELECT userID, password, passwordSalt, nickname, phoneNumber, 
                 method, kakaoAccessToken, status
+
                 FROM user
                 WHERE loginID = ?;
                 `;

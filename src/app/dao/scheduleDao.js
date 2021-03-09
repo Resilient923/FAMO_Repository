@@ -47,7 +47,7 @@ async function getscheduleInfo(userID) {
   const getscheduleQuery = `
         
   select scheduleID,
-       date_format(scheduleDate, ' %e %b'),
+       date_format(scheduleDate, '%e %b') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -68,7 +68,7 @@ where scheduleDelete = 1
   return getscheduleRow;
 }
 //카테고리별 일정 조회
-async function getschedulebycategoryInfo(userID,categoryID) {
+async function getschedulebycategoryInfo(userID,schedulecategoryID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getschedulebycategoryQuery = `
         
@@ -83,7 +83,7 @@ from schedule
     inner join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
 and schedule.userID = '${userID}'
-and scheduleCategoryID = '${categoryID}';
+and scheduleCategoryID = '${schedulecategoryID}';
 
     
     `;
