@@ -32,7 +32,7 @@ exports.insertschedule = async function (req, res) {
         }
     }
     try {
-        // 일정생성
+        // 오늘일정생성
         const userID = req.verifiedToken.userID;
         const insertscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
         const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
