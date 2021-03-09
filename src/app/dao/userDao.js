@@ -67,11 +67,12 @@ async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
   SELECT userID, loginID, nickname, phoneNumber, kakaoRefreshToken, method, status FROM user
-  WHERE userID = ${loginID};
+  WHERE loginID = '${loginID}';
                 `;
 
+  
   const [userInfoRows] = await connection.query(
-    selectUserInfoQuery
+    selectUserInfoQuery,
   );
   connection.release();
   return [userInfoRows];
