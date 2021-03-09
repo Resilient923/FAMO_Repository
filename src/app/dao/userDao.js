@@ -66,14 +66,12 @@ async function insertKakaoUserInfo(insertUserInfoParams){
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
-                SELECT * FROM user
-                WHERE loginID = ?;
+  SELECT userID, loginID, nickname, phoneNumber, kakaoRefreshToken, method, status FROM user
+  WHERE userID = ${loginID};
                 `;
 
-  let selectUserInfoParams = [loginID];
   const [userInfoRows] = await connection.query(
-    selectUserInfoQuery,
-    selectUserInfoParams
+    selectUserInfoQuery
   );
   connection.release();
   return [userInfoRows];

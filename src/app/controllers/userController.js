@@ -259,8 +259,8 @@ exports.kakaoOauth = async function (req, res){
                 const loginIDRows = await userDao.checkUserLoginID(email);
         
                 if (loginIDRows[0].exist == 1) {
-                    const userInfoRows = await userDao.selectUserInfo(email);
-        
+                    const [userInfoRows] = await userDao.selectUserInfo(email);
+                    
                     let token = jwt.sign({
                         userID: userInfoRows[0].userID,
                         method: userInfoRows[0].method
