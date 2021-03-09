@@ -203,7 +203,7 @@ exports.signIn = async function (req, res) {
 /* 카카오 로그인 동의 화면 출력 API */
 exports.kakao = async function (req, res) {
     const clientID = secret_config.kakaoClientID;
-    const url = 'http://localhost:3000/kakao/oauth'
+    const url = 'https://dev.risingsoi.site/kakao/oauth'
     res.redirect(`https://kauth.kakao.com/oauth/authorize?client_id=${clientID}&redirect_uri=${url}&response_type=code`);
 };
 
@@ -211,7 +211,7 @@ exports.kakao = async function (req, res) {
 exports.kakaoOauth = async function (req, res){
     const code = req.query.code;
     const clientID = secret_config.kakaoClientID;
-    const url = 'http://localhost:3000/kakao/oauth';
+    const url = 'https://dev.risingsoi.site/kakao/oauth';
     
     const options = {
         url: 'https://kauth.kakao.com/oauth/token',
