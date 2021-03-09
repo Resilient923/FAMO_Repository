@@ -69,12 +69,11 @@ where categoryID = '${categoryID}';
 async function getcategoryInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getcategoryQuery = `
-  select 
-    userID,    
-  categoryID,
+  select categoryID,
        categoryName,
-       categoryColor
-  from category
+       colorInfo
+from category
+inner join categoryColor on categoryColor = colorID
   where userID ='${userID}';
   `;
   const getcategoryRow = await connection.query(

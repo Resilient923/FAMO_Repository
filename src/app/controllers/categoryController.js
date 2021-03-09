@@ -127,7 +127,7 @@ exports.deletecategory = async function (req, res) {
         // const connection = await pool.getConnection(async (conn) => conn);
         const deletecategoryrows = await categoryDao.deletecategoryInfo(categoryID);
         console.log(deletecategoryrows)
-        if (deletecategoryrows) {
+        if (deletecategoryrows.affectedRows==1) {
             return res.json({
                 isSuccess: true,
                 code: 100,
