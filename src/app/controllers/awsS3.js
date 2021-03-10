@@ -23,8 +23,7 @@ const storage = multerS3({
     bucket: "soibucket",
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
-        const extension = path.extname(file.originalname);
-        cb(null, "FamoProfile/" + path.basename(userIDInToken + extension));
+        cb(null, "FamoProfile/" + path.basename(userIDInToken));
     },
     acl: "public-read-write",
 });

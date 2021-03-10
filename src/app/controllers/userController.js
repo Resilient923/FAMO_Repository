@@ -122,6 +122,8 @@ exports.signIn = async function (req, res) {
         loginID, password
     } = req.body;
 
+    console.log(typeof(loginID));
+
     if (!loginID) return res.json({
         isSuccess: false, 
         code: 201, 
@@ -150,7 +152,7 @@ exports.signIn = async function (req, res) {
 
             const passwordHash = crypto.pbkdf2Sync(password, userInfoRows[0].passwordSalt, 101024, 64, 'sha512').toString('base64');
             
-            if (userInfoRows[0].password !== passwordHash) {
+            if (userInfoRows[0].password != passwordHash) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
@@ -391,10 +393,48 @@ exports.check = async function (req, res) {
 /* 프로필 사진 업로드 API */
 exports.uploadProfileImage = async function (req, res) {
     const userIDInToken = req.verifiedToken.userID;
-    res.json({
-        userID: userIDInToken,
-        isSuccess: true,
-        code: 100,
-        message: "프로필 사진 업로드 성공"
-    })
+
+    try{
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const s3ProfileImage = `https://soibucket.s3.ap-northeast-2.amazonaws.com/FamoProfile/${userIDInToken}`;
+            
+            const checkProfileImageRow = await userDao.checkProfileImage(userIDInToken);
+
+            if(checkProfileImageRow[0].exist === 0){
+                const insertProfileImageParams = [userIDInToken, s3ProfileImage];
+                userDao.insertProfileImage(insertProfileImageParams);
+
+                res.json({
+                    userID: userIDInToken,
+                    profileImageURL: s3ProfileImage,
+                    isSuccess: true,
+                    code: 100,
+                    message: "프로필 사진 업로드 성공"
+                });
+    
+            } 
+            else{
+                userDao.updateProfileImage(s3ProfileImage, userIDInToken);
+
+                res.json({
+                    userID: userIDInToken,
+                    profileImageURL: s3ProfileImage,
+                    isSuccess: true,
+                    code: 100,
+                    message: "프로필 사진 업데이트 성공"
+                });    
+            }
+
+            connection.release();
+
+        } catch (err){
+            connection.release();
+            logger.error(`Upload Profile Image Query error\n: ${JSON.stringify(err)}`);
+            return false;
+        }
+    }catch (err) {
+        logger.error(`Upload Profile Image DB connection error\n: ${JSON.stringify(err)}`);
+        return false;
+    }
 };
