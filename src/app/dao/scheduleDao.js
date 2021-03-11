@@ -4,11 +4,9 @@ const { pool } = require("../../../config/database");
 async function insertscheduleInfo(insertscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertscheduleQuery = `
-  insert into schedule(userID, scheduleName, scheduleDate,scheduleTime,
-    scheduleCategoryID, scheduleMemo, scheduleStatus,
-    scheduleDelete, scheduleCreatedAt, scheduleUpdatedAt, schedulePick)
-values ( ?, ?, current_date(),?, ?, ?, default, default, default, default
-, default);
+  insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
+    scheduleCategoryID,scheduleMemo,scheduleStatus,scheduleDelete,scheduleCreatedAt,scheduleUpdatedAt,schedulePick)
+values (?,?,current_date(),?,?,?,default,default,default,default,default);
   `;
 
   const [insertschedulerows] = await connection.query(

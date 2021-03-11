@@ -21,13 +21,6 @@ exports.insertschedule = async function (req, res) {
             message: "일정제목길이는 최대 50자입니다."
         });
     } 
-    if (!scheduleDate) {
-        return res.json({
-            isSuccess: false,
-            code: 207,
-            message: "일정 날짜를 입력해주세요"
-        });
-    }
     if(scheduleMemo){
         if (scheduleMemo.length >= 100){
             return res.json({
@@ -83,6 +76,7 @@ exports.updateschedule = async function (req, res) {
         });
     }
     try {
+        const connection = await pool.getConnection(async (conn) => conn);
         
         const updateschedule = await scheduleDao.updatescheduleInfo(updatescheduleParams,scheduleID);
         if(req.body.scheduleMemo){
