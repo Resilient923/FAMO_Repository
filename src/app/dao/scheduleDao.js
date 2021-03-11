@@ -47,14 +47,15 @@ async function getscheduleInfo(userID) {
   const getscheduleQuery = `
         
   select scheduleID,
-       date_format(scheduleDate, '%e %b') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       colorInfo
+  date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+  scheduleName,
+  scheduleMemo,
+  schedulePick,
+  colorInfo
 from schedule
-         inner join category on schedule.userID = category.userID
-         inner join categoryColor on categoryColor = colorID
+    left join category on category.categoryID = schedule.scheduleCategoryID
+   left join categoryColor ON categoryColor.colorID = category.categoryColor
+where scheduleDelete = 1
 where scheduleDelete = 1
   and schedule.userID = '${userID}';
     
@@ -79,14 +80,12 @@ async function getschedulebycategoryInfo(userID,schedulecategoryID) {
   schedulePick,
   colorInfo
 from schedule
-    inner join category on schedule.userID = category.userID
+    inner join category on categoryID = scheduleCategoryID
     inner join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
 and schedule.userID = '${userID}'
 and scheduleCategoryID = '${schedulecategoryID}';
-
-    
-    `;
+`; 
   
   const getschedulebycategoryRow = await connection.query(
     getschedulebycategoryQuery, 
