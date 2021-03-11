@@ -46,6 +46,22 @@ exports.signUp = async function (req, res) {
         message: "아이디는 최대 320자입니다."
     });
 
+    if(password.length < 8) return res.json({
+        isSuccess: false,
+        code: 316,
+        message: "비밀번호는 최소 8자입니다."
+    });
+
+    var num = password.search(/[0-9]/g);
+    var eng = password.search(/[a-z]/ig);
+    var spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
+
+    if(num < 0 || eng < 0 || spe < 0) return res.json({
+        isSuccess: false,
+        code: 317,
+        message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 입력해주세요."
+    });
+
     if(nickname.length > 20) return res.json({
         isSuccess: false,
         code: 302,
@@ -106,13 +122,13 @@ exports.signUp = async function (req, res) {
             });
         } catch (err) {
            // await connection.rollback(); // ROLLBACK           
-            logger.error(`App - SignUp Query error\n: ${err.message}`);
+            logger.error(`SignUp Query error\n: ${err.message}`);
             connection.release();
             return res.status(500).send(`Error: ${err.message}`);
         }
     } catch (err) {
-        logger.error(`non transaction DB Connection error\n: ${JSON.stringify(err)}`);
-        return false;
+        logger.error(`SignUp DB Connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
     }
 };
 
@@ -121,8 +137,6 @@ exports.signIn = async function (req, res) {
     const {
         loginID, password
     } = req.body;
-
-    console.log(typeof(loginID));
 
     if (!loginID) return res.json({
         isSuccess: false, 
@@ -160,7 +174,7 @@ exports.signIn = async function (req, res) {
                     message: "비밀번호를 확인해주세요."
                 });
             }
-            if (userInfoRows[0].status === 0) {
+            if (userInfoRows[0].status === -1) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
@@ -192,13 +206,13 @@ exports.signIn = async function (req, res) {
 
             connection.release();
         } catch (err) {
-            logger.error(`App - SignIn Query error\n: ${JSON.stringify(err)}`);
+            logger.error(`SignIn Query error\n: ${JSON.stringify(err)}`);
             connection.release();
-            return false;
+            return res.status(500).send(`Error: ${err.message}`);
         }
      } catch (err) {
-        logger.error(`non transaction DB Connection error\n: ${JSON.stringify(err)}`);
-        return false;
+        logger.error(`SignIn DB Connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
      }
 };
 
@@ -314,11 +328,11 @@ exports.kakaoOauth = async function (req, res){
             }catch (err) {
             connection.release();
             logger.error(`KAKAO Login Query error\n: ${JSON.stringify(err)}`);
-            return false;
+            return res.status(500).send(`Error: ${err.message}`);
             }
         }catch (err) {
             logger.error(`KAKAO Login DB connection error\n: ${JSON.stringify(err)}`);
-            return false;
+            return res.status(500).send(`Error: ${err.message}`);
         }
     };
     
@@ -401,7 +415,7 @@ exports.uploadProfileImage = async function (req, res) {
             
             const checkProfileImageRow = await userDao.checkProfileImage(userIDInToken);
 
-            if(checkProfileImageRow[0].exist === 0){
+            if(checkProfileImageRow[0].exist == 0){
                 const insertProfileImageParams = [userIDInToken, s3ProfileImage];
                 userDao.insertProfileImage(insertProfileImageParams);
 
@@ -431,10 +445,10 @@ exports.uploadProfileImage = async function (req, res) {
         } catch (err){
             connection.release();
             logger.error(`Upload Profile Image Query error\n: ${JSON.stringify(err)}`);
-            return false;
+            return res.status(500).send(`Error: ${err.message}`);
         }
     }catch (err) {
         logger.error(`Upload Profile Image DB connection error\n: ${JSON.stringify(err)}`);
-        return false;
+        return res.status(500).send(`Error: ${err.message}`);
     }
 };
