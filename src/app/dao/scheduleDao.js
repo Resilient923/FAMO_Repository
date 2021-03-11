@@ -129,11 +129,31 @@ async function deletescheduleInfo(scheduleID) {
   connection.release();
   return deletescheduleRow;
 }
+//일정 즐겨찾기,즐겨찾기 취소
+async function patchschedulepickInfo(scheduleID,userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const patchschedulepickQuery = `
+        
+  update schedule
+  set schedulePick = if(schedulePick = 1, -1, 1)
+  where scheduleID = '${scheduleID}' and userID = '${userID}';
+
+    
+    `;
+  
+  const patchschedulepickRow = await connection.query(
+    patchschedulepickQuery, 
+   
+  );
+  connection.release();
+  return patchschedulepickRow;
+}
 module.exports = {
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
   getscheduleInfo,
   getschedulebycategoryInfo,
-  deletescheduleInfo
+  deletescheduleInfo,
+  patchschedulepickInfo
 };

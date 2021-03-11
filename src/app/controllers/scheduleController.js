@@ -144,13 +144,15 @@ exports.updateschedule = async function (req, res) {
                 });
             }
         }
-        if (req.body.scheduleName.length>=50) {
+        
+        if (req.body.scheduleName.length >= 50) {
             return res.json({
                 isSuccess: false,
                 code: 310,
                 message: "일정제목길이는 최대 50자입니다."
             });
         }
+        
         if (updateschedule[0].affectedRows == 1) {
             return res.json({
                 isSuccess: true,
@@ -277,6 +279,39 @@ exports.deleteschedule = async function (req, res) {
     } catch (err) {
 
         logger.error(`일정 삭제 error: ${err.message}`);
+        return res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//일정 즐겨찾기/즐겨찾기 취소
+exports.patchschedulepick = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const scheduleID = req.body;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const patchschedulepickrows = await scheduleDao.patchschedulepickInfo(scheduleID,userID);
+
+        if (patchschedulepickrows) {
+
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저"+scheduleID +"번 일정 즐겨찾기수정"
+                
+                
+
+            });
+
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 307,
+                message: "즐겨찾기수정 실패"
+            });
+        }
+    } catch (err) {
+
+        logger.error(`즐겨찾기수정 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
 };
