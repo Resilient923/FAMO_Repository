@@ -4,6 +4,7 @@
 ## 팀원
 
 * [오소정(Soi)](https://github.com/sojungoh) : 서버 개발
+* [정재원(James)](https://github.com/BingoTop) : 안드로이드 개발
 ---
 ## 개발 셋업 환경
 >AWS EC2, AWS RDS, Node.js, MySQL
