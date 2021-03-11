@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.858.0",
+    "aws-sdk": "^2.861.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -29,12 +29,9 @@
     "path": "^0.12.7",
     "promise": "^8.1.0",
     "regex-email": "^1.0.2",
-
-    "twilio": "^3.57.0",
-
     "request": "^2.88.2",
     "require": "^2.4.20",
-
+    "twilio": "^3.57.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
