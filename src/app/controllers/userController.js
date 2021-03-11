@@ -4,6 +4,7 @@ const {logger} = require('../../../config/winston');
 const jwt = require('jsonwebtoken');
 const regexEmail = require('regex-email');
 const crypto = require('crypto');
+const request = require('request');
 const secret_config = require('../../../config/secret');
 
 const userDao = require('../dao/userDao');
@@ -37,7 +38,19 @@ exports.signUp = async function (req, res) {
         isSuccess: false,
         code: 204,
         message: "핸드폰 번호를 입력해주세요."
-    })
+    });
+
+    if(loginID.length > 320) return res.json({
+        isSuccess: false,
+        code: 301,
+        message: "아이디는 최대 320자입니다."
+    });
+
+    if(nickname.length > 20) return res.json({
+        isSuccess: false,
+        code: 302,
+        message: "닉네임은 최대 20자입니다."
+    });
 
     try {
         const connection = await pool.getConnection(async conn => conn);
@@ -47,7 +60,7 @@ exports.signUp = async function (req, res) {
 
                 return res.json({
                     isSuccess: false,
-                    code: 301,
+                    code: 401,
                     message: "중복된 아이디입니다."
                 });
             }
@@ -57,7 +70,7 @@ exports.signUp = async function (req, res) {
 
                 return res.json({
                     isSuccess: false,
-                    code: 302,
+                    code: 402,
                     message: "중복된 휴대폰 번호입니다."
                 });
             }
@@ -109,6 +122,8 @@ exports.signIn = async function (req, res) {
         loginID, password
     } = req.body;
 
+    console.log(typeof(loginID));
+
     if (!loginID) return res.json({
         isSuccess: false, 
         code: 201, 
@@ -137,7 +152,7 @@ exports.signIn = async function (req, res) {
 
             const passwordHash = crypto.pbkdf2Sync(password, userInfoRows[0].passwordSalt, 101024, 64, 'sha512').toString('base64');
             
-            if (userInfoRows[0].password !== passwordHash) {
+            if (userInfoRows[0].password != passwordHash) {
                 connection.release();
                 return res.json({
                     isSuccess: false,
@@ -187,21 +202,239 @@ exports.signIn = async function (req, res) {
      }
 };
 
+/* 카카오 로그인 동의 화면 출력 API */
+exports.kakao = async function (req, res) {
+    const clientID = secret_config.kakaoClientID;
+    const url = 'https://dev.risingsoi.site/kakao/oauth'
+    res.redirect(`https://kauth.kakao.com/oauth/authorize?client_id=${clientID}&redirect_uri=${url}&response_type=code`);
+};
+
+/* 카카오 access token, refresh token 발급 및 로그인 API */
+exports.kakaoOauth = async function (req, res){
+    const code = req.query.code;
+    const clientID = secret_config.kakaoClientID;
+    const url = 'https://dev.risingsoi.site/kakao/oauth';
+    
+    const options = {
+        url: 'https://kauth.kakao.com/oauth/token',
+        method: 'POST',
+        headers: {
+            'Host': 'kauth.kakao.com',
+            'Content-type': 'application/x-www-form-urlencoded; charset=utf-8;'
+        },
+        body: `grant_type=authorization_code&client_id=${clientID}&redirect_uri=${url}&code=${code}`
+    };
+
+    var nickname;
+    var profileImage;
+    var email;
+    var refreshToken;
+
+    const p = new Promise(
+        (resolve, reject) => {
+            request(options, function(err, res, body){
+                if(err){
+                    reject(err);
+                }
+                const json = JSON.parse(body);
+                const accessToken = json.access_token;
+                refreshToken = json.refresh_token;
+
+                resolve(accessToken)
+            })
+        }
+    );
+
+    const onError = (error) => {
+        res.status(403).json({
+            isSuccess:false,
+            code: 215,
+            message:"KaKao API Callback error"
+        });
+    };
+
+    const insertKakaoUserInfo = async function (email, nickname, refreshToken, profileImage){
+        try{
+            const connection = await pool.getConnection(async conn => conn);
+            try{
+                //console.log(email, nickname, refreshToken, profileImage);
+                const loginIDRows = await userDao.checkUserLoginID(email);
+        
+                if (loginIDRows[0].exist == 1) {
+                    const [userInfoRows] = await userDao.selectUserInfo(email);
+                    
+                    let token = jwt.sign({
+                        userID: userInfoRows[0].userID,
+                        method: userInfoRows[0].method
+                    }, // 토큰의 내용(payload)
+                    secret_config.jwtsecret, // 비밀 키
+                    {
+                        expiresIn: '365d',
+                        subject: 'userInfo',
+                    } // 유효 시간은 365일
+                );
+        
+                res.json({
+                    userID: userInfoRows[0].userID,
+                    nickname: userInfoRows[0].nickname,
+                    jwt: token,
+                    isSuccess: true,
+                    code: 100,
+                    message: "카카오 계정으로 로그인 성공"
+                })
+        
+                }else{
+                    const insertUserInfoParams = [email, nickname, refreshToken, 'K'];
+                    const insertUserRowsId = await userDao.insertKakaoUserInfo(insertUserInfoParams);
+                    const [userInfoRows] = await userDao.selectUserInfo(email);
+                    const insertProfileImageParams = [insertUserRowsId, profileImage];
+                    await userDao.insertProfileImage(insertProfileImageParams);
+        
+                    let token = jwt.sign({
+                        userID: insertUserRowsId,
+                        method: 'K'
+                      }, // 토큰의 내용(payload)
+                        secret_config.jwtsecret, // 비밀 키
+                      {
+                        expiresIn: '365d',
+                        subject: 'userInfo'
+                      } // 유효 시간은 365일
+                    );
+                    // await connection.commit(); // COMMIT
+                    // connection.release();
+                    return res.json({
+                        userID: userInfoRows[0].userID,
+                        nickname: userInfoRows[0].nickname,
+                        jwt: token,
+                        isSuccess: true,
+                        code: 100,
+                        message: "카카오 계정으로 첫 로그인 성공"
+                    });
+                }
+            }catch (err) {
+            connection.release();
+            logger.error(`KAKAO Login Query error\n: ${JSON.stringify(err)}`);
+            return false;
+            }
+        }catch (err) {
+            logger.error(`KAKAO Login DB connection error\n: ${JSON.stringify(err)}`);
+            return false;
+        }
+    };
+    
+    p.then((accessToken)=>{
+
+        const optionTwo = {
+            url: 'https://kapi.kakao.com/v2/user/me',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: 'property_keys=["properties.thumbnail_image"]'
+        };
+    
+        const k = new Promise(
+            (resolve, reject) => {
+                request(optionTwo, (err, res, body) => {
+
+                    if(err){
+                        reject(err);
+                    }
+                    
+                    const json = JSON.parse(body);
+                    nickname = json.properties.nickname;
+                    
+                    if(json.kakao_account.profile.thumbnail_image_url){
+                        profileImage = json.kakao_account.profile.thumbnail_image_url;
+                    }else{
+                        profileImage = null;
+                    }
+                    
+                    if(json.kakao_account.has_email === true){
+                        email = json.kakao_account.email;
+                    }else{
+                        res.status(403).json({
+                            isSuccess:false,
+                            code: 315,
+                            message:"카카오 계정에 이메일 설정이 되어있지 않습니다."
+                        })
+                    }
+                    resolve()
+                })
+            }
+        );
+
+        const upError = (error) => {
+            res.status(403).json({
+                isSuccess:false,
+                code: 216,
+                message:"KaKao API Call UserInfo error"
+            });
+        };
+
+        k.then(()=>{
+            //console.log(email, nickname, profileImage);
+            insertKakaoUserInfo(email, nickname, refreshToken, profileImage);
+        }).catch(upError)
+    }).catch(onError)
+};
+
+/* JWT 토큰 검증 API */
 exports.check = async function (req, res) {
     res.json({
+        userID: req.verifiedToken.userID,
+        loginMethod: req.verifiedToken.method,
         isSuccess: true,
         code: 100,
-        message: "검증 성공",
-        info: req.verifiedToken
+        message: "jwt 토큰 검증 성공"
     })
 };
 
+/* 프로필 사진 업로드 API */
 exports.uploadProfileImage = async function (req, res) {
     const userIDInToken = req.verifiedToken.userID;
-    res.json({
-        userID: userIDInToken,
-        isSuccess: true,
-        code: 100,
-        message: "프로필 사진 업로드 성공"
-    })
+
+    try{
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const s3ProfileImage = `https://soibucket.s3.ap-northeast-2.amazonaws.com/FamoProfile/${userIDInToken}`;
+            
+            const checkProfileImageRow = await userDao.checkProfileImage(userIDInToken);
+
+            if(checkProfileImageRow[0].exist === 0){
+                const insertProfileImageParams = [userIDInToken, s3ProfileImage];
+                userDao.insertProfileImage(insertProfileImageParams);
+
+                res.json({
+                    userID: userIDInToken,
+                    profileImageURL: s3ProfileImage,
+                    isSuccess: true,
+                    code: 100,
+                    message: "프로필 사진 업로드 성공"
+                });
+    
+            } 
+            else{
+                userDao.updateProfileImage(s3ProfileImage, userIDInToken);
+
+                res.json({
+                    userID: userIDInToken,
+                    profileImageURL: s3ProfileImage,
+                    isSuccess: true,
+                    code: 100,
+                    message: "프로필 사진 업데이트 성공"
+                });    
+            }
+
+            connection.release();
+
+        } catch (err){
+            connection.release();
+            logger.error(`Upload Profile Image Query error\n: ${JSON.stringify(err)}`);
+            return false;
+        }
+    }catch (err) {
+        logger.error(`Upload Profile Image DB connection error\n: ${JSON.stringify(err)}`);
+        return false;
+    }
 };
