@@ -14,7 +14,7 @@ async function checkUserLoginID(loginID) {
     loginIDParams
   );
   connection.release();
-  return loginIDRows;
+  return [loginIDRows];
 }
 
 async function checkPhoneNumber(phoneNumber) {
@@ -30,7 +30,7 @@ async function checkPhoneNumber(phoneNumber) {
     phoneNumberParams
   );
   connection.release();
-  return phoneNumberRows;
+  return [phoneNumberRows];
 }
 
 async function insertUserInfo(insertUserInfoParams) {

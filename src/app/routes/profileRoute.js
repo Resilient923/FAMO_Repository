@@ -4,5 +4,5 @@ module.exports = function(app){
     const aws = require('../controllers/awsS3');
 
     app.post('/profiles/image', [jwtMiddleware, aws.jwt, aws.upload.single('profileImage')], profile.uploadProfileImage);
-
+    app.get('/profiles/comments', jwtMiddleware, profile.getTitleComment);
 };

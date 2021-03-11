@@ -13,12 +13,12 @@ exports.uploadProfileImage = async function (req, res) {
         try{
             const s3ProfileImage = `https://soibucket.s3.ap-northeast-2.amazonaws.com/FamoProfile/${userIDInToken}`;
             
-            const checkProfileImageRow = await profileDao.checkProfileImage(userIDInToken);
+            const checkUserProfileRow = await profileDao.checkUserProfile(userIDInToken);
 
-            if(checkProfileImageRow[0].exist == 0){
+            if(checkUserProfileRow[0].exist == 0){
                 
                 const insertProfileImageParams = [userIDInToken, s3ProfileImage];
-                profileDao.insertProfileImage(insertProfileImageParams);
+                await profileDao.insertProfileImage(insertProfileImageParams);
 
                 res.json({
                     userID: userIDInToken,
@@ -30,7 +30,7 @@ exports.uploadProfileImage = async function (req, res) {
     
             } 
             else{
-                profileDao.updateProfileImage(s3ProfileImage, userIDInToken);
+                await profileDao.updateProfileImage(s3ProfileImage, userIDInToken);
 
                 res.json({
                     userID: userIDInToken,
@@ -53,3 +53,48 @@ exports.uploadProfileImage = async function (req, res) {
         return res.status(500).send(`Error: ${err.message}`);
     }
 };
+
+exports.getTitleComment = async function (req, res) {
+    const userIDInToken = req.verifiedToken.userID;
+
+    try{
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const [profileInfoRow] = await profileDao.getProfileInfo(userIDInToken);
+
+            if(profileInfoRow[0].goalStatus === -1){
+                const [getTitleCommentRow] = await profileDao.getTitleComment(userIDInToken);
+                
+                res.json({
+                    nickname: getTitleCommentRow[0].nickname,
+                    titleComment: getTitleCommentRow[0].titleComment,
+                    goalStatus: getTitleCommentRow[0].goalStatus,
+                    isSuccess: true,
+                    code: 100,
+                    message: "상단 멘트 조회 성공"
+                })
+            }else{
+                const [getTitleGoalRow] = await profileDao.getTitleGoal(userIDInToken);
+
+                res.json({
+                    goalTitle: getTitleGoalRow[0].goalTitle,
+                    Dday: getTitleGoalRow[0].Dday,
+                    goalDate: getTitleGoalRow[0].goalDate,
+                    goalStatus: getTitleGoalRow[0].goalStatus,
+                    isSuccess: true,
+                    code: 100,
+                    message: "상단 목표 조회 성공"
+                })
+            };
+            connection.release();
+
+        }catch (err) {
+            connection.release();
+            logger.error(`Get Titile Comment Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }catch (err) {
+        logger.error(`Get Title Comment DB connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
+}
