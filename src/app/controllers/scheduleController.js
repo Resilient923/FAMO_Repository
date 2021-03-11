@@ -76,6 +76,7 @@ exports.updateschedule = async function (req, res) {
         });
     }
     try {
+        const connection = await pool.getConnection(async (conn) => conn);
         
         const updateschedule = await scheduleDao.updatescheduleInfo(updatescheduleParams,scheduleID);
         if(req.body.scheduleMemo){
