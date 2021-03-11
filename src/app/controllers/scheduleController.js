@@ -14,14 +14,20 @@ exports.insertschedule = async function (req, res) {
             message: "일정제목을 입력해주세요."
         });
     }
-    if (scheduleName.length>=50) {
+    if (scheduleName.length >=50) {
         return res.json({
             isSuccess: false,
             code: 310,
             message: "일정제목길이는 최대 50자입니다."
         });
     } 
-    
+    if (!scheduleDate) {
+        return res.json({
+            isSuccess: false,
+            code: 207,
+            message: "일정 날짜를 입력해주세요"
+        });
+    }
     if(scheduleMemo){
         if (scheduleMemo.length >= 100){
             return res.json({
@@ -30,7 +36,8 @@ exports.insertschedule = async function (req, res) {
                 message: "메모최대길이는 100자입니다"
             });
         }
-    }
+    }  
+
     try {
         // 오늘일정생성
         const userID = req.verifiedToken.userID;
