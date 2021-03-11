@@ -285,18 +285,18 @@ exports.deleteschedule = async function (req, res) {
 //일정 즐겨찾기/즐겨찾기 취소
 exports.patchschedulepick = async function (req, res) {
     const userID = req.verifiedToken.userID;
-    const scheduleID = req.body;
+    const scheduleID = req.body.scheduleID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
         const patchschedulepickrows = await scheduleDao.patchschedulepickInfo(scheduleID,userID);
-
+        console.log(patchschedulepickrows);
         if (patchschedulepickrows) {
 
             return res.json({
                 isSuccess: true,
                 code: 100,
-                message: userID + "번 유저"+scheduleID +"번 일정 즐겨찾기수정"
+                message: userID + "번 유저 "+ scheduleID +"번 일정 즐겨찾기수정"
                 
                 
 
@@ -305,13 +305,13 @@ exports.patchschedulepick = async function (req, res) {
         }else{
             return res.json({
                 isSuccess: false,
-                code: 307,
-                message: "즐겨찾기수정 실패"
+                code: 318,
+                message: "일정 즐겨찾기수정 실패"
             });
         }
     } catch (err) {
 
-        logger.error(`즐겨찾기수정 조회\n ${err.message}`);
+        logger.error(`일정 즐겨찾기수정 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
 };
