@@ -5,7 +5,7 @@ const categoryDao = require('../dao/categoryDao');
 exports.insertcategory = async function (req, res) {
    const {
         categoryName,categoryColor
-    } = req.body
+    } = req.body;
     const userID = req.verifiedToken.userID;
     if (!categoryName) {
         return res.json({

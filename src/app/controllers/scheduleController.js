@@ -2,10 +2,10 @@ const {pool} = require('../../../config/database');
 const {logger} = require('../../../config/winston');
 const scheduleDao = require('../dao/scheduleDao');
 //오늘일정생성
-exports.insertschedule = async function (req, res) {
+exports.inserttodayschedule = async function (req, res) {
    const {
         scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo
-    } = req.body
+    } = req.body;
 
     if (!scheduleName) {
         return res.json({
@@ -34,22 +34,78 @@ exports.insertschedule = async function (req, res) {
     try {
         // 오늘일정생성
         const userID = req.verifiedToken.userID;
-        const insertscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
-        const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
+        const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
+        const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
 
         return res.json({
             isSuccess: true,
             code: 100,
-            message: "일정 생성 성공"
+            message: "오늘 일정 생성 성공"
 
         });
         } catch (err) {
             // await connection.rollback(); // ROLLBACK
             // connection.release();
-            logger.error(`일정생성 에러\n: ${err.message}`);
+            logger.error(`오늘일정생성 에러\n: ${err.message}`);
             return res.status(401).send(`Error: ${err.message}`);
         }
 };
+//일정생성(월캘린더에서 생성)
+exports.insertschedule = async function (req, res) {
+    const {
+         scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
+     } = req.body;
+ 
+     if (!scheduleName) {
+         return res.json({
+             isSuccess: false,
+             code: 206,
+             message: "일정제목을 입력해주세요."
+         });
+     }
+     if (scheduleName.length >=50) {
+         return res.json({
+             isSuccess: false,
+             code: 310,
+             message: "일정제목길이는 최대 50자입니다."
+         });
+     } 
+     if(scheduleMemo){
+         if (scheduleMemo.length >= 100){
+             return res.json({
+                 isSuccess: false,
+                 code: 309,
+                 message: "메모최대길이는 100자입니다"
+             });
+         }
+     }  
+     if (!scheduleDate) {
+        return res.json({
+            isSuccess: false,
+            code: 207,
+            message: "일정날짜를 입력해주세요"
+        });
+    }
+ 
+     try {
+         // 오늘일정생성
+         const userID = req.verifiedToken.userID;
+         const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo];
+         const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
+ 
+         return res.json({
+             isSuccess: true,
+             code: 100,
+             message: "일정 생성 성공"
+ 
+         });
+         } catch (err) {
+             // await connection.rollback(); // ROLLBACK
+             // connection.release();
+             logger.error(`일정생성 에러\n: ${err.message}`);
+             return res.status(401).send(`Error: ${err.message}`);
+         }
+ };
 //일정수정
 exports.updateschedule = async function (req, res) {
 

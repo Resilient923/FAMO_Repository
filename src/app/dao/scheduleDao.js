@@ -1,12 +1,31 @@
 const { pool } = require("../../../config/database");
 
 // 오늘일정생성
-async function insertscheduleInfo(insertscheduleParams) {
+async function inserttodayscheduleInfo(inserttodayscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const insertscheduleQuery = `
+  const inserttodayscheduleQuery = `
   insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
     scheduleCategoryID,scheduleMemo,scheduleStatus,scheduleDelete,scheduleCreatedAt,scheduleUpdatedAt,schedulePick)
 values (?,?,current_date(),?,?,?,default,default,default,default,default);
+  `;
+
+  const [inserttodayschedulerows] = await connection.query(
+    inserttodayscheduleQuery,
+    inserttodayscheduleParams
+  );
+  connection.release();
+
+  return  inserttodayschedulerows;
+}
+//일정생성
+async function insertscheduleInfo(insertscheduleParams) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertscheduleQuery = `
+  insert into schedule(userID, scheduleName, scheduleDate, scheduleTime,
+    scheduleCategoryID, scheduleMemo, scheduleStatus,
+    scheduleDelete, scheduleCreatedAt, scheduleUpdatedAt, schedulePick)
+values ( ?, ?, ?, ?, ?, ?, default, default, default, default
+, default);
   `;
 
   const [insertschedulerows] = await connection.query(
@@ -111,6 +130,7 @@ async function deletescheduleInfo(scheduleID) {
   return deletescheduleRow;
 }
 module.exports = {
+  inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
   getscheduleInfo,
