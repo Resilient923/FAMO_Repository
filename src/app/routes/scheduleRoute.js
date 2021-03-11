@@ -11,5 +11,5 @@ module.exports = function(app){
     app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
     app.post('/schedules/months',jwtMiddleware,schedule.insertschedule); //일정생성(월별)
     
-
+    app.patch('/schedules/picks',jwtMiddleware,schedule.patchschedulepick);//즐겨찾기
 };
