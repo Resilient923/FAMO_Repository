@@ -56,7 +56,6 @@ from schedule
     left join category on category.categoryID = schedule.scheduleCategoryID
    left join categoryColor ON categoryColor.colorID = category.categoryColor
 where scheduleDelete = 1
-where scheduleDelete = 1
   and schedule.userID = '${userID}';
     
     `;

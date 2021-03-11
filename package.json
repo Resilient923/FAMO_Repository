@@ -29,8 +29,12 @@
     "path": "^0.12.7",
     "promise": "^8.1.0",
     "regex-email": "^1.0.2",
+
+    "twilio": "^3.57.0",
+
     "request": "^2.88.2",
     "require": "^2.4.20",
+
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
     "winston-daily-rotate-file": "^4.5.0"
