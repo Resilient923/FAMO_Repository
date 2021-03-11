@@ -16,13 +16,31 @@ async function insertcategoryInfo(insertcategoryParams) {
 
   return insertcategoryrows;
 }
+//카테고리개수제한 체크
+async function insertcategoryCountCheck(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertcategoryCountCheckQuery = `
+  select count(categoryID) as 'categoryCount'
+  from category
+  where userID = '${userID}';
+                
+                `;
+ 
+  const [insertcategoryCountCheckRows] = await connection.query(
+    insertcategoryCountCheckQuery,
+  
+  );
+  connection.release();
+  return insertcategoryCountCheckRows;
+}
 //카테고리중복체크
-async function insertcategoryCheck(categoryName) {
+async function insertcategoryCheck(categoryName,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertcategoryCheckQuery = `
                 SELECT categoryName
                 FROM category
-                WHERE categoryName = '${categoryName}';
+                WHERE categoryName = '${categoryName}'
+                and userID = '${userID}';
                 `;
  
   const [insertcategoryCheckRows] = await connection.query(
@@ -31,6 +49,23 @@ async function insertcategoryCheck(categoryName) {
   );
   connection.release();
   return insertcategoryCheckRows;
+}
+//카테고리색상중복체크
+async function insertcategoryColorCheck(categoryColor,userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertcategoryColorCheckQuery = `
+                SELECT categoryColor
+                FROM category
+                WHERE categoryColor = '${categoryColor}'
+                and userID = '${userID}';
+                `;
+ 
+  const [insertcategoryColorCheckRows] = await connection.query(
+    insertcategoryColorCheckQuery,
+  
+  );
+  connection.release();
+  return insertcategoryColorCheckRows;
 }
 //카테고리수정
 async function updatecategoryInfo(updatecategoryParams) {
@@ -85,7 +120,9 @@ inner join categoryColor on categoryColor = colorID
 }
 module.exports = {
   insertcategoryInfo,
+  insertcategoryCountCheck,
   insertcategoryCheck,
+  insertcategoryColorCheck,
   updatecategoryInfo,
   deletecategoryInfo,
   getcategoryInfo

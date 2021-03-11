@@ -29,16 +29,30 @@ exports.insertcategory = async function (req, res) {
         });
     }
     try {
-        const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName);
+        const insertcategoryCountCheckRows = await categoryDao.insertcategoryCountCheck(userID);
+        if (insertcategoryCountCheckRows[0].categoryCount>=10){
+            return res.json({
+                isSuccess: false,
+                code: 405,
+                message: userID +"번 유저 최대 카테고리 개수는 10개입니다."
+            });
+        }
+        const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName,userID);
         if (insertcategoryCheckRows.length > 0){
             return res.json({
                 isSuccess: false,
                 code: 403,
-                message: "중복된 카테고리 이름입니다"
+                message: userID +"번 유저 중복된 카테고리 이름입니다"
             });
         }
-
-
+        const insertcategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
+        if (insertcategoryColorCheckRows.length > 0){
+            return res.json({
+                isSuccess: false,
+                code: 404,
+                message: userID +"번 유저 중복된 카테고리 색상입니다"
+            });
+        }
         const insertcategoryParams = [userID,categoryName,categoryColor];
         const insertcategoryRows = await categoryDao.insertcategoryInfo(insertcategoryParams);
         
