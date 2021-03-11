@@ -72,7 +72,7 @@ exports.signUp = async function (req, res) {
     try {
         const connection = await pool.getConnection(async conn => conn);
         try {
-            const loginIDRows = await userDao.checkUserLoginID(loginID);
+            const [loginIDRows] = await userDao.checkUserLoginID(loginID);
             if (loginIDRows[0].exist == 1) {
 
                 return res.json({
@@ -82,7 +82,7 @@ exports.signUp = async function (req, res) {
                 });
             };
 
-            const phoneNumberRows = await userDao.checkPhoneNumber(phoneNumber);
+            const [phoneNumberRows] = await userDao.checkPhoneNumber(phoneNumber);
             if (phoneNumberRows[0].exist == 1) {
 
                 return res.json({
@@ -92,15 +92,18 @@ exports.signUp = async function (req, res) {
                 });
             };
 
-            // TRANSACTION : advanced
-           // await connection.beginTransaction(); // START TRANSACTION
+            await connection.beginTransaction(); // START TRANSACTION
             const passwordSalt = crypto.randomBytes(64).toString('base64');
             const passwordHash = crypto.pbkdf2Sync(password, passwordSalt, 101024, 64, 'sha512').toString('base64');
 
             const insertUserInfoParams = [loginID, passwordHash, passwordSalt, nickname, phoneNumber, 'F'];
             const insertUserRowsId = await userDao.insertUserInfo(insertUserInfoParams);
+            const insertProfileImageParams = [insertUserRowsId, null];
+            await profileDao.insertProfileImage(insertProfileImageParams);
             const [userInfoRows] = await userDao.selectUserInfo(loginID);
             
+            await connection.commit();
+
             let token = jwt.sign({
                 userID: insertUserRowsId,
                 method: 'F'
@@ -111,20 +114,21 @@ exports.signUp = async function (req, res) {
                 subject: 'userInfo'
               } // 유효 시간은 365일
             );
-           //  await connection.commit(); // COMMIT
-           // connection.release();
-            return res.json({
+           
+            res.json({
                 userID: userInfoRows[0].userID,
                 nickname: userInfoRows[0].nickname,
                 jwt: token,
                 isSuccess: true,
                 code: 100,
                 message: "회원가입 성공"
-            });
-        } catch (err) {
-           // await connection.rollback(); // ROLLBACK           
-            logger.error(`SignUp Query error\n: ${JSON.stringify(err)}`);
+            })
+
             connection.release();
+        } catch (err) {        
+            await connection.rollback();
+            connection.release();
+            logger.error(`SignUp Query error\n: ${JSON.stringify(err)}`);
             return res.status(500).send(`Error: ${err.message}`);
         }
     } catch (err) {
@@ -220,7 +224,7 @@ exports.signIn = async function (req, res) {
 /* 카카오 로그인 동의 화면 출력 API */
 exports.kakao = async function (req, res) {
     const clientID = secret_config.kakaoClientID;
-    const url = 'https://dev.risingsoi.site/kakao/oauth'
+    const url = 'https://dev.risingsoi.site/kakao/oauth';
     res.redirect(`https://kauth.kakao.com/oauth/authorize?client_id=${clientID}&redirect_uri=${url}&response_type=code`);
 };
 
@@ -229,7 +233,7 @@ exports.kakaoOauth = async function (req, res){
     const code = req.query.code;
     const clientID = secret_config.kakaoClientID;
     const url = 'https://dev.risingsoi.site/kakao/oauth';
-    
+
     const options = {
         url: 'https://kauth.kakao.com/oauth/token',
         method: 'POST',
@@ -272,7 +276,7 @@ exports.kakaoOauth = async function (req, res){
         try{
             const connection = await pool.getConnection(async (conn) => conn);
             try{
-                const loginIDRows = await userDao.checkUserLoginID(email);
+                const [loginIDRows] = await userDao.checkUserLoginID(email);
         
                 if (loginIDRows[0].exist == 1) {
                     const [userInfoRows] = await userDao.selectUserInfo(email);
@@ -298,12 +302,16 @@ exports.kakaoOauth = async function (req, res){
                 })
         
                 }else{
+                    await connection.beginTransaction();
+
                     const insertUserInfoParams = [email, nickname, refreshToken, 'K'];
                     const insertUserRowsId = await userDao.insertKakaoUserInfo(insertUserInfoParams);
                     const [userInfoRows] = await userDao.selectUserInfo(email);
                     const insertProfileImageParams = [insertUserRowsId, profileImage];
                     profileDao.insertProfileImage(insertProfileImageParams);
         
+                    await connection.commit();
+
                     let token = jwt.sign({
                         userID: insertUserRowsId,
                         method: 'K'
@@ -314,9 +322,8 @@ exports.kakaoOauth = async function (req, res){
                         subject: 'userInfo'
                       } // 유효 시간은 365일
                     );
-                    // await connection.commit(); // COMMIT
-                    // connection.release();
-                    return res.json({
+                    
+                    res.json({
                         userID: userInfoRows[0].userID,
                         nickname: userInfoRows[0].nickname,
                         jwt: token,
@@ -324,8 +331,10 @@ exports.kakaoOauth = async function (req, res){
                         code: 100,
                         message: "카카오 계정으로 첫 로그인 성공"
                     });
+                    connection.release();
                 }
             }catch (err) {
+            await connection.rollback();
             connection.release();
             logger.error(`KAKAO Login Query error\n: ${JSON.stringify(err)}`);
             return false;
