@@ -2,8 +2,11 @@ const {pool} = require('../../../config/database');
 const {logger} = require('../../../config/winston');
 const scheduleDao = require('../dao/scheduleDao');
 //오늘일정생성
-exports.inserttodayschedule = async function (req, res) {
-     const {
+
+/* exports.inserttodayschedule = async function (req, res) {
+   const {
+
+
         scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo
      } = req.body;
 
@@ -50,15 +53,18 @@ exports.inserttodayschedule = async function (req, res) {
         connection.release();
         logger.error(`오늘일정생성 에러\n: ${err.message}`);
          res.status(401).send(`Error: ${err.message}`);
-     }
-    };
+
+        }
+}; */
+
+   
+
 //일정생성(월캘린더에서 생성)
 exports.insertschedule = async function (req, res) {
     const {
          scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
      } = req.body;
      
-
      if (!scheduleName) {
          res.json({
              isSuccess: false,
@@ -66,45 +72,37 @@ exports.insertschedule = async function (req, res) {
              message: "일정제목을 입력해주세요."
          });
      }
-
      if (scheduleName.length >=50) {
          res.json({
-
-
              isSuccess: false,
              code: 310,
              message: "일정제목길이는 최대 50자입니다."
          });
      } 
      if(scheduleMemo){
-
          if (scheduleMemo.length >= 100){
              res.json({
-
-
                  isSuccess: false,
                  code: 309,
                  message: "메모최대길이는 100자입니다"
              });
          }
-
      }  
-     if (!scheduleDate) {
-        const userID = req.verifiedToken.userID;
-        const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
-        const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
-
-     res.json({
-            isSuccess: true,
-            code: 100,
-            message: "오늘 일정 생성 성공"
-
-        });
-    }
-    connection.release();
-
-    
      try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        if (!scheduleDate) {
+            const userID = req.verifiedToken.userID;
+            const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
+            const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
+    
+         res.json({
+                isSuccess: true,
+                code: 100,
+                message: "오늘 일정 생성 성공"
+    
+            });
+            connection.release();
+        }else{
          // 오늘일정생성
          const userID = req.verifiedToken.userID;
          const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo];
@@ -117,6 +115,7 @@ exports.insertschedule = async function (req, res) {
  
          });
          connection.release();
+        }
          } catch (err) {
              // await connection.rollback(); // ROLLBACK
              connection.release();
@@ -124,7 +123,6 @@ exports.insertschedule = async function (req, res) {
              res.status(401).send(`Error: ${err.message}`);
          }
  };
-
 //일정수정
 exports.updateschedule = async function (req, res) {
 
@@ -197,8 +195,10 @@ exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        try{
-            const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+
+
+        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+
 
             if (getschedulerows) {
                 res.json({
@@ -220,10 +220,8 @@ exports.getschedule = async function (req, res) {
                 logger.error(`일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
-        }catch (err) {
-            logger.error(`일정 조회\n ${err.message}`);
-            res.status(401).send(`Error: ${err.message}`);
-        }
+        
+
 };
 //카테고리별일정조회
 exports.getschedulebycategory = async function (req, res) {
