@@ -64,7 +64,7 @@ async function getscheduleInfo(userID) {
   const getscheduleQuery = `
         
   select scheduleID,
-  date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+  date_format(scheduleDate, '%e %b') as 'scheduleDate',
   scheduleName,
   scheduleMemo,
   schedulePick,
