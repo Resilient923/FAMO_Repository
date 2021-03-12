@@ -57,6 +57,7 @@ exports.insertschedule = async function (req, res) {
          scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
      } = req.body;
      
+
      if (!scheduleName) {
          res.json({
              isSuccess: false,
@@ -64,21 +65,28 @@ exports.insertschedule = async function (req, res) {
              message: "일정제목을 입력해주세요."
          });
      }
+
      if (scheduleName.length >=50) {
          res.json({
+
+
              isSuccess: false,
              code: 310,
              message: "일정제목길이는 최대 50자입니다."
          });
      } 
      if(scheduleMemo){
+
          if (scheduleMemo.length >= 100){
              res.json({
+
+
                  isSuccess: false,
                  code: 309,
                  message: "메모최대길이는 100자입니다"
              });
          }
+
      }  
      if (!scheduleDate) {
         const userID = req.verifiedToken.userID;
@@ -115,6 +123,7 @@ exports.insertschedule = async function (req, res) {
              res.status(401).send(`Error: ${err.message}`);
          }
  };
+
 //일정수정
 exports.updateschedule = async function (req, res) {
 
@@ -187,6 +196,10 @@ exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        try{
+            const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+            if (getschedulerows) {
+
 
         const getschedulerows = await scheduleDao.getscheduleInfo(userID);
 
@@ -210,6 +223,7 @@ exports.getschedule = async function (req, res) {
         }
         connection.release();
     } catch (err) {
+
 
         logger.error(`일정 조회\n ${err.message}`);
      res.status(401).send(`Error: ${err.message}`);

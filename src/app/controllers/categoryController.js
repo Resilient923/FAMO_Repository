@@ -165,29 +165,31 @@ exports.getcategory = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        try{
+            const getcategoryrows = await categoryDao.getcategoryInfo(userID);
 
-        const getcategoryrows = await categoryDao.getcategoryInfo(userID);
+            if (getcategoryrows) {
+                return res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저 카테고리 조회 성공",
+                    data : getcategoryrows[0]
+                    
+                });
+            }else{
+                return res.json({
+                    isSuccess: false,
+                    code: 314,
+                    message: userID + "번 유저 카테고리 조회 실패"
+                });
+            };
 
-        if (getcategoryrows) {
-
-            return res.json({
-                isSuccess: true,
-                code: 100,
-                message: userID + "번 유저 카테고리 조회 성공",
-                data : getcategoryrows[0]
-                
-
-            });
-
-        }else{
-            return res.json({
-                isSuccess: false,
-                code: 314,
-                message: userID + "번 유저 카테고리 조회 실패"
-            });
+        }catch (err) {
+            connection.release();
+            logger.error(` 카테고리 조회\n ${err.message}`);
+            return res.status(401).send(`Error: ${err.message}`);
         }
     } catch (err) {
-
         logger.error(` 카테고리 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
