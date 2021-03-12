@@ -5,4 +5,5 @@ module.exports = function(app){
 
     app.post('/profiles/image', [jwtMiddleware, aws.jwt, aws.upload.single('profileImage')], profile.uploadProfileImage);
     app.get('/profiles/comments', jwtMiddleware, profile.getTitleComment);
+    app.get('/profiles', jwtMiddleware, profile.getProfile);
 };
