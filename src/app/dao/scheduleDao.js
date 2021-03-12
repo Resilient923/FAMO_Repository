@@ -148,6 +148,42 @@ async function patchschedulepickInfo(scheduleID,userID) {
   connection.release();
   return patchschedulepickRow;
 }
+//일정완료 , 완료취소
+async function updateachievementscheduleInfo(scheduleID,userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const updateachievementscheduleQuery = `
+        
+  update schedule
+  set scheduleStatus = if(scheduleStatus = 1, -1, 1)
+  where scheduleID = '${scheduleID}' and userID = '${userID}';
+
+    
+    `;
+  
+  const updateachievementscheduleRow = await connection.query(
+    updateachievementscheduleQuery, 
+   
+  );
+  connection.release();
+  return updateachievementscheduleRow;
+}
+//유저별 해낸 일정 개수 조회
+async function getdoneschedulecountInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getdoneschedulecountQuery = `
+  select count(scheduleID) as 'doneScheduleCount'
+  from schedule
+  where userID ='${userID}' and scheduleStatus = 1
+`; 
+  
+  const  getdoneschedulecountRow = await connection.query(
+    getdoneschedulecountQuery, 
+    
+  );
+  connection.release();
+  return getdoneschedulecountRow;
+}
+
 module.exports = {
   inserttodayscheduleInfo,
   insertscheduleInfo,
@@ -155,5 +191,7 @@ module.exports = {
   getscheduleInfo,
   getschedulebycategoryInfo,
   deletescheduleInfo,
-  patchschedulepickInfo
+  patchschedulepickInfo,
+  updateachievementscheduleInfo,
+  getdoneschedulecountInfo
 };
