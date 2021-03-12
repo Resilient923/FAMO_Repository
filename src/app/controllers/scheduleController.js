@@ -315,3 +315,68 @@ exports.patchschedulepick = async function (req, res) {
         return res.status(401).send(`Error: ${err.message}`);
     }
 };
+//일정 완료 버튼
+exports.updateachievementschedule = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const scheduleID = req.body.scheduleID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const updateachievementschedulerows = await scheduleDao.updateachievementscheduleInfo(scheduleID,userID);
+        
+        if (updateachievementschedulerows) {
+
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 "+ scheduleID +"번 일정 완료/미완료"
+                
+                
+
+            });
+
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 319,
+                message: "일정 완료수정 실패"
+            });
+        }
+    } catch (err) {
+
+        logger.error(`일정 완료수정 조회\n ${err.message}`);
+        return res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//유저별 총 해낸 일정수 조회
+exports.getdoneschedulecount = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getdoneschedulecountrows = await scheduleDao.getdoneschedulecountInfo(userID);
+
+        if (getdoneschedulecountrows) {
+
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 해낸 일정 개수 조회 성공",
+                data : getdoneschedulecountrows[0]
+                
+
+            });
+
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 307,
+                message: "해낸 일정 개수 조회 실패"
+            });
+        }
+    } catch (err) {
+
+        logger.error(`해낸 일정 개수 조회\n ${err.message}`);
+        return res.status(401).send(`Error: ${err.message}`);
+    }
+};
