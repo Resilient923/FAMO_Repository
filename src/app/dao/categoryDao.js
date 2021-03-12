@@ -107,17 +107,17 @@ async function getcategoryInfo(userID) {
   select categoryID,
        categoryName,
        colorInfo
-from category
-inner join categoryColor on categoryColor = colorID
-  where userID ='${userID}';
+  from category
+  inner join categoryColor on categoryColor = colorID
+  where userID= ${userID};
   `;
   const getcategoryRow = await connection.query(
     getcategoryQuery, 
-    
   );
   connection.release();
   return getcategoryRow;
 }
+
 module.exports = {
   insertcategoryInfo,
   insertcategoryCountCheck,
@@ -125,6 +125,6 @@ module.exports = {
   insertcategoryColorCheck,
   updatecategoryInfo,
   deletecategoryInfo,
-  getcategoryInfo
-  
+  getcategoryInfo,
+
 };
