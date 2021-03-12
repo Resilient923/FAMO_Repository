@@ -55,7 +55,7 @@ exports.insertschedule = async function (req, res) {
     const {
          scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
      } = req.body;
- 
+     
      if (!scheduleName) {
          return res.json({
              isSuccess: false,
@@ -80,10 +80,15 @@ exports.insertschedule = async function (req, res) {
          }
      }  
      if (!scheduleDate) {
+        const userID = req.verifiedToken.userID;
+        const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
+        const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
+
         return res.json({
-            isSuccess: false,
-            code: 207,
-            message: "일정날짜를 입력해주세요"
+            isSuccess: true,
+            code: 100,
+            message: "오늘 일정 생성 성공"
+
         });
     }
  
@@ -166,7 +171,7 @@ exports.updateschedule = async function (req, res) {
                 message: "일정 수정 실패"
             });
         }
-        
+
     } catch (err) {
 
         logger.error(`일정수정에러\n ${err.message}`);
@@ -199,6 +204,7 @@ exports.getschedule = async function (req, res) {
                 message: "일정 조회 실패"
             });
         }
+        
     } catch (err) {
 
         logger.error(`일정 조회\n ${err.message}`);
