@@ -61,7 +61,6 @@ exports.insertcategory = async function (req, res) {
             code: 100,
             message: "카테고리생성 성공",
             data : "생성된 카테고리번호 : "+ insertcategoryRows.insertId
-
         });
         } catch (err) {
             // await connection.rollback(); // ROLLBACK
