@@ -17,63 +17,97 @@ exports.signUp = async function (req, res) {
         loginID, password, nickname, phoneNumber
     } = req.body;
 
-    if (!loginID) return res.json({
-        isSuccess: false, 
-        code: 201, 
-        message: "아이디를 입력해주세요."
-    });
+    if (!loginID) {
+        connection.release();
 
-    if (!password) return res.json({
-        isSuccess: false, 
-        code: 202, 
-        message: "비밀번호를 입력해주세요."
-    });
+        return res.json({
+            isSuccess: false, 
+            code: 201, 
+            message: "아이디를 입력해주세요."
+        });
+    };
 
-    if (!nickname) return res.json({
-        isSuccess: false, 
-        code: 203, 
-        message: "닉네임을 입력해주세요."
-    });
+    if (!password){
+        connection.release();
 
-    if (!phoneNumber) return res.json({
-        isSuccess: false,
-        code: 204,
-        message: "핸드폰 번호를 입력해주세요."
-    });
+        return res.json({
+            isSuccess: false, 
+            code: 202, 
+            message: "비밀번호를 입력해주세요."
+        });
+    }
 
-    if(loginID.length > 320) return res.json({
-        isSuccess: false,
-        code: 301,
-        message: "아이디는 최대 320자입니다."
-    });
+    if (!nickname){
+        connection.release();
 
-    if(password.length < 8) return res.json({
-        isSuccess: false,
-        code: 316,
-        message: "비밀번호는 최소 8자입니다."
-    });
+        return res.json({
+            isSuccess: false, 
+            code: 203, 
+            message: "닉네임을 입력해주세요."
+        });
+    }
+
+    if (!phoneNumber){
+        connection.release();
+
+        return res.json({
+            isSuccess: false,
+            code: 204,
+            message: "핸드폰 번호를 입력해주세요."
+        });
+    }
+
+    if(loginID.length > 320){
+        connection.release();
+
+        return res.json({
+            isSuccess: false,
+            code: 301,
+            message: "아이디는 최대 320자입니다."
+        });
+    }
+
+    if(password.length < 8){
+        connection.release();
+
+        return res.json({
+            isSuccess: false,
+            code: 316,
+            message: "비밀번호는 최소 8자입니다."
+        });
+    }
 
     var num = password.search(/[0-9]/g);
     var eng = password.search(/[a-z]/ig);
     var spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
 
-    if(num < 0 || eng < 0 || spe < 0) return res.json({
-        isSuccess: false,
-        code: 317,
-        message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 입력해주세요."
-    });
+    if(num < 0 || eng < 0 || spe < 0){
+        connection.release();
 
-    if(nickname.length > 20) return res.json({
-        isSuccess: false,
-        code: 302,
-        message: "닉네임은 최대 20자입니다."
-    });
+        return res.json({
+            isSuccess: false,
+            code: 317,
+            message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 입력해주세요."
+        });
+    }
+
+    if(nickname.length > 20){
+        connection.release();
+
+        return res.json({
+            isSuccess: false,
+            code: 302,
+            message: "닉네임은 최대 20자입니다."
+        });
+    }
 
     try {
         const connection = await pool.getConnection(async conn => conn);
         try {
             const [loginIDRows] = await userDao.checkUserLoginID(loginID);
             if (loginIDRows[0].exist == 1) {
+
+                connection.release();
 
                 return res.json({
                     isSuccess: false,
@@ -84,6 +118,8 @@ exports.signUp = async function (req, res) {
 
             const [phoneNumberRows] = await userDao.checkPhoneNumber(phoneNumber);
             if (phoneNumberRows[0].exist == 1) {
+
+                connection.release();
 
                 return res.json({
                     isSuccess: false,
@@ -123,8 +159,8 @@ exports.signUp = async function (req, res) {
                 code: 100,
                 message: "회원가입 성공"
             })
-
             connection.release();
+
         } catch (err) {        
             await connection.rollback();
             connection.release();
@@ -143,17 +179,25 @@ exports.signIn = async function (req, res) {
         loginID, password
     } = req.body;
 
-    if (!loginID) return res.json({
-        isSuccess: false, 
-        code: 201, 
-        message: "아이디를 입력해주세요."
-    });
+    if (!loginID){
+        connection.release();
 
-    if (!password) return res.json({
-        isSuccess: false, 
-        code: 202, 
-        message: "비밀번호를 입력해주세요."
-    });
+        return res.json({
+            isSuccess: false, 
+            code: 201, 
+            message: "아이디를 입력해주세요."
+        });
+    }
+
+    if (!password){
+        connection.release();
+
+        return res.json({
+            isSuccess: false, 
+            code: 202, 
+            message: "비밀번호를 입력해주세요."
+        });
+    }
 
     try {
         const connection = await pool.getConnection(async conn => conn);
@@ -211,8 +255,8 @@ exports.signIn = async function (req, res) {
 
             connection.release();
         } catch (err) {
-            logger.error(`SignIn Query error\n: ${JSON.stringify(err)}`);
             connection.release();
+            logger.error(`SignIn Query error\n: ${JSON.stringify(err)}`);
             return res.status(500).send(`Error: ${err.message}`);
         }
      } catch (err) {
@@ -291,7 +335,7 @@ exports.kakaoOauth = async function (req, res){
                         subject: 'userInfo',
                     } // 유효 시간은 365일
                 );
-        
+
                 res.json({
                     userID: userInfoRows[0].userID,
                     nickname: userInfoRows[0].nickname,
@@ -376,7 +420,8 @@ exports.kakaoOauth = async function (req, res){
                     if(json.kakao_account.has_email === true){
                         email = json.kakao_account.email;
                     }else{
-                        res.status(403).json({
+                        connection.release();
+                        return res.status(403).json({
                             isSuccess:false,
                             code: 315,
                             message:"카카오 계정에 이메일 설정이 되어있지 않습니다."

@@ -68,7 +68,7 @@ async function selectUserInfo(loginID) {
   const selectUserInfoQuery = `
   SELECT userID, loginID, password, passwordSalt, nickname, phoneNumber, kakaoRefreshToken, method, status FROM user
   WHERE loginID = '${loginID}';
-                `;
+  `;
 
   const [userInfoRows] = await connection.query(
     selectUserInfoQuery,

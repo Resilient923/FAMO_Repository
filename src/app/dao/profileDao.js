@@ -84,7 +84,24 @@ async function getTitleGoal(userID){
   connection.release();
   return [getTitleGoalRow];
 };
+/* 내정보 조회 */
+async function getUserProfile(userID){
+  const connection = await pool.getConnection(async conn => conn);
 
+  const getUserProfile = `
+  SELECT loginID, method, nickname, profileImageURL, titleComment, goalStatus, goalTitle,
+  TIMESTAMPDIFF(DAY, goalDate, current_date()) AS Dday, goalDate
+  FROM profile
+  INNER JOIN user ON user.userID = profile.userID
+  WHERE profile.userID = ${userID} AND user.status = 1;
+  `;
+
+  const [getUserProfileRow] = await connection.query(
+    getUserProfile,
+  );
+  connection.release();
+  return [getUserProfileRow];
+};
 
 module.exports = {
     checkUserProfile,
@@ -93,4 +110,5 @@ module.exports = {
     updateProfileImage,
     getTitleComment,
     getTitleGoal,
+    getUserProfile,
 };

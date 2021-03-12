@@ -20,13 +20,6 @@ module.exports = function () {
     require('../src/app/routes/indexRoute')(app);
     require('../src/app/routes/userRoute')(app);
     require('../src/app/routes/profileRoute')(app);
-    
-    
-    
-    
-    
-    
-    
     require('../src/app/routes/scheduleRoute')(app);
     require('../src/app/routes/categoryRoute')(app);
     /* Web */
