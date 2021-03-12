@@ -6,16 +6,14 @@ async function inserttodayscheduleInfo(inserttodayscheduleParams) {
   const inserttodayscheduleQuery = `
   insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
     scheduleCategoryID,scheduleMemo,scheduleStatus,scheduleDelete,scheduleCreatedAt,scheduleUpdatedAt,schedulePick)
-values (?,?,current_date(),?,?,?,default,default,default,default,default);
+  values (?,?,current_date(),?,?,?,default,default,default,default,default);
   `;
 
-  const [inserttodayschedulerows] = await connection.query(
+  await connection.query(
     inserttodayscheduleQuery,
     inserttodayscheduleParams
   );
   connection.release();
-
-  return  inserttodayschedulerows;
 }
 //일정생성
 async function insertscheduleInfo(insertscheduleParams) {
@@ -24,17 +22,14 @@ async function insertscheduleInfo(insertscheduleParams) {
   insert into schedule(userID, scheduleName, scheduleDate, scheduleTime,
     scheduleCategoryID, scheduleMemo, scheduleStatus,
     scheduleDelete, scheduleCreatedAt, scheduleUpdatedAt, schedulePick)
-values ( ?, ?, ?, ?, ?, ?, default, default, default, default
-, default);
+  values (?, ?, ?, ?, ?, ?, default, default, default, default, default);
   `;
 
-  const [insertschedulerows] = await connection.query(
+  await connection.query(
     insertscheduleQuery,
     insertscheduleParams
   );
   connection.release();
-
-  return  insertschedulerows;
 }
 
 //일정 수정
@@ -63,22 +58,19 @@ async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduleQuery = `
         
-  select scheduleID,
-  date_format(scheduleDate, '%e %b') as 'scheduleDate',
+  select scheduleID, date_format(scheduleDate, '%e %b') as 'scheduleDate', 
   scheduleName,
   scheduleMemo,
   schedulePick,
   colorInfo
-from schedule
-    left join category on category.categoryID = schedule.scheduleCategoryID
-   left join categoryColor ON categoryColor.colorID = category.categoryColor
-where scheduleDelete = 1
-  and schedule.userID = '${userID}';
-    
-    `;
+  from schedule
+  left join category on category.categoryID = schedule.scheduleCategoryID
+  left join categoryColor ON categoryColor.colorID = category.categoryColor
+  where scheduleDelete = 1 and schedule.userID = '${userID}';
+  `;
   
   const getscheduleRow = await connection.query(
-    getscheduleQuery, 
+    getscheduleQuery,
     //updatescheduleParams 
   );
   connection.release();

@@ -56,6 +56,7 @@ exports.insertschedule = async function (req, res) {
          scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
      } = req.body;
      
+
      if (!scheduleName) {
          return res.json({
              isSuccess: false,
@@ -63,7 +64,7 @@ exports.insertschedule = async function (req, res) {
              message: "일정제목을 입력해주세요."
          });
      }
-     if (scheduleName.length >=50) {
+     if (scheduleName.length > 50) {
          return res.json({
              isSuccess: false,
              code: 310,
@@ -71,46 +72,47 @@ exports.insertschedule = async function (req, res) {
          });
      } 
      if(scheduleMemo){
-         if (scheduleMemo.length >= 100){
+         if (scheduleMemo.length > 100){
              return res.json({
                  isSuccess: false,
                  code: 309,
                  message: "메모최대길이는 100자입니다"
              });
          }
-     }  
-     if (!scheduleDate) {
-        const userID = req.verifiedToken.userID;
-        const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
-        const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
+     }
 
-        return res.json({
-            isSuccess: true,
-            code: 100,
-            message: "오늘 일정 생성 성공"
-
-        });
-    }
- 
      try {
          // 오늘일정생성
          const userID = req.verifiedToken.userID;
-         const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo];
-         const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
- 
-         return res.json({
-             isSuccess: true,
-             code: 100,
-             message: "일정 생성 성공"
- 
-         });
-         } catch (err) {
+
+         if (!scheduleDate) {
+            const inserttodayscheduleParams = [userID, scheduleName, scheduleTime, scheduleCategoryID, scheduleMemo];
+            await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
+    
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: "오늘 일정 생성 성공"
+    
+            });
+        }else {
+            const insertscheduleParams = [userID, scheduleName, scheduleDate, scheduleTime, scheduleCategoryID, scheduleMemo];
+            await scheduleDao.insertscheduleInfo(insertscheduleParams);
+
+            return res.json({
+                isSuccess: true,
+                code: 100,
+                message: "일정 생성 성공"
+            });
+
+        }
+     } catch (err) {
              // await connection.rollback(); // ROLLBACK
              // connection.release();
              logger.error(`일정생성 에러\n: ${err.message}`);
              return res.status(401).send(`Error: ${err.message}`);
-         }
- };
+     }
+    };
 //일정수정
 exports.updateschedule = async function (req, res) {
 
@@ -183,30 +185,31 @@ exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        try{
+            const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+            if (getschedulerows) {
 
-        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+                return res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저 일정 조회 성공",
+                    data : getschedulerows[0]
+                });
+    
+            }else{
+                return res.json({
+                    isSuccess: false,
+                    code: 307,
+                    message: "일정 조회 실패"
+                });
+            }
 
-        if (getschedulerows) {
-
-            return res.json({
-                isSuccess: true,
-                code: 100,
-                message: userID + "번 유저 일정 조회 성공",
-                data : getschedulerows[0]
-                
-
-            });
-
-        }else{
-            return res.json({
-                isSuccess: false,
-                code: 307,
-                message: "일정 조회 실패"
-            });
+        }catch (err){
+            connection.release();
+            logger.error(`일정 조회\n ${err.message}`);
+            return res.status(401).send(`Error: ${err.message}`);
         }
-        
-    } catch (err) {
-
+    }catch (err) {
         logger.error(`일정 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
