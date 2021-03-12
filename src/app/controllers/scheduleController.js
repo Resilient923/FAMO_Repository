@@ -187,6 +187,7 @@ exports.getschedule = async function (req, res) {
         const connection = await pool.getConnection(async (conn) => conn);
         try{
             const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+
             if (getschedulerows) {
 
                 return res.json({
@@ -352,7 +353,7 @@ exports.updateachievementschedule = async function (req, res) {
             });
         }
     } catch (err) {
-
+        
         logger.error(`일정 완료수정 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
@@ -384,7 +385,7 @@ exports.getdoneschedulecount = async function (req, res) {
             });
         }
     } catch (err) {
-
+        
         logger.error(`해낸 일정 개수 조회\n ${err.message}`);
         return res.status(401).send(`Error: ${err.message}`);
     }
