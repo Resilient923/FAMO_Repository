@@ -403,31 +403,53 @@ exports.getdoneschedulecount = async function (req, res) {
 //남은일정수조회
 exports.getremainschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
+    const filter = req.query.filter;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
-        const getremainschedulerows = await scheduleDao.getremainscheduleInfo(userID);
+        const connection = await pool.getConnection(async (conn) => conn);
+        if(filter == 'total'){
+        const getremainschedulerows = await scheduleDao.getremaintotalscheduleInfo(userID);
 
         if (getremainschedulerows) {
 
          res.json({
                 isSuccess: true,
                 code: 100,
-                message: userID + "번 유저 남은 일정 개수 조회 성공",
+                message: userID + "번 유저 전체 남은 일정 개수 조회 성공",
                 data :getremainschedulerows[0]
             });
 
         }else{
          res.json({
                 isSuccess: false,
-                code: 322,
-                message: "해낸 일정 개수 조회 실패"
+                code: 325,
+                message: "전체 남은 일정 개수 조회 실패"
             });
         }
+    }else if(filter == 'today'){
+        const getremainstodaychedulerows = await scheduleDao.getremaintodayscheduleInfo(userID);
+
+        if (getremainstodaychedulerows) {
+
+         res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 오늘 남은 일정 개수 조회 성공",
+                data :getremainstodaychedulerows[0]
+            });
+
+        }else{
+         res.json({
+                isSuccess: false,
+                code: 326,
+                message: "오늘 남은 일정 개수 조회 실패"
+            });
+        }
+    }
         connection.release();
     } catch (err) {
-        connection.release();
-        logger.error(`해낸 일정 개수 조회\n ${err.message}`);
+        //connection.release();
+        logger.error(` 남은 일정 개수 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
 };

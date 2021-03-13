@@ -176,12 +176,12 @@ async function getdoneschedulecountInfo(userID) {
   return getdoneschedulecountRow;
 }
 //남은일정수조회
-async function getremainscheduleInfo(userID) {
+async function getremaintotalscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getremainscheduleQuery = `
-  select count(scheduleID) as 'doneScheduleCount'
-  from schedule
-  where userID ='${userID}' and scheduleStatus = 1
+  select count(scheduleID) as 'remainScheduleCount'
+from schedule
+where userID ='${userID}' and scheduleStatus = -1 ;
 `; 
   
   const  getremainscheduleRow = await connection.query(
@@ -190,6 +190,22 @@ async function getremainscheduleInfo(userID) {
   );
   connection.release();
   return getremainscheduleRow;
+}
+//오늘남은일정
+async function getremaintodayscheduleInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getremaintodayscheduleQuery = `
+  select count(scheduleID) as 'remainScheduleCount'
+from schedule
+where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = current_date();
+`; 
+  
+  const  getremaintodayscheduleRow = await connection.query(
+    getremaintodayscheduleQuery, 
+    
+  );
+  connection.release();
+  return getremaintodayscheduleRow;
 }
 //날짜별일정조회
 async function getschedulebydateInfo(userID,scheduleDate) {
@@ -227,6 +243,7 @@ module.exports = {
   patchschedulepickInfo,
   updateachievementscheduleInfo,
   getdoneschedulecountInfo,
-  getremainscheduleInfo,
-  getschedulebydateInfo
+  getremaintotalscheduleInfo,
+  getschedulebydateInfo,
+  getremaintodayscheduleInfo
 };
