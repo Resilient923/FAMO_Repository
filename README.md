@@ -35,7 +35,15 @@
 
 >https://docs.google.com/spreadsheets/d/1Yo6aHpu_JHAJutldZumR04UU2bQ_J1s4IklUq9cuQ3I/edit?usp=sharing
 
+## 프로젝트 설계 및 UI구성 
+
 
 ![image](https://user-images.githubusercontent.com/64014651/111032253-9cec9d00-844e-11eb-96b2-98c32469bdab.png)
+![image](https://user-images.githubusercontent.com/64014651/111032285-c4dc0080-844e-11eb-940e-b19e00dc817f.png)
+![image](https://user-images.githubusercontent.com/64014651/111032297-d4f3e000-844e-11eb-890d-02b16f75edc0.png)
+![image](https://user-images.githubusercontent.com/64014651/111032302-dd4c1b00-844e-11eb-8be9-32f670d4044a.png)
+![image](https://user-images.githubusercontent.com/64014651/111032313-e76e1980-844e-11eb-96e8-253eb9f921f3.png)
+![image](https://user-images.githubusercontent.com/64014651/111032320-f228ae80-844e-11eb-8a6d-c46bfd74930e.png)
+
 
 
