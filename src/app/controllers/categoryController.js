@@ -11,7 +11,7 @@ exports.insertcategory = async function (req, res) {
 
     if (!categoryName) {
 
-         res.json({
+        return res.json({
 
             isSuccess: false,
             code: 212,
@@ -20,7 +20,7 @@ exports.insertcategory = async function (req, res) {
     }
     if (categoryName.length>=10) {
 
-         res.json({
+        return res.json({
 
             isSuccess: false,
             code: 312,
@@ -29,7 +29,7 @@ exports.insertcategory = async function (req, res) {
     }
     if(!categoryColor){
 
-         res.json({
+        return res.json({
 
             isSuccess : false,
             code : 214,
@@ -38,64 +38,70 @@ exports.insertcategory = async function (req, res) {
     }
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        const insertcategoryCountCheckRows = await categoryDao.insertcategoryCountCheck(userID);
-        if (insertcategoryCountCheckRows[0].categoryCount>=10){
-
-             res.json({
-
-                isSuccess: false,
-                code: 405,
-                message: userID +"번 유저 최대 카테고리 개수는 10개입니다."
+        try {
+            const insertcategoryCountCheckRows = await categoryDao.insertcategoryCountCheck(userID);
+            if (insertcategoryCountCheckRows[0].categoryCount>=10){
+                connection.release();
+                return res.json({
+    
+                    isSuccess: false,
+                    code: 405,
+                    message: userID +"번 유저 최대 카테고리 개수는 10개입니다."
+                });
+            }
+            
+            const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName,userID);
+            if (insertcategoryCheckRows.length > 0){
+                connection.release();
+                return res.json({
+    
+                    isSuccess: false,
+                    code: 403,
+                    message: userID +"번 유저 중복된 카테고리 이름입니다"
+                });
+            }
+            const insertcategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
+            if (insertcategoryColorCheckRows.length > 0){
+                connection.release();
+                return res.json({
+    
+                    isSuccess: false,
+                    code: 404,
+                    message: userID +"번 유저 중복된 카테고리 색상입니다"
+                });
+            }
+            const insertcategoryParams = [userID,categoryName,categoryColor];
+            const insertcategoryRows = await categoryDao.insertcategoryInfo(insertcategoryParams);
+            
+    
+            res.json({
+    
+                isSuccess: true,
+                code: 100,
+                message: "카테고리생성 성공",
+                data : "생성된 카테고리번호 : "+ insertcategoryRows.insertId
             });
-        }
-        const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName,userID);
-        if (insertcategoryCheckRows.length > 0){
-
-             res.json({
-
-                isSuccess: false,
-                code: 403,
-                message: userID +"번 유저 중복된 카테고리 이름입니다"
-            });
-        }
-        const insertcategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
-        if (insertcategoryColorCheckRows.length > 0){
-
-             res.json({
-
-                isSuccess: false,
-                code: 404,
-                message: userID +"번 유저 중복된 카테고리 색상입니다"
-            });
-        }
-        const insertcategoryParams = [userID,categoryName,categoryColor];
-        const insertcategoryRows = await categoryDao.insertcategoryInfo(insertcategoryParams);
-        
-
-         res.json({
-
-            isSuccess: true,
-            code: 100,
-            message: "카테고리생성 성공",
-            data : "생성된 카테고리번호 : "+ insertcategoryRows.insertId
-        });
-        connection.release();
-
-        } catch (err) {
-            // await connection.rollback(); // ROLLBACK
             connection.release();
+            }catch (err) {
+                connection.release();
+                logger.error(`카테고리생성 에러\n: ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);    
+            }
+
+        }catch (err) {
+            // await connection.rollback(); // ROLLBACK
             logger.error(`카테고리생성 에러\n: ${err.message}`);
-             res.status(401).send(`Error: ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);
         }
 };
 //카테고리수정
 exports.updatecategory = async function(req,res){
-    //const userID = req.verifiedToken.userID;
+    const userID = req.verifiedToken.userID;
     const categoryID = req.params.categoryID;
     const {categoryName,categoryColor} = req.body;
     if(!categoryID){
 
-         res.json({
+        return res.json({
 
             isSuccess : false,
             code : 213,
@@ -104,7 +110,7 @@ exports.updatecategory = async function(req,res){
     }
     if(!categoryColor){
 
-         res.json({
+        return res.json({
 
             isSuccess : false,
             code : 214,
@@ -113,7 +119,7 @@ exports.updatecategory = async function(req,res){
     }
     if(!categoryName){
 
-         res.json({
+        return res.json({
 
             isSuccess : false,
             code : 212,
@@ -122,7 +128,7 @@ exports.updatecategory = async function(req,res){
     }
     if (categoryName.length>=10) {
 
-         res.json({
+        return res.json({
 
             isSuccess: false,
             code: 312,
@@ -131,77 +137,91 @@ exports.updatecategory = async function(req,res){
     } 
     try{
         const connection = await pool.getConnection(async (conn) => conn);
-        const updatecategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName);
-        if (updatecategoryCheckRows.length > 0){
-
-             res.json({
-
-                isSuccess: false,
-                code: 403,
-                message: "중복된 카테고리 이름입니다"
-            });
-        }
-        const updatecategoryParams = [categoryName,categoryColor,categoryID];
-        const updatecategoryRows = await categoryDao.updatecategoryInfo(updatecategoryParams);
+        try {
+            const updatecategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName, userID);
+            if (updatecategoryCheckRows.length > 0){
+                connection.release();
+                return res.json({
+    
+                    isSuccess: false,
+                    code: 403,
+                    message: "중복된 카테고리 이름입니다"
+                });
+            }
+            const updatecategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
+                if (updatecategoryColorCheckRows.length > 0){
+                    connection.release();
+                    return res.json({
         
-
-         res.json({
-
-            isSuccess: true,
-            code: 100,
-            message: "카테고리수정 성공"
-
-        });
-        connection.release();
-
-
+                        isSuccess: false,
+                        code: 404,
+                        message: "중복된 카테고리 색상입니다"
+                    });
+                }
+            const updatecategoryParams = [categoryName,categoryColor,categoryID];
+            const updatecategoryRows = await categoryDao.updatecategoryInfo(updatecategoryParams);
+            
+    
+            res.json({
+    
+                isSuccess: true,
+                code: 100,
+                message: "카테고리수정 성공"
+    
+            });
+            connection.release();
+        }catch (err){
+                connection.release();
+                logger.error(`카테고리수정 에러\n: ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);
+        }
     }catch (err){
-        connection.release();
-        logger.error(`카테고리수정 에러\n: ${err.message}`);
-         res.status(401).send(`Error: ${err.message}`);
+            logger.error(`카테고리수정 에러\n: ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);
     }
-}
+};
 //카테고리삭제
 exports.deletecategory = async function (req, res) {
     const categoryID = req.params.categoryID;
-
-    if (!categoryID) {
-
-         res.json({ 
-
-            isSuccess: false, 
-            code: 213,
-            message: "카테고리고유번호를 입력해주세요" 
-        });
-    }
-
-    try {
-
-         const connection = await pool.getConnection(async (conn) => conn);
-
-        const deletecategoryrows = await categoryDao.deletecategoryInfo(categoryID);
-        if (deletecategoryrows.affectedRows==1) {
-
-             res.json({
-
-                isSuccess: true,
-                code: 100,
-                message: "카테고리 삭제 성공",
-             });
-        }else{
-
-             res.json({
-
-                isSuccess: false,
-                code: 313,
-                message: "카테고리 삭제 실패"
+    
+        if (!categoryID) {
+    
+            return res.json({ 
+    
+                isSuccess: false, 
+                code: 213,
+                message: "카테고리고유번호를 입력해주세요" 
             });
         }
-        connection.release();
-    } catch (err) {
-        connection.release();
+    
+        try {
+            const connection = await pool.getConnection(async (conn) => conn);
+            try {
+                const deletecategoryrows = await categoryDao.deletecategoryInfo(categoryID);
+                if (deletecategoryrows.affectedRows==1) {
+                    res.json({
+    
+                        isSuccess: true,
+                        code: 100,
+                        message: "카테고리 삭제 성공",
+                     });
+                }else{
+                    res.json({
+        
+                        isSuccess: false,
+                        code: 313,
+                        message: "카테고리 삭제 실패"
+                    });
+                }
+                connection.release();
+            }catch (err) {
+                connection.release();
+                logger.error(`카테고리 삭제 error: ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);        
+            }
+    }catch (err) {
         logger.error(`카테고리 삭제 error: ${err.message}`);
-         res.status(401).send(`Error: ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
     }
 };
 //카테고리조회
