@@ -400,3 +400,65 @@ exports.getdoneschedulecount = async function (req, res) {
         res.status(401).send(`Error: ${err.message}`);
     }
 };
+//남은일정수조회
+exports.getremainschedule = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getremainschedulerows = await scheduleDao.getremainscheduleInfo(userID);
+
+        if (getremainschedulerows) {
+
+         res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 남은 일정 개수 조회 성공",
+                data :getremainschedulerows[0]
+            });
+
+        }else{
+         res.json({
+                isSuccess: false,
+                code: 322,
+                message: "해낸 일정 개수 조회 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`해낸 일정 개수 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//날짜별일정조회
+exports.getschedulebydate = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const scheduleDate = req.query.scheduleDate;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const getschedulebydaterows = await scheduleDao.getschedulebydateInfo(userID,scheduleDate);
+
+            if (getschedulebydaterows) {
+                res.json({
+                       isSuccess: true,
+                       code: 100,
+                       message: userID + "번 유저 일정 "+scheduleDate+"일정 조회 성공",
+                       data : getschedulebydaterows[0]
+                   });
+               }else{
+                res.json({
+                       isSuccess: false,
+                       code: 321,
+                       message: "날짜별일정 조회 실패"
+                   });
+               }
+               connection.release();
+            }catch (err) {
+               // connection.release();
+                logger.error(`일정 조회\n ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);
+            }
+        
+
+};

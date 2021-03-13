@@ -14,4 +14,5 @@ module.exports = function(app){
     app.post('/schedules/picks',jwtMiddleware,schedule.patchschedulepick);//즐겨찾기
     app.post('/schedules/achievements/today',jwtMiddleware,schedule.updateachievementschedule);//일정완료버튼
     app.get('/schedules/achievements',jwtMiddleware,schedule.getdoneschedulecount);//총해낸일정조회
+    app.get('/schedules/dates',jwtMiddleware,schedule.getschedulebydate);//날짜별일정조회
 };
