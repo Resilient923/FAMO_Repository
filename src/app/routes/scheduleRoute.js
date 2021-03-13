@@ -16,4 +16,5 @@ module.exports = function(app){
     app.get('/schedules/achievements',jwtMiddleware,schedule.getdoneschedulecount);//총해낸일정조회
     app.get('/schedules/dates',jwtMiddleware,schedule.getschedulebydate);//날짜별일정조회
     app.get('/schedules/left-over',jwtMiddleware,schedule.getremainschedule);//남은일정수조회
+    app.get('/schedules/:scheduleID/details',jwtMiddleware,schedule.getscheduledetails);//일정상세조회
   };

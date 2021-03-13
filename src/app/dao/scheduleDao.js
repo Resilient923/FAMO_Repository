@@ -232,6 +232,29 @@ and schedule.userID = '${userID}' and scheduleDate = '${scheduleDate}';
   connection.release();
   return getschedulebydateRow;
 }
+//일정상세조회
+async function getscheduledetailsInfo(scheduleID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscheduledetailsQuery = `
+  select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
+       categoryName,
+        scheduleName,
+       scheduleMemo,
+       scheduleTime,
+        colorInfo
+from schedule
+left join category  on schedule.scheduleCategoryID = category.categoryID
+left join categoryColor on categoryColor = colorID
+where scheduleID = '${scheduleID}';
+`; 
+  
+  const getscheduledetailsRow = await connection.query(
+    getscheduledetailsQuery, 
+    
+  );
+  connection.release();
+  return getscheduledetailsRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
@@ -245,5 +268,6 @@ module.exports = {
   getdoneschedulecountInfo,
   getremaintotalscheduleInfo,
   getschedulebydateInfo,
-  getremaintodayscheduleInfo
+  getremaintodayscheduleInfo,
+  getscheduledetailsInfo
 };
