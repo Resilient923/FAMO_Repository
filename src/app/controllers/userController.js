@@ -18,8 +18,6 @@ exports.signUp = async function (req, res) {
     } = req.body;
 
     if (!loginID) {
-        connection.release();
-
         return res.json({
             isSuccess: false, 
             code: 201, 
@@ -28,8 +26,6 @@ exports.signUp = async function (req, res) {
     };
 
     if (!password){
-        connection.release();
-
         return res.json({
             isSuccess: false, 
             code: 202, 
@@ -38,8 +34,6 @@ exports.signUp = async function (req, res) {
     }
 
     if (!nickname){
-        connection.release();
-
         return res.json({
             isSuccess: false, 
             code: 203, 
@@ -48,8 +42,6 @@ exports.signUp = async function (req, res) {
     }
 
     if (!phoneNumber){
-        connection.release();
-
         return res.json({
             isSuccess: false,
             code: 204,
@@ -58,8 +50,6 @@ exports.signUp = async function (req, res) {
     }
 
     if(loginID.length > 320){
-        connection.release();
-
         return res.json({
             isSuccess: false,
             code: 301,
@@ -68,8 +58,6 @@ exports.signUp = async function (req, res) {
     }
 
     if(password.length < 8){
-        connection.release();
-
         return res.json({
             isSuccess: false,
             code: 316,
@@ -82,8 +70,6 @@ exports.signUp = async function (req, res) {
     var spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
 
     if(num < 0 || eng < 0 || spe < 0){
-        connection.release();
-
         return res.json({
             isSuccess: false,
             code: 317,
@@ -92,8 +78,6 @@ exports.signUp = async function (req, res) {
     }
 
     if(nickname.length > 20){
-        connection.release();
-
         return res.json({
             isSuccess: false,
             code: 302,
@@ -106,7 +90,6 @@ exports.signUp = async function (req, res) {
         try {
             const [loginIDRows] = await userDao.checkUserLoginID(loginID);
             if (loginIDRows[0].exist == 1) {
-
                 connection.release();
 
                 return res.json({
@@ -180,8 +163,6 @@ exports.signIn = async function (req, res) {
     } = req.body;
 
     if (!loginID){
-        connection.release();
-
         return res.json({
             isSuccess: false, 
             code: 201, 
@@ -190,8 +171,6 @@ exports.signIn = async function (req, res) {
     }
 
     if (!password){
-        connection.release();
-
         return res.json({
             isSuccess: false, 
             code: 202, 
@@ -375,8 +354,8 @@ exports.kakaoOauth = async function (req, res){
                         code: 100,
                         message: "카카오 계정으로 첫 로그인 성공"
                     });
-                    connection.release();
                 }
+                connection.release();
             }catch (err) {
             await connection.rollback();
             connection.release();
@@ -420,7 +399,6 @@ exports.kakaoOauth = async function (req, res){
                     if(json.kakao_account.has_email === true){
                         email = json.kakao_account.email;
                     }else{
-                        connection.release();
                         return res.status(403).json({
                             isSuccess:false,
                             code: 315,
