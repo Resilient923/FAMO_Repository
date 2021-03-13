@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const secret_config = require('./secret');
+const userDao = require('../src/app/dao/userDao');
+
 const jwtMiddleware = (req, res, next) => {
     // read the token from header or url
     const token = req.headers['x-access-token'] || req.query.token;
@@ -15,8 +17,9 @@ const jwtMiddleware = (req, res, next) => {
     // create a promise that decodes the token
     const p = new Promise(
         (resolve, reject) => {
-            jwt.verify(token, secret_config.jwtsecret , (err, verifiedToken) => {
+            jwt.verify(token, secret_config.jwtsecret , (err, verifiedToken) => {            
                 if(err) reject(err);
+
                 resolve(verifiedToken)
             })
         }
@@ -31,12 +34,28 @@ const jwtMiddleware = (req, res, next) => {
         });
     };
 
-    // process the promise
+    const checkUserID = async function(userID) {
+        const [checkUserIDRow] = await userDao.checkUserID(userID);
+
+        if(checkUserIDRow[0].exist == 0){
+            return res.status(401).json({
+                isSuccess:false,
+                code: 217,
+                message:"존재하지 않는 회원입니다."
+            });
+
+        }else{
+            return next();
+        }
+    };
+
     p.then((verifiedToken)=>{
-        //비밀 번호 바꼇을 때 검증 부분 추가 할 곳
+
         req.verifiedToken = verifiedToken;
-        next();
-    }).catch(onError)
+
+        checkUserID(verifiedToken.userID);
+
+    }).catch(onError);
 };
 
 module.exports = jwtMiddleware;

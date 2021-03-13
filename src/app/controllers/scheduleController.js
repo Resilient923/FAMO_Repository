@@ -210,28 +210,32 @@ exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        try {
+            const getschedulerows = await scheduleDao.getscheduleInfo(userID);
 
-        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
-
-        if (getschedulerows) {
-            res.json({
-                   isSuccess: true,
-                   code: 100,
-                   message: userID + "번 유저 일정 조회 성공",
-                   data : getschedulerows[0]
-               });
-        }else{
-            res.json({
-                   isSuccess: false,
-                   code: 307,
-                   message: "일정 조회 실패"
-            });
+            if (getschedulerows) {
+                res.json({
+                       isSuccess: true,
+                       code: 100,
+                       message: userID + "번 유저 일정 조회 성공",
+                       data : getschedulerows[0]
+                   });
+            }else{
+                res.json({
+                       isSuccess: false,
+                       code: 307,
+                       message: "일정 조회 실패"
+                });
+            }
+            connection.release();
+        }catch (err) {
+            connection.release();
+            logger.error(`일정 조회\n ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);
         }
-        connection.release();
     }catch (err) {
-                connection.release();
-                logger.error(`일정 조회\n ${err.message}`);
-                res.status(401).send(`Error: ${err.message}`);
+        logger.error(`일정 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
     }
 };
 //카테고리별일정조회

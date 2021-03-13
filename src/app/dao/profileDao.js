@@ -88,7 +88,7 @@ async function getTitleGoal(userID){
 async function getUserProfile(userID){
   const connection = await pool.getConnection(async conn => conn);
 
-  const getUserProfile = `
+  const getUserProfileQuery = `
   SELECT loginID, method, nickname, profileImageURL, titleComment, goalStatus, goalTitle,
   TIMESTAMPDIFF(DAY, goalDate, current_date()) AS Dday, goalDate
   FROM profile
@@ -97,10 +97,44 @@ async function getUserProfile(userID){
   `;
 
   const [getUserProfileRow] = await connection.query(
-    getUserProfile,
+    getUserProfileQuery,
   );
   connection.release();
   return [getUserProfileRow];
+};
+/* 내정보 수정 */
+async function updateUserProfile(userID, updateProfileParams){
+  const connection = await pool.getConnection(async conn => conn);
+
+  const updateUserProfileQuery = `
+  UPDATE profile
+  SET titleComment = ?, 
+  goalStatus = ?,
+  goalTitle = ?,
+  goalDate = ?
+  WHERE userID = ${userID};
+  `;
+
+  await connection.query(
+    updateUserProfileQuery,
+    updateProfileParams
+  );
+  connection.release();
+};
+/* 닉네임 수정 */
+async function updateNickname(userID, nickname){
+  const connection = await pool.getConnection(async conn => conn);
+
+  const updateNicknameQuery = `
+  UPDATE user
+  SET nickname = '${nickname}'
+  WHERE userID = ${userID};
+  `;
+
+  await connection.query(
+    updateNicknameQuery
+  );
+  connection.release();
 };
 
 module.exports = {
@@ -111,4 +145,6 @@ module.exports = {
     getTitleComment,
     getTitleGoal,
     getUserProfile,
+    updateUserProfile,
+    updateNickname,
 };

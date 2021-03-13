@@ -77,11 +77,11 @@ exports.signUp = async function (req, res) {
         });
     }
 
-    if(nickname.length > 20){
+    if(nickname.length > 6){
         return res.json({
             isSuccess: false,
             code: 302,
-            message: "닉네임은 최대 20자입니다."
+            message: "닉네임은 최대 6자입니다."
         });
     }
 

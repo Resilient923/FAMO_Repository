@@ -77,11 +77,26 @@ async function selectUserInfo(loginID) {
   return [userInfoRows];
 };
 
+async function checkUserID(userID){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const checkUserIDQuery = `
+  SELECT EXISTS (SELECT * FROM user WHERE userID = ${userID} AND status = 1) AS exist;
+  `;
+
+  const [checkUserIDRow] = await connection.query(
+    checkUserIDQuery,
+  );
+  connection.release();
+  return [checkUserIDRow];
+}
+
 module.exports = {
   checkUserLoginID,
   checkPhoneNumber,
   insertUserInfo,
   insertKakaoUserInfo,
   selectUserInfo,
+  checkUserID,
 };
+
 
