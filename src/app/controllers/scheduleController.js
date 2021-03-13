@@ -488,3 +488,34 @@ exports.getschedulebydate = async function (req, res) {
         
 
 };
+//일정상세조회
+exports.getscheduledetails = async function (req, res) {
+    const scheduleID = req.params.scheduleID;
+   
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const getscheduledetailsrows = await scheduleDao.getscheduledetailsInfo(scheduleID);
+            
+            if (getscheduledetailsrows) {
+                res.json({
+                       isSuccess: true,
+                       code: 100,
+                       message: scheduleID+"번 일정상세조회 성공",
+                       data : getscheduledetailsrows[0]
+                   });
+               }else{
+                res.json({
+                       isSuccess: false,
+                       code: 327,
+                       message: "일정상세조회 실패"
+                   });
+               }
+               connection.release();
+            }catch (err) {
+               // connection.release();
+                logger.error(`일정상세 조회\n ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);
+            }
+        
+
+};
