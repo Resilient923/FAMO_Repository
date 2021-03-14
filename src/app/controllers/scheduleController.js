@@ -210,6 +210,9 @@ exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        try {
+            const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+
 
         const getschedulerows = await scheduleDao.getscheduleInfo(userID);
 
@@ -226,9 +229,10 @@ exports.getschedule = async function (req, res) {
                    code: 307,
                    message: "전체 일정 조회 실패"
             });
+
         }
-        connection.release();
     }catch (err) {
+
                 connection.release();
                 logger.error(`전체일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
@@ -261,6 +265,7 @@ exports.getscheduletoday = async function (req, res) {
                 connection.release();
                 logger.error(`오늘일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
+
     }
 };
 //카테고리별일정조회

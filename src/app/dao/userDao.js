@@ -1,6 +1,6 @@
 const { pool } = require("../../../config/database");
 
-/* 회원가입 */
+/* 로그인ID 유무 확인 */
 async function checkUserLoginID(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const existLoginIDQuery = `
@@ -16,7 +16,7 @@ async function checkUserLoginID(loginID) {
   connection.release();
   return [loginIDRows];
 }
-
+/* 휴대폰 번호 유무 확인 */
 async function checkPhoneNumber(phoneNumber) {
   const connection = await pool.getConnection(async (conn) => conn);
   const existPhoneNumberQuery = `
@@ -32,7 +32,7 @@ async function checkPhoneNumber(phoneNumber) {
   connection.release();
   return [phoneNumberRows];
 }
-
+/* FAMO 회원가입 */
 async function insertUserInfo(insertUserInfoParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertUserInfoQuery = `
@@ -47,7 +47,7 @@ async function insertUserInfo(insertUserInfoParams) {
   connection.release();
   return insertUserInfoRow[0].insertId;
 }
-
+/* 카카오 로그인 회원가입 */
 async function insertKakaoUserInfo(insertUserInfoParams){
   const connection = await pool.getConnection(async (conn) => conn);
   const insertKakaoUserInfoQuery = `
@@ -61,8 +61,7 @@ async function insertKakaoUserInfo(insertUserInfoParams){
   connection.release();
   return insertKakaoUserInfoRow[0].insertId;
 }
-
-/* 로그인 */
+/* 유저 정보 조회 */
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
@@ -76,6 +75,34 @@ async function selectUserInfo(loginID) {
   connection.release();
   return [userInfoRows];
 };
+/* userID 유무 확인 */
+async function checkUserID(userID){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const checkUserIDQuery = `
+  SELECT EXISTS (SELECT * FROM user WHERE userID = ${userID} AND status = 1) AS exist;
+  `;
+
+  const [checkUserIDRow] = await connection.query(
+    checkUserIDQuery,
+  );
+  connection.release();
+  return [checkUserIDRow];
+}
+/* 회원 탈퇴 */
+async function deleteUserAccount(userID){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const deleteUserAccountQuery = `
+  UPDATE user
+  SET status = -1
+  WHERE userID = ${userID};
+  `;
+
+  await connection.query(
+    deleteUserAccountQuery,
+  );
+
+  connection.release();
+}
 
 module.exports = {
   checkUserLoginID,
@@ -83,5 +110,8 @@ module.exports = {
   insertUserInfo,
   insertKakaoUserInfo,
   selectUserInfo,
+  checkUserID,
+  deleteUserAccount,
 };
+
 
