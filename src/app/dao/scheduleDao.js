@@ -53,7 +53,7 @@ async function updatescheduleInfo(updatescheduleParams) {
   connection.release();
   return updatescheduleRow;
 }
-//일정 조회
+//유저별전체일정 조회
 async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduleQuery = `
@@ -76,6 +76,34 @@ async function getscheduleInfo(userID) {
   );
   connection.release();
   return getscheduleRow;
+}
+//유저별오늘일정 조회
+async function getscheduletodayInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscheduletodayQuery = `
+        
+  select scheduleID,
+       date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       scheduleStatus,
+       categoryID,
+       categoryName,
+       colorInfo
+from schedule
+         left join category on category.categoryID = schedule.scheduleCategoryID
+        left join categoryColor ON categoryColor.colorID = category.categoryColor
+where scheduleDelete = 1
+and schedule.userID = '${userID}' and scheduleDate = current_date;
+  `;
+  
+  const getscheduletodayRow = await connection.query(
+    getscheduletodayQuery,
+    //updatescheduleParams 
+  );
+  connection.release();
+  return getscheduletodayRow;
 }
 //카테고리별 일정 조회
 async function getschedulebycategoryInfo(userID,schedulecategoryID) {
@@ -278,6 +306,7 @@ module.exports = {
   insertscheduleInfo,
   updatescheduleInfo,
   getscheduleInfo,
+  getscheduletodayInfo,
   getschedulebycategoryInfo,
   deletescheduleInfo,
   patchschedulepickInfo,

@@ -205,7 +205,7 @@ exports.updateschedule = async function (req, res) {
         res.status(401).send(`Error: ${err.message}`);
     }
 };
-//일정 조회
+//유저별일정전체 조회
 exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
@@ -217,20 +217,49 @@ exports.getschedule = async function (req, res) {
             res.json({
                    isSuccess: true,
                    code: 100,
-                   message: userID + "번 유저 일정 조회 성공",
+                   message: userID + "번 유저 전체 일정 조회 성공",
                    data : getschedulerows[0]
                });
         }else{
             res.json({
                    isSuccess: false,
                    code: 307,
-                   message: "일정 조회 실패"
+                   message: "전체 일정 조회 실패"
             });
         }
         connection.release();
     }catch (err) {
                 connection.release();
-                logger.error(`일정 조회\n ${err.message}`);
+                logger.error(`전체일정 조회\n ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//유저별오늘일정조회
+exports.getscheduletoday = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getscheduletodayrows = await scheduleDao.getscheduletodayInfo(userID);
+
+        if (getscheduletodayrows) {
+            res.json({
+                   isSuccess: true,
+                   code: 100,
+                   message: userID + "번 유저 오늘 일정 조회 성공",
+                   data : getscheduletodayrows[0]
+               });
+        }else{
+            res.json({
+                   isSuccess: false,
+                   code: 328,
+                   message: "오늘일정 조회 실패"
+            });
+        }
+        connection.release();
+    }catch (err) {
+                connection.release();
+                logger.error(`오늘일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
     }
 };
