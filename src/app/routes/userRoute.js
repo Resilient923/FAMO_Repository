@@ -9,4 +9,5 @@ module.exports = function(app){
     app.route('/kakao/oauth').get(user.kakaoOauth);
 
     app.get('/users/check', jwtMiddleware, user.check);
+    app.patch('/users/account', jwtMiddleware, user.deleteUserAccount);
 };
