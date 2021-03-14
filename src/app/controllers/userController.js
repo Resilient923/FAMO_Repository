@@ -2,14 +2,12 @@ const {pool} = require('../../../config/database');
 const {logger} = require('../../../config/winston');
 
 const jwt = require('jsonwebtoken');
-const regexEmail = require('regex-email');
 const crypto = require('crypto');
 const request = require('request');
 const secret_config = require('../../../config/secret');
 
 const userDao = require('../dao/userDao');
 const profileDao = require('../dao/profileDao');
-const { constants } = require('buffer');
 
 /* 회원가입 API */
 exports.signUp = async function (req, res) {
@@ -96,7 +94,7 @@ exports.signUp = async function (req, res) {
                     isSuccess: false,
                     code: 401,
                     message: "중복된 아이디입니다."
-                });
+                })
             };
 
             const [phoneNumberRows] = await userDao.checkPhoneNumber(phoneNumber);
@@ -126,7 +124,7 @@ exports.signUp = async function (req, res) {
             let token = jwt.sign({
                 userID: insertUserRowsId,
                 method: 'F'
-              }, // 토큰의 내용(payload)
+            },
                 secret_config.jwtsecret, // 비밀 키
               {
                 expiresIn: '365d',
@@ -144,14 +142,14 @@ exports.signUp = async function (req, res) {
             })
             connection.release();
 
-        } catch (err) {        
+        }catch (err) {
             await connection.rollback();
             connection.release();
-            logger.error(`SignUp Query error\n: ${JSON.stringify(err)}`);
+            logger.error(`Sign up Query error\n: ${JSON.stringify(err)}`);
             return res.status(500).send(`Error: ${err.message}`);
         }
-    } catch (err) {
-        logger.error(`SignUp DB Connection error\n: ${JSON.stringify(err)}`);
+    }catch (err) {
+        logger.error(`Sign up DB connection error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
     }
 };
@@ -433,4 +431,34 @@ exports.check = async function (req, res) {
         code: 100,
         message: "jwt 토큰 검증 성공"
     })
+};
+
+/* 회원 탈퇴 API */
+exports.deleteUserAccount = async function (req, res) {
+    const userIDInToken = req.verifiedToken.userID;
+
+    try {
+        const connection = await pool.getConnection(async conn => conn);
+        try {
+
+            await userDao.deleteUserAccount(userIDInToken);
+
+            res.json({
+                userID: userIDInToken,
+                isSuccess: true,
+                code: 100,
+                message: "회원 탈퇴 성공"
+            })
+            
+            connection.release();
+ 
+        }catch (err) {
+            connection.release();
+            logger.error(`Delete user account Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }catch (err) {
+        logger.error(`Delete user account DB connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
 };
