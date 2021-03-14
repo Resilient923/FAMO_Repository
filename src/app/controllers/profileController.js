@@ -55,6 +55,43 @@ exports.uploadProfileImage = async function (req, res) {
     }
 };
 
+/* 프로필 사진 삭제 API */
+exports.deleteProfileImage = async function (req, res) {
+    const userIDInToken = req.verifiedToken.userID;
+    try {
+       const connection = await pool.getConnection(async conn => conn);
+
+        try {
+            await connection.beginTransaction();
+
+            await profileDao.updateProfileImage(null, userIDInToken);
+
+            const [getProfileInfo] = await profileDao.getProfileInfo(userIDInToken);
+
+            await connection.commit();
+           
+            res.json({
+                userID: userIDInToken,
+                profileImageURL: getProfileInfo[0].profileImageURL,
+                isSuccess: true,
+                code: 100,
+                message: "프로필 사진 삭제 성공"
+            })
+           
+            connection.release();
+
+        }catch (err) {
+            await connection.rollback();
+            connection.release();
+            logger.error(`Delete profile image Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }catch (err) {
+        logger.error(`Delete profile image DB connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
+};
+
 /* 상단 멘트 조회 API */
 exports.getTitleComment = async function (req, res) {
     const userIDInToken = req.verifiedToken.userID;
@@ -223,6 +260,7 @@ exports.updateProfile = async function (req, res) {
             connection.release();
 
         }catch (err) {
+            await connection.rollback();
             connection.release();
             logger.error(`Update Profile Query error\n: ${JSON.stringify(err)}`);
             return res.status(500).send(`Error: ${err.message}`);
