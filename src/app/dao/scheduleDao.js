@@ -246,7 +246,8 @@ async function getschedulebydateInfo(userID,scheduleDate) {
        scheduleMemo,
        categoryID,
        categoryName,
-       colorInfo
+       colorInfo,
+       date_format(scheduleDate, '%Y-%m-%d') as 'scheduleFormDate'
 from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
