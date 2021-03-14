@@ -110,7 +110,7 @@ exports.signUp = async function (req, res) {
                     message: "중복된 휴대폰 번호입니다."
                 });
             };
-
+            
             await connection.beginTransaction(); // START TRANSACTION
             const passwordSalt = crypto.randomBytes(64).toString('base64');
             const passwordHash = crypto.pbkdf2Sync(password, passwordSalt, 101024, 64, 'sha512').toString('base64');
