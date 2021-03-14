@@ -545,3 +545,32 @@ exports.getscheduledetails = async function (req, res) {
 
 };
 //월별해낸일정수조회
+exports.getdonemonthcount = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getdonemonthcountrows = await scheduleDao.getdonemonthcountInfo(userID);
+
+        if (getdonemonthcountrows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 월별 해낸 일정 개수 조회 성공",
+                data :getdonemonthcountrows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 307,
+                message: "월별 해낸 일정 개수 조회 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`월별 해낸 일정 개수 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
