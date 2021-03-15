@@ -21,13 +21,13 @@ const pool = mysql.createPool({
 // });
 
 /* steady test DB */
-// const pool = mysql.createPool({
-//     host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
-//      user: 'steady',
-//      port: 3306,
-//      password: databaseInfo.rdspwd,
-//      database: 'famo_steady'
-//  });
+ /* const pool = mysql.createPool({
+     host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
+      user: 'steady',
+      port: 3306,
+      password: databaseInfo.rdspwd,
+      database: 'famo_steady'
+  }); */
 
 module.exports = {
     pool: pool
