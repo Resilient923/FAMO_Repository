@@ -5,9 +5,14 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const request = require('request');
 const secret_config = require('../../../config/secret');
+const nodeCache = require('node-cache');
+const twilio = require('twilio');
 
 const userDao = require('../dao/userDao');
 const profileDao = require('../dao/profileDao');
+
+const codeCache = new nodeCache({stdTTL: 180, checkperiod: 200});
+const client = new twilio(secret_config.twilioSid, secret_config.twilioToken);
 
 /* 회원가입 API */
 exports.signUp = async function (req, res) {
@@ -459,6 +464,112 @@ exports.deleteUserAccount = async function (req, res) {
         }
     }catch (err) {
         logger.error(`Delete user account DB connection error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
+};
+
+exports.sendAuthCode = async function(req, res){
+    const {
+        phoneNumber
+    } = req.body;
+
+    if (!phoneNumber){
+        return res.json({
+            isSuccess: false,
+            code: 204,
+            message: "핸드폰 번호를 입력해주세요."
+        });
+    }
+
+    try{
+        const randomCode = Math.floor(Math.random() * 900000) + 100000;
+        const success = codeCache.set(phoneNumber, {"randomCode": `${randomCode}`});
+
+        if(success === true){
+            client.messages.create({
+                body: `FAMO 인증번호 [${randomCode}]`,
+                to: `+82${phoneNumber}`,
+                from: '+15108227026' // From a valid Twilio number
+            })
+            .catch(error => res.status(500).send(`Error: ${error}`));
+            //.then((message) => console.log(message.sid));
+
+            return res.status(200).json({
+                isSuccess: true,
+                code: 100,
+                message: "문자 발송 성공"
+            });
+
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 300,
+                message: "서버 오류로 문자메세지를 보내는데 실패했습니다. 고객센터에 문의해주세요."
+            })
+        }
+    }catch (err) {
+        logger.error(`Send Auth Code Message Query error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
+};
+
+exports.checkAuthCode = async function(req, res){
+    const {
+        phoneNumber, authCode
+    } = req.body;
+
+    const value = codeCache.get(phoneNumber);
+
+    if (!phoneNumber){
+        return res.json({
+            isSuccess: false,
+            code: 204,
+            message: "핸드폰 번호를 입력해주세요."
+        });
+    }
+    if (!authCode){
+        return res.json({
+            isSuccess: false,
+            code: 221,
+            message: "인증번호를 입력해주세요."
+        });
+    }
+    if(value == undefined){
+        return res.json({
+            isSuccess: false,
+            code: 222,
+            message: "인증번호가 발급되지 않았습니다."
+        });   
+    }
+
+    try{
+        if(authCode == value.randomCode){
+            codeCache.del(phoneNumber);
+
+            let token = jwt.sign({
+                phoneNumber: phoneNumber
+            },
+            secret_config.jwtauth, // 비밀 키
+            {
+                expiresIn: '1d',
+                subject: 'userInfo'
+            });
+
+            return res.json({
+                jwt: token,
+                isSuccess: true,
+                code: 100,
+                message: "인증번호 확인 성공"
+            });
+        }else{
+            return res.json({
+                isSuccess: false,
+                code: 329,
+                message: "인증번호가 일치하지 않습니다."
+            });
+        }
+    }catch (err) {
+        logger.error(`Check Auth Code Query error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
     }
 };

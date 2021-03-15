@@ -61,7 +61,7 @@ async function insertKakaoUserInfo(insertUserInfoParams){
   connection.release();
   return insertKakaoUserInfoRow[0].insertId;
 }
-/* 유저 정보 조회 */
+/* 로그인 ID로 유저 정보 조회 */
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const selectUserInfoQuery = `
@@ -75,6 +75,21 @@ async function selectUserInfo(loginID) {
   connection.release();
   return [userInfoRows];
 };
+/* 휴대폰 번호로 유저 정보 조회 */
+async function selectUserInfoByPhone(phoneNumber){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const selectUserInfoByPhoneQuery = `
+  SELECT userID, loginID, method, status
+  FROM user
+  WHERE phoneNumber = '${phoneNumber}';
+  `;
+
+  const [userInfoByPhoneRow] = await connection.query(
+    selectUserInfoByPhoneQuery,
+  );
+  connection.release();
+  return [userInfoByPhoneRow];
+}
 /* userID 유무 확인 */
 async function checkUserID(userID){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -110,6 +125,7 @@ module.exports = {
   insertUserInfo,
   insertKakaoUserInfo,
   selectUserInfo,
+  selectUserInfoByPhone,
   checkUserID,
   deleteUserAccount,
 };
