@@ -53,6 +53,25 @@ async function updatescheduleInfo(updatescheduleParams) {
   connection.release();
   return updatescheduleRow;
 }
+//일정수정할때 스케쥴날짜 가져오는 Dao
+//일정상세조회
+async function getdate(scheduleID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getdateQuery = `
+  select scheduleDate
+       
+from schedule
+
+where scheduleID = '${scheduleID}';
+`; 
+  
+  const getdateRow = await connection.query(
+    getdateQuery, 
+    
+  );
+  connection.release();
+  return getdateRow;
+}
 //유저별전체일정 조회
 async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -460,6 +479,7 @@ module.exports = {
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
+  getdate,
   getscheduleInfo,
   getscheduletodayInfo,
   getschedulebycategoryInfo,
