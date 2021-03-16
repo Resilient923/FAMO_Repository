@@ -83,7 +83,7 @@ async function getscheduletodayInfo(userID) {
   const getscheduletodayQuery = `
         
   select scheduleID,
-       date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+       date_format(scheduleDate, '%e %b') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -301,6 +301,31 @@ where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = '${schedule
   connection.release();
   return getdoneschedulecountRow;
 }
+//즐겨찾기한일정조회
+async function getpickscheduleInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getpickscheduleQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       categoryID,
+       colorInfo
+from schedule
+         left join category on category.categoryID = schedule.scheduleCategoryID
+        left join categoryColor ON categoryColor.colorID = category.categoryColor
+where schedule.userID = '${userID}' and schedulePick = 1 
+order by scheduleDate desc ;
+`; 
+  
+  const  getpickscheduleRow = await connection.query(
+    getpickscheduleQuery, 
+    
+  );
+  connection.release();
+  return getpickscheduleRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
@@ -317,5 +342,6 @@ module.exports = {
   getschedulebydateInfo,
   getremaintodayscheduleInfo,
   getscheduledetailsInfo,
-  getdonemonthcountInfo
+  getdonemonthcountInfo,
+  getpickscheduleInfo
 };

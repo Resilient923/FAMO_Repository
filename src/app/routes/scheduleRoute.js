@@ -18,4 +18,11 @@ module.exports = function(app){
     app.get('/schedules/dates',jwtMiddleware,schedule.getschedulebydate);//날짜별일정조회
     app.get('/schedules/left-over',jwtMiddleware,schedule.getremainschedule);//남은일정수조회
     app.get('/schedules/:scheduleID/details',jwtMiddleware,schedule.getscheduledetails);//일정상세조회
+  
+  
+    //월별해낸일정수조회
+    app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdonemonthcount);
+
+    app.get('/schedules/picks',jwtMiddleware,schedule.getpickschedule);//즐겨찾기일정조회
+
   };

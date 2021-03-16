@@ -543,7 +543,7 @@ exports.getscheduledetails = async function (req, res) {
             }
         
 
-};
+}; 
 //월별해낸일정수조회
 exports.getdonemonthcount = async function (req, res) {
     const userID = req.verifiedToken.userID;
@@ -571,6 +571,36 @@ exports.getdonemonthcount = async function (req, res) {
     } catch (err) {
         connection.release();
         logger.error(`월별 해낸 일정 개수 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//즐겨찾기한 일정조회
+exports.getpickschedule = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getpickschedulerows = await scheduleDao.getpickscheduleInfo(userID);
+
+        if (getpickschedulerows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 즐겨찾기한일정 조회 성공",
+                data :getpickschedulerows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 331,
+                message: "즐겨찾기한일정 조회 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`즐겨찾기한일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
 };
