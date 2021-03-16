@@ -56,9 +56,6 @@ const scheduleDao = require('../dao/scheduleDao');
 
         }
 }; */
-
-   
-
 //일정생성(월캘린더에서 생성)
 exports.insertschedule = async function (req, res) {
     const {
@@ -88,15 +85,15 @@ exports.insertschedule = async function (req, res) {
              });
          }
      }  
-     try {
+    try {
         const connection = await pool.getConnection(async (conn) => conn);
-
+        
         try{
             if (!scheduleDate) {
                 const userID = req.verifiedToken.userID;
                 const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
                 const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
-        
+
             res.json({
                     isSuccess: true,
                     code: 100,
@@ -131,15 +128,13 @@ exports.insertschedule = async function (req, res) {
 };
 //일정수정
 exports.updateschedule = async function (req, res) {
-     const scheduleID = req.params.scheduleID;
+    const scheduleID = req.params.scheduleID;
     var scheduleName = req.body.scheduleName;
     var scheduleDate = req.body.scheduleDate;
     var scheduleCategoryID = req.body.scheduleCategoryID;
     var scheduleMemo = req.body.scheduleMemo;
     
     const getdaterows = await scheduleDao.getdate(scheduleID);
-    
-            
             if(scheduleDate==null){
                 scheduleDate = getdaterows[0][0].scheduleDate
                 
