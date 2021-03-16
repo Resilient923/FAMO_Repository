@@ -9,7 +9,7 @@ module.exports = function(app){
     app.get('/schedules/today',jwtMiddleware,schedule.getscheduletoday);//유저별오늘일정조회
     app.put('/schedules/:scheduleID',jwtMiddleware,schedule.deleteschedule); //일정삭제
     //카테고리별일정조회
-    app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
+    app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategorysort);
     app.post('/schedules',jwtMiddleware,schedule.insertschedule); //일정생성(월별)
     
     app.post('/schedules/picks',jwtMiddleware,schedule.patchschedulepick);//즐겨찾기
@@ -18,4 +18,15 @@ module.exports = function(app){
     app.get('/schedules/dates',jwtMiddleware,schedule.getschedulebydate);//날짜별일정조회
     app.get('/schedules/left-over',jwtMiddleware,schedule.getremainschedule);//남은일정수조회
     app.get('/schedules/:scheduleID/details',jwtMiddleware,schedule.getscheduledetails);//일정상세조회
+  
+  
+    //월별해낸일정수조회
+    app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdonemonthcount);
+//즐겨찾기일정조회
+    app.get('/schedules/picks',jwtMiddleware,schedule.getpickschedule);
+    //최근생성일정조회
+    app.get('/schedules/recents',jwtMiddleware,schedule.getrecentschedule);
+   
+    //카테고리별 정렬 일정 조회
+    //app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
   };
