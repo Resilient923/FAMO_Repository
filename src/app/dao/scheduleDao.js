@@ -54,7 +54,7 @@ async function updatescheduleInfo(updatescheduleParams) {
   return updatescheduleRow;
 }
 //일정수정할때 스케쥴날짜 가져오는 Dao
-//일정상세조회
+
 async function getdate(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getdateQuery = `
@@ -286,6 +286,7 @@ async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduledetailsQuery = `
   select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
+  scheduleDate as 'scheduleForm',
        categoryName,
         scheduleName,
        scheduleMemo,
