@@ -326,6 +326,135 @@ order by scheduleDate desc ;
   connection.release();
   return getpickscheduleRow;
 }
+//최근 생성일정조회
+async function getrecentscheduleInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getrecentscheduleQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       categoryID,
+       colorInfo
+from schedule
+         left join category on category.categoryID = schedule.scheduleCategoryID
+        left join categoryColor ON categoryColor.colorID = category.categoryColor
+where schedule.userID = '${userID}'
+order by scheduleDate desc ;
+`; 
+  
+  const  getrecentscheduleRow = await connection.query(
+    getrecentscheduleQuery, 
+    
+  );
+  connection.release();
+  return getrecentscheduleRow;
+}
+//카테고리별 최신순 정렬 일정 조회
+async function getscategoryrecentInfo(userID,schedulecategoryID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscategoryrecentQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       colorInfo
+from schedule
+left join category on categoryID = scheduleCategoryID
+left join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID = '${schedulecategoryID}'
+order by scheduleDate desc ;
+`; 
+  
+  const  getscategoryrecentRow = await connection.query(
+    getscategoryrecentQuery, 
+    
+  );
+  connection.release();
+  return getscategoryrecentRow;
+}
+//카테고리별 남은순 정렬 일정 조회
+async function getscategoryleftInfo(userID,schedulecategoryID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscategoryleftQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       colorInfo
+from schedule
+         left join category on categoryID = scheduleCategoryID
+         left join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID = '${schedulecategoryID}'
+order by scheduleStatus  ;
+`; 
+  
+  const  getscategoryleftRow = await connection.query(
+    getscategoryleftQuery, 
+    
+  );
+  connection.release();
+  return getscategoryleftRow;
+}
+//카테고리별 완료순 정렬 일정 조회
+async function getscategorydoneInfo(userID,schedulecategoryID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscategorydoneQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       colorInfo
+from schedule
+left join category on categoryID = scheduleCategoryID
+left join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID = '${schedulecategoryID}'
+order by scheduleStatus desc ;
+`; 
+  
+  const  getscategorydoneRow = await connection.query(
+    getscategorydoneQuery, 
+    
+  );
+  connection.release();
+  return getscategorydoneRow;
+}
+//카테고리별 즐겨찾기 정렬 일정 조회
+async function getscategorypickInfo(userID,schedulecategoryID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscategorypickQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick,
+       colorInfo
+from schedule
+left join category on categoryID = scheduleCategoryID
+left join categoryColor on categoryColor = colorID
+where scheduleDelete = 1
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID = '${schedulecategoryID}'
+order by scheduleDate desc ;
+`; 
+  
+  const  getscategorypickRow = await connection.query(
+    getscategorypickQuery, 
+    
+  );
+  connection.release();
+  return getscategorypickRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
@@ -343,5 +472,10 @@ module.exports = {
   getremaintodayscheduleInfo,
   getscheduledetailsInfo,
   getdonemonthcountInfo,
-  getpickscheduleInfo
+  getpickscheduleInfo,
+  getrecentscheduleInfo,
+  getscategoryrecentInfo,
+  getscategoryleftInfo,
+  getscategorydoneInfo,
+  getscategorypickInfo
 };

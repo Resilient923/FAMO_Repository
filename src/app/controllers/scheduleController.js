@@ -264,7 +264,7 @@ exports.getscheduletoday = async function (req, res) {
     }
 };
 //카테고리별일정조회
-exports.getschedulebycategory = async function (req, res) {
+/* exports.getschedulebycategory = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const schedulecategoryID = req.query.scheduleCategoryID;
     try {
@@ -296,7 +296,7 @@ exports.getschedulebycategory = async function (req, res) {
         logger.error(`카테고리별 일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
-};
+}; */
 //일정 삭제
 exports.deleteschedule = async function (req, res) {
     const scheduleID = req.params.scheduleID;
@@ -601,6 +601,157 @@ exports.getpickschedule = async function (req, res) {
     } catch (err) {
         connection.release();
         logger.error(`즐겨찾기한일정 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//최근 생성 일정조회
+exports.getrecentschedule = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getrecentschedulerows = await scheduleDao.getrecentscheduleInfo(userID);
+
+        if (getrecentschedulerows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 최근생성일정 조회 성공",
+                data :getrecentschedulerows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 332,
+                message: " 최근생성일정 조회  실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(` 최근생성일정 조회 \n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//카테고리별 일정 정렬 조회
+exports.getschedulebycategorysort = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const schedulecategoryID = req.query.scheduleCategoryID;
+    const sort = req.query.sort;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        if(sort == null){
+            const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID);
+
+        if (getschedulebycategoryrows) {
+
+         res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 일정 조회 성공",
+                data : getschedulebycategoryrows[0]
+                
+
+            });
+
+        }else{
+         res.json({
+                isSuccess: false,
+                code: 311,
+                message: "카테고리별 일정 조회 실패"
+            });
+        }
+        }
+        else if(sort =='recent'/* 최신순 */){
+            const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,sort);
+
+            if (getscategoryrecentrows) {
+
+            res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 최근정렬 일정 조회 성공",
+                    data : getscategoryrecentrows[0]
+                    
+
+                });
+
+            }else{ 
+            res.json({
+                    isSuccess: false,
+                    code: 333,
+                    message: "카테고리별 최신 순 정렬 일정 조회 실패"
+                });
+            }
+        }else if(sort == 'left'/* 남은순 */){
+            const getscategoryleftrows = await scheduleDao.getscategoryleftInfo(userID,schedulecategoryID,sort);
+
+            if (getscategoryleftrows) {
+
+            res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 남은정렬 일정 조회 성공",
+                    data : getscategoryleftrows[0]
+                    
+
+                });
+
+            }else{
+            res.json({
+                    isSuccess: false,
+                    code: 334,
+                    message: "카테고리별 남은 순 정렬 일정 조회 실패"
+                });
+            }
+        }else if(sort == 'done'/* 완료순 */){
+            const getscategorydonerows = await scheduleDao.getscategorydoneInfo(userID,schedulecategoryID,sort);
+
+            if (getscategorydonerows) {
+
+            res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 완료정렬 일정 조회 성공",
+                    data : getscategorydonerows[0]
+                    
+
+                });
+
+            }else{
+            res.json({
+                    isSuccess: false,
+                    code: 335,
+                    message: "카테고리별 완료 순 정렬 일정 조회 실패"
+                });
+            }
+        }else if(sort == 'pick'/* 즐겨찾기순 */){
+            const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,sort);
+
+            if (getscategorypickrows) {
+
+            res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 즐겨찾기정렬 일정 조회 성공",
+                    data : getscategorypickrows[0]
+                    
+
+                });
+
+            }else{
+            res.json({
+                    isSuccess: false,
+                    code: 336,
+                    message: "카테고리별 즐겨찾기 순 정렬 일정 조회 실패"
+                });
+            }
+        }
+        connection.release();
+    } catch (err) {
+       // connection.release();
+        logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
 };
