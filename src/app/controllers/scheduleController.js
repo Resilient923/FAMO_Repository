@@ -131,16 +131,20 @@ exports.insertschedule = async function (req, res) {
 };
 //일정수정
 exports.updateschedule = async function (req, res) {
-
-    const scheduleID = req.params.scheduleID;
-   
-    const updatescheduleParams = [
-        req.body.scheduleName,
-        req.body.scheduleDate,
-        req.body.scheduleCategoryID,
-        req.body.scheduleMemo,
-        scheduleID
-    ];
+     const scheduleID = req.params.scheduleID;
+    var scheduleName = req.body.scheduleName;
+    var scheduleDate = req.body.scheduleDate;
+    var scheduleCategoryID = req.body.scheduleCategoryID;
+    var scheduleMemo = req.body.scheduleMemo;
+    
+    const getdaterows = await scheduleDao.getdate(scheduleID);
+    
+            
+            if(scheduleDate==null){
+                scheduleDate = getdaterows[0][0].scheduleDate
+                
+            }
+            
     if (!scheduleID) {
         return res.json({ 
             isSuccess: false, 
@@ -158,6 +162,14 @@ exports.updateschedule = async function (req, res) {
     try {
         const connection = await pool.getConnection(async (conn) => conn);
         try {
+            var updatescheduleParams = [
+                scheduleName,
+                scheduleDate,
+                scheduleCategoryID,
+                scheduleMemo,
+                scheduleID
+            ];
+            
             const updateschedule = await scheduleDao.updatescheduleInfo(updatescheduleParams,scheduleID);
             if(req.body.scheduleMemo){
                 if (req.body.scheduleMemo.length >= 100){
