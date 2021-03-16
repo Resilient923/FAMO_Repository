@@ -547,10 +547,10 @@ exports.checkAuthCode = async function(req, res){
             let token = jwt.sign({
                 phoneNumber: phoneNumber
             },
-            secret_config.jwtauth, // 비밀 키
+            secret_config.jwtauth,
             {
                 expiresIn: '1d',
-                subject: 'userInfo'
+                subject: 'phoneNumberInfo'
             });
 
             return res.json({
@@ -568,6 +568,68 @@ exports.checkAuthCode = async function(req, res){
         }
     }catch (err) {
         logger.error(`Check Auth Code Query error\n: ${JSON.stringify(err)}`);
+        return res.status(500).send(`Error: ${err.message}`);
+    }
+};
+
+/* 아이디 찾기 API */
+exports.findLoginID = async function (req, res) {
+    const phoneNumber = req.verifiedOtpToken.phoneNumber;
+
+    try{
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const [checkPhoneNumberRow] = await userDao.checkPhoneNumber(phoneNumber);
+            
+            if(checkPhoneNumberRow[0].exist == 0){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 406,
+                    message: `${phoneNumber}로 가입된 계정이 없습니다.`
+                });
+            };
+
+            const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
+
+            if(getUserAccountInfoRow[0].status == -1){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
+                });
+            };
+
+            if(getUserAccountInfoRow[0].method == 'K'){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 407,
+                    message: "카카오로 로그인해주세요."
+                });
+            };
+
+            res.json({
+                userID: getUserAccountInfoRow[0].userID,
+                loginID: getUserAccountInfoRow[0].loginID, 
+                isSuccess: true,
+                code: 100,
+                message: "아이디 조회 성공"
+            });
+
+            connection.release();
+
+        }catch (err) {
+            connection.release();
+            logger.error(`Find LoginID Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }catch (err) {
+        logger.error(`Finde LoginID connection error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
     }
 };
