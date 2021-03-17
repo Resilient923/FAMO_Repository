@@ -718,8 +718,7 @@ exports.checkLoginID = async function (req, res) {
 /* 비밀번호 재설정 */
 exports.updatePassword = async function (req, res) {
     const phoneNumber = req.verifiedOtpToken.phoneNumber;
-    const loginID = req.query.loginid;
-    const { password } = req.body;
+    const { loginID, password } = req.body;
 
     if(!loginID){
         return res.json({
