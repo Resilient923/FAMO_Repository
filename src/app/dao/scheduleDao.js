@@ -136,8 +136,8 @@ async function getschedulebycategoryInfo(userID,schedulecategoryID) {
   schedulePick,
   colorInfo
 from schedule
-    inner join category on categoryID = scheduleCategoryID
-    inner join categoryColor on categoryColor = colorID
+    left join category on categoryID = scheduleCategoryID
+    left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
 and schedule.userID = '${userID}'
 and scheduleCategoryID = '${schedulecategoryID}';
@@ -505,14 +505,16 @@ async function getdoneschedulemonthInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getdoneschedulemonthQuery = `
   SELECT
-    MONTH(scheduleDate) as 'month',
+  MONTH(scheduleDate) as 'month',
+  concat((extract(year from scheduleDate)), '-', date_format(scheduleDate,'%m')) as 'yearmonth',
        COUNT(*) as 'scheduleCount'
 FROM schedule
-    WHERE scheduleDate 
-    and Year(scheduleDate) =Year(current_date) 
-    and scheduleStatus =1 
-    and userID = '${userID}'
-    GROUP by MONTH(scheduleDate);
+WHERE scheduleDate
+
+  and userID = '${userID}' and scheduleStatus = 1
+GROUP by extract(year_month from scheduleDate)
+order by extract(year_month from scheduleDate) desc
+limit 6;
 `; 
   
   const  getdoneschedulemonthRow = await connection.query(
@@ -521,24 +523,44 @@ FROM schedule
   connection.release();
   return getdoneschedulemonthRow;
 }
-//월별 전체일정수 조회
-async function gettotalschedulemonthInfo(userID) {
+//월별 전체일정수조회
+async function getdonescheduletotalInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const gettotalschedulemonthQuery = `
+  const getdonescheduletotalQuery = `
   SELECT
-    MONTH(scheduleDate) as 'month',
+  MONTH(scheduleDate) as 'month',
+  concat((extract(year from scheduleDate)), '-', date_format(scheduleDate,'%m')) as 'yearmonth',
        COUNT(*) as 'scheduleCount'
 FROM schedule
-    WHERE scheduleDate and Year(scheduleDate) =Year(current_date) and userID ='${userID}'
-    GROUP by MONTH(scheduleDate);
+WHERE scheduleDate
+
+  and userID = '${userID}'
+GROUP by extract(year_month from scheduleDate)
+order by extract(year_month from scheduleDate) desc
+limit 6;
 `; 
   
-  const gettotalschedulemonthRow = await connection.query(
-    gettotalschedulemonthQuery, 
+  const getdonescheduletotalRow = await connection.query(
+    getdonescheduletotalQuery, 
+  );
+  connection.release();
+  return getdonescheduletotalRow;
+}
+//전체일정수 조회 6개씩
+async function gettotalscheduleInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const gettotalscheduleQuery = `
+  select count(scheduleID) as 'totalScheduleCount'
+  from schedule
+  where userID='${userID}';
+`; 
+  
+  const gettotalscheduleRow = await connection.query(
+    gettotalscheduleQuery, 
     
   );
   connection.release();
-  return gettotalschedulemonthRow;
+  return gettotalscheduleRow;
 }
 
 module.exports = {
@@ -566,5 +588,6 @@ module.exports = {
   getscategorydoneInfo,
   getscategorypickInfo,
   getdoneschedulemonthInfo,
-  gettotalschedulemonthInfo
+  gettotalscheduleInfo,
+  getdonescheduletotalInfo
 };
