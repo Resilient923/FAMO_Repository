@@ -520,6 +520,39 @@ exports.getschedulebydate = async function (req, res) {
         
 
 };
+//월별일정조회
+exports.getschedulemonth = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const month = req.query.month;
+    const year = req.query.year;
+   
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const getschedulemonthrows = await scheduleDao.getschedulemonthInfo(userID,month,year);
+            
+            if (getschedulemonthrows) {
+                res.json({
+                       isSuccess: true,
+                       code: 100,
+                       message: userID+"번 유저"+year+"년"+month+"월 일정조회 성공",
+                       data : getschedulemonthrows[0]
+                   });
+               }else{
+                res.json({
+                       isSuccess: false,
+                       code: 337,
+                       message: "월별일정조회 실패"
+                   });
+               }
+               connection.release();
+            }catch (err) {
+               // connection.release();
+                logger.error(`월별일정조회 조회\n ${err.message}`);
+                res.status(401).send(`Error: ${err.message}`);
+            }
+        
+
+}; 
 //일정상세조회
 exports.getscheduledetails = async function (req, res) {
     const scheduleID = req.params.scheduleID;
