@@ -281,6 +281,31 @@ and schedule.userID = '${userID}' and scheduleDate = '${scheduleDate}';
   connection.release();
   return getschedulebydateRow;
 }
+//월별일정조회
+async function getschedulemonthInfo(userID,month,year) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getschedulemonthQuery = `
+  SELECT
+    date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+       scheduleDate as 'scheduleForm',
+       scheduleID,
+       scheduleName,
+       scheduleMemo,
+       colorInfo
+FROM schedule
+left join category  on schedule.scheduleCategoryID = category.categoryID
+left join categoryColor on categoryColor = colorID
+where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
+and Year(scheduleDate) = '${year}';
+`; 
+  
+  const getschedulemonthRow = await connection.query(
+    getschedulemonthQuery, 
+    
+  );
+  connection.release();
+  return getschedulemonthRow;
+}
 //일정상세조회
 async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -491,6 +516,7 @@ module.exports = {
   getremaintotalscheduleInfo,
   getschedulebydateInfo,
   getremaintodayscheduleInfo,
+  getschedulemonthInfo,
   getscheduledetailsInfo,
   getdonemonthcountInfo,
   getpickscheduleInfo,

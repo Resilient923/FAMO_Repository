@@ -29,4 +29,5 @@ module.exports = function(app){
    
     //카테고리별 정렬 일정 조회
     //app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
+    app.get('/schedules/months',jwtMiddleware,schedule.getschedulemonth);//월별일정조회
   };
