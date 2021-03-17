@@ -88,6 +88,15 @@ exports.signUp = async function (req, res) {
         });
     }
 
+    var phone = /^[0-9]{2,3}[0-9]{3,4}[0-9]{4}$/;
+    if(!phone.test(phoneNumber)){
+        return res.json({
+            isSuccess: false,
+            code: 340,
+            message: "올바른 핸드폰 번호를 입력해주세요."
+        });
+    }
+
     try {
         const connection = await pool.getConnection(async conn => conn);
         try {
@@ -384,7 +393,16 @@ exports.updatePhoneNumber = async function (req, res) {
             code: 204,
             message: "핸드폰 번호를 입력해주세요."
         });
-    }
+    };
+
+    var phone = /^[0-9]{2,3}[0-9]{3,4}[0-9]{4}$/;
+    if(!phone.test(phoneNumber)){
+        return res.json({
+            isSuccess: false,
+            code: 340,
+            message: "올바른 핸드폰 번호를 입력해주세요."
+        });
+    };
 
     try{
         const connection = await pool.getConnection(async conn => conn);
@@ -476,7 +494,16 @@ exports.sendAuthCode = async function(req, res){
             code: 204,
             message: "핸드폰 번호를 입력해주세요."
         });
-    }
+    };
+
+    var phone = /^[0-9]{2,3}[0-9]{3,4}[0-9]{4}$/;
+    if(!phone.test(phoneNumber)){
+        return res.json({
+            isSuccess: false,
+            code: 340,
+            message: "올바른 핸드폰 번호를 입력해주세요."
+        });
+    };
 
     try{
         const randomCode = Math.floor(Math.random() * 900000) + 100000;
