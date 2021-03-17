@@ -500,6 +500,46 @@ order by scheduleDate desc ;
   connection.release();
   return getscategorypickRow;
 }
+//월별 해낸일정수조회
+async function getdoneschedulemonthInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getdoneschedulemonthQuery = `
+  SELECT
+    MONTH(scheduleDate) as 'month',
+       COUNT(*) as 'scheduleCount'
+FROM schedule
+    WHERE scheduleDate 
+    and Year(scheduleDate) =Year(current_date) 
+    and scheduleStatus =1 
+    and userID = '${userID}'
+    GROUP by MONTH(scheduleDate);
+`; 
+  
+  const  getdoneschedulemonthRow = await connection.query(
+    getdoneschedulemonthQuery, 
+  );
+  connection.release();
+  return getdoneschedulemonthRow;
+}
+//월별 전체일정수 조회
+async function gettotalschedulemonthInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const gettotalschedulemonthQuery = `
+  SELECT
+    MONTH(scheduleDate) as 'month',
+       COUNT(*) as 'scheduleCount'
+FROM schedule
+    WHERE scheduleDate and Year(scheduleDate) =Year(current_date) and userID ='${userID}'
+    GROUP by MONTH(scheduleDate);
+`; 
+  
+  const gettotalschedulemonthRow = await connection.query(
+    gettotalschedulemonthQuery, 
+    
+  );
+  connection.release();
+  return gettotalschedulemonthRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
@@ -524,5 +564,7 @@ module.exports = {
   getscategoryrecentInfo,
   getscategoryleftInfo,
   getscategorydoneInfo,
-  getscategorypickInfo
+  getscategorypickInfo,
+  getdoneschedulemonthInfo,
+  gettotalschedulemonthInfo
 };

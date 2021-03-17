@@ -585,7 +585,7 @@ exports.getscheduledetails = async function (req, res) {
 
 }; 
 //월별해낸일정수조회
-exports.getdonemonthcount = async function (req, res) {
+/* exports.getdonemonthcount = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
@@ -609,11 +609,11 @@ exports.getdonemonthcount = async function (req, res) {
         }
         connection.release();
     } catch (err) {
-        connection.release();
+       // connection.release();
         logger.error(`월별 해낸 일정 개수 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
-};
+}; */
 //즐겨찾기한 일정조회
 exports.getpickschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
@@ -792,6 +792,66 @@ exports.getschedulebycategorysort = async function (req, res) {
     } catch (err) {
        // connection.release();
         logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//월별 해낸 일정수조회
+exports.getdoneschedulemonth = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const getdoneschedulemonthrows = await scheduleDao.getdoneschedulemonthInfo(userID);
+
+        if (getdoneschedulemonthrows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 월별 해낸 일정수조회 성공",
+                data :getdoneschedulemonthrows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 338,
+                message: "월별 해낸 일정수조회 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`월별 해낸 일정수조회 \n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
+//월별 전체 일정수조회
+exports.gettotalschedulemonth = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const gettotalschedulemonthrows = await scheduleDao.gettotalschedulemonthInfo(userID);
+
+        if (gettotalschedulemonthrows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번 유저 월별 전체 일정수조회 성공",
+                data :gettotalschedulemonthrows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 339,
+                message: "월별 전체 일정수조회  실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`월별 전체 일정수조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
 };
