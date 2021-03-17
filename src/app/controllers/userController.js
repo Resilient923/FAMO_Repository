@@ -732,7 +732,7 @@ exports.updatePassword = async function (req, res) {
         return res.json({
             isSuccess: false,
             code: 201,
-            message: "아이디를 입력해주세요."
+            message: "비밀번호를 입력해주세요."
         })
     }
 
