@@ -132,6 +132,22 @@ async function updatePhoneNumber(userID, phoneNumber){
 
   connection.release();
 };
+/* 비밀번호 업데이트 */
+async function updatePassword(phoneNumber, passwordParams){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const updatePasswordQuery = `
+  UPDATE user
+  SET password = ?, passwordSalt = ?
+  WHERE phoneNumber = '${phoneNumber}';
+  `;
+
+  await connection.query(
+    updatePasswordQuery,
+    passwordParams
+  );
+
+  connection.release();
+}
 
 module.exports = {
   checkUserLoginID,
@@ -143,6 +159,7 @@ module.exports = {
   checkUserID,
   deleteUserAccount,
   updatePhoneNumber,
+  updatePassword
 };
 
 
