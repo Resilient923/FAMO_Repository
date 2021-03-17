@@ -8,7 +8,8 @@ const pool = mysql.createPool({
     user: 'steady',
     port: 3306,
     password: databaseInfo.rdspwd,
-    database: 'famodb'
+    database: 'famodb',
+    dateStrings: 'date'
 });
 
 /*soi local test DB*/

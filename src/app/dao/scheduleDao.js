@@ -53,6 +53,25 @@ async function updatescheduleInfo(updatescheduleParams) {
   connection.release();
   return updatescheduleRow;
 }
+//일정수정할때 스케쥴날짜 가져오는 Dao
+
+async function getdate(scheduleID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getdateQuery = `
+  select scheduleDate
+       
+from schedule
+
+where scheduleID = '${scheduleID}';
+`; 
+  
+  const getdateRow = await connection.query(
+    getdateQuery, 
+    
+  );
+  connection.release();
+  return getdateRow;
+}
 //유저별전체일정 조회
 async function getscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -262,11 +281,37 @@ and schedule.userID = '${userID}' and scheduleDate = '${scheduleDate}';
   connection.release();
   return getschedulebydateRow;
 }
+//월별일정조회
+async function getschedulemonthInfo(userID,month,year) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getschedulemonthQuery = `
+  SELECT
+    date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+       scheduleDate as 'scheduleForm',
+       scheduleID,
+       scheduleName,
+       scheduleMemo,
+       colorInfo
+FROM schedule
+left join category  on schedule.scheduleCategoryID = category.categoryID
+left join categoryColor on categoryColor = colorID
+where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
+and Year(scheduleDate) = '${year}';
+`; 
+  
+  const getschedulemonthRow = await connection.query(
+    getschedulemonthQuery, 
+    
+  );
+  connection.release();
+  return getschedulemonthRow;
+}
 //일정상세조회
 async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduledetailsQuery = `
   select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
+  scheduleDate as 'scheduleForm',
        categoryName,
         scheduleName,
        scheduleMemo,
@@ -455,11 +500,52 @@ order by scheduleDate desc ;
   connection.release();
   return getscategorypickRow;
 }
+//월별 해낸일정수조회
+async function getdoneschedulemonthInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getdoneschedulemonthQuery = `
+  SELECT
+    MONTH(scheduleDate) as 'month',
+       COUNT(*) as 'scheduleCount'
+FROM schedule
+    WHERE scheduleDate 
+    and Year(scheduleDate) =Year(current_date) 
+    and scheduleStatus =1 
+    and userID = '${userID}'
+    GROUP by MONTH(scheduleDate);
+`; 
+  
+  const  getdoneschedulemonthRow = await connection.query(
+    getdoneschedulemonthQuery, 
+  );
+  connection.release();
+  return getdoneschedulemonthRow;
+}
+//월별 전체일정수 조회
+async function gettotalschedulemonthInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const gettotalschedulemonthQuery = `
+  SELECT
+    MONTH(scheduleDate) as 'month',
+       COUNT(*) as 'scheduleCount'
+FROM schedule
+    WHERE scheduleDate and Year(scheduleDate) =Year(current_date) and userID ='${userID}'
+    GROUP by MONTH(scheduleDate);
+`; 
+  
+  const gettotalschedulemonthRow = await connection.query(
+    gettotalschedulemonthQuery, 
+    
+  );
+  connection.release();
+  return gettotalschedulemonthRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
+  getdate,
   getscheduleInfo,
   getscheduletodayInfo,
   getschedulebycategoryInfo,
@@ -470,6 +556,7 @@ module.exports = {
   getremaintotalscheduleInfo,
   getschedulebydateInfo,
   getremaintodayscheduleInfo,
+  getschedulemonthInfo,
   getscheduledetailsInfo,
   getdonemonthcountInfo,
   getpickscheduleInfo,
@@ -477,5 +564,7 @@ module.exports = {
   getscategoryrecentInfo,
   getscategoryleftInfo,
   getscategorydoneInfo,
-  getscategorypickInfo
+  getscategorypickInfo,
+  getdoneschedulemonthInfo,
+  gettotalschedulemonthInfo
 };

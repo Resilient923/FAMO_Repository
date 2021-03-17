@@ -21,7 +21,7 @@ module.exports = function(app){
   
   
     //월별해낸일정수조회
-    app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdonemonthcount);
+    //app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdonemonthcount);
 //즐겨찾기일정조회
     app.get('/schedules/picks',jwtMiddleware,schedule.getpickschedule);
     //최근생성일정조회
@@ -29,4 +29,7 @@ module.exports = function(app){
    
     //카테고리별 정렬 일정 조회
     //app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
+    app.get('/schedules/months',jwtMiddleware,schedule.getschedulemonth);//월별일정조회
+    app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdoneschedulemonth);//월별해낸일정수조회
+    app.get('/schedules/months/totals',jwtMiddleware,schedule.gettotalschedulemonth);//월별전체일정수조회
   };
