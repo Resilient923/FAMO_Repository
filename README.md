@@ -35,6 +35,10 @@
 
 >https://docs.google.com/spreadsheets/d/1Yo6aHpu_JHAJutldZumR04UU2bQ_J1s4IklUq9cuQ3I/edit?usp=sharing
 
+## 앱UI 제플린
+
+>https://app.zeplin.io/project/6051317626a6cc458ed55e66
+
 ## 프로젝트 설계 및 UI구성 
 
 
