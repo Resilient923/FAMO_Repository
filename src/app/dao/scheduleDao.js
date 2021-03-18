@@ -562,6 +562,95 @@ async function gettotalscheduleInfo(userID) {
   connection.release();
   return gettotalscheduleRow;
 }
+//검색 (scheduleID받아오기) 제목으로
+async function getIdFromScheduleNameInfo(searchWord,userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getIdFromScheduleNameQuery = `
+  select scheduleID
+from schedule
+where scheduleName like concat('%','${searchWord}','%') and userID = '${userID}';
+`; 
+  
+  const [getIdFromScheduleNameRow] = await connection.query(
+    getIdFromScheduleNameQuery, 
+    
+  );
+  connection.release();
+  return getIdFromScheduleNameRow;
+}
+
+//검색 (scheduleID받아오기) 내용으로
+async function getIdFromScheduleMemoInfo(searchWord,userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getIdFromScheduleMemoQuery = `
+  select scheduleID
+from schedule
+where scheduleMemo like concat('%','${searchWord}','%') and userID = '${userID}';
+`; 
+  
+  const [getIdFromScheduleMemoRow] = await connection.query(
+    getIdFromScheduleMemoQuery, 
+    
+  );
+  connection.release();
+  return getIdFromScheduleMemoRow;
+}
+//검색(schedule정보 받아오기) 
+async function getscheduleFromMemoInfo(scheduleID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getscheduleFromNameQuery = `
+  select scheduleID,
+       scheduleName,
+       scheduleMemo,
+       scheduleDate,
+       schedulePick,
+    colorInfo
+FROM schedule
+         left join category on schedule.scheduleCategoryID = category.categoryID
+         left join categoryColor on categoryColor = colorID
+where scheduleID='${scheduleID}';
+`; 
+  
+  const [getscheduleFromNameRow] = await connection.query(
+    getscheduleFromNameQuery, 
+    
+  );
+  connection.release();
+  return getscheduleFromNameRow;
+}
+//검색히스토리생성
+async function insertSearchHistoryInfo(userID,searchWord) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const insertSearchHistoryQuery = `
+  insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
+values ('${userID}','${searchWord}',default,default);
+`; 
+  
+  const insertSearchHistoryRow = await connection.query(
+    insertSearchHistoryQuery, 
+    
+  );
+  connection.release();
+  return insertSearchHistoryRow;
+}
+//유저별검색기록조회
+async function gethistoryInfo(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const gethistoryInfoQuery = `
+  select distinct searchHistory
+from searchHistory
+where userID = '${userID}'
+order by historyCreatedAt desc
+limit 10;
+`; 
+  
+  const gethistoryInfoRow = await connection.query(
+    gethistoryInfoQuery, 
+    
+  );
+  connection.release();
+  return gethistoryInfoRow;
+}
 
 module.exports = {
   inserttodayscheduleInfo,
@@ -589,5 +678,12 @@ module.exports = {
   getscategorypickInfo,
   getdoneschedulemonthInfo,
   gettotalscheduleInfo,
-  getdonescheduletotalInfo
+  getdonescheduletotalInfo,
+  //검색
+  getIdFromScheduleNameInfo,
+  getIdFromScheduleMemoInfo,
+  insertSearchHistoryInfo,
+  getscheduleFromMemoInfo,
+
+  gethistoryInfo
 };
