@@ -28,7 +28,7 @@
 
 >https://aquerytool.com:443/aquerymain/index/?rurl=a297f5f8-4a95-44fe-86a5-568dad698ab9
 
->password : b2a4o6
+>password : z2h3zoge25
 
 
 ## API 명세서
