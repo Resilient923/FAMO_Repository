@@ -32,4 +32,7 @@ module.exports = function(app){
     app.get('/schedules/months',jwtMiddleware,schedule.getschedulemonth);//월별일정조회
     app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdoneschedulemonth);//월별달성률조회
     app.get('/schedules/totals',jwtMiddleware,schedule.gettotalschedule);//전체일정수조회
+  
+    app.get('/schedules/search',jwtMiddleware,schedule.searchSchedule);//일정검색
+    app.get('/schedules/search/histories',jwtMiddleware,schedule.gethistory);//검색기록조회
   };

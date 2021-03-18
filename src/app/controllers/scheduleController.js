@@ -880,3 +880,94 @@ exports.gettotalschedule = async function (req, res) {
         res.status(401).send(`Error: ${err.message}`);
     }
 };
+//일정검색
+exports.searchSchedule = async function (req, res) {
+    //const { page,limit } = req.query;
+    const { searchWord } = req.body;
+    //유저 인덱스
+    const userID = req.verifiedToken.userID;
+  
+    let searchscheduleID = [];
+  
+    if(!searchWord)
+    return res.json({
+      isSuccess: false,
+      code: 223,
+      message: "검색어를 입력해 주세요.",
+    });
+    const insertSearchHistoryRows = await scheduleDao.insertSearchHistoryInfo(userID,searchWord,userID);
+     //검색어로 일정제목에서 인덱스받아오기
+    const getIdFromScheduleNameRows = await scheduleDao.getIdFromScheduleNameInfo(searchWord,userID);
+    
+    for(let i=0; i<getIdFromScheduleNameRows.length; i++){
+        searchscheduleID.push(getIdFromScheduleNameRows[i].scheduleID)
+    }
+    
+  
+    //검색어로 일정내용에서 인덱스받아오기
+    const getIdFromScheduleMemoRows = await scheduleDao.getIdFromScheduleMemoInfo(searchWord,userID);
+    
+    for(let i=0; i<getIdFromScheduleMemoRows.length; i++){
+    searchscheduleID.push(getIdFromScheduleMemoRows[i].scheduleID)
+    }
+    try{
+        
+        const connection = await pool.getConnection(async (conn) => conn);
+        let x = new Set(searchscheduleID);
+        let scheduleData = [...x];
+        data = [];
+        for(let i=0;i<scheduleData.length;i++){
+            const getscheduleFromMemoRows = await scheduleDao.getscheduleFromMemoInfo(searchscheduleID[i]);
+            data.push(getscheduleFromMemoRows);
+        }
+        if (data) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: searchWord + " 검색어 관련 일정 조회성공",
+                data : data
+            });
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 341,
+                message: "검색어 일정 조회 실패"
+            });
+        }
+        connection.release();
+    }catch(err){
+        connection.release();
+        logger.error(`검색어 관련 일정 조회 \n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+}
+//유저별검색기록조회
+exports.gethistory = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const gethistoryrows = await scheduleDao.gethistoryInfo(userID);
+
+        if (gethistoryrows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번유저 검색기록조회 성공",
+                data :gethistoryrows[0]
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 342,
+                message: "유저별 검색기록조회 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+        connection.release();
+        logger.error(`검색기록조회 \n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
