@@ -91,9 +91,16 @@ exports.insertschedule = async function (req, res) {
         try{
             if (!scheduleDate) {
                 const userID = req.verifiedToken.userID;
-                const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
+                const getOrderRows = await scheduleDao.getOrderInfo(userID);
+                if(!getOrderRows){
+                    var scheduleOrder = -1;
+                }else if(getOrderRows){
+                    var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+                }
+                const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
                 const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
-
+                
+                //유저가 가지고있는 Orer중 가장 큰값
             res.json({
                     isSuccess: true,
                     code: 100,
@@ -105,9 +112,15 @@ exports.insertschedule = async function (req, res) {
             }else{
                 // 오늘일정생성
              const userID = req.verifiedToken.userID;
-             const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo];
+             const getOrderRows = await scheduleDao.getOrderInfo(userID);
+             if(!getOrderRows){
+                var scheduleOrder = -1;
+            }else if(getOrderRows){
+                var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+            } 
+             const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
              const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
-    
+        
              res.json({
                 isSuccess: true,
                 code: 100,
@@ -215,10 +228,12 @@ exports.updateschedule = async function (req, res) {
 //유저별일정전체 조회
 exports.getschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
+    const offset = req.query.offset;
+    const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getschedulerows = await scheduleDao.getscheduleInfo(userID);
+        const getschedulerows = await scheduleDao.getscheduleInfo(userID,offset,limit);
 
         if (getschedulerows) {
             res.json({
@@ -236,7 +251,7 @@ exports.getschedule = async function (req, res) {
         }
         connection.release();
     }catch (err) {
-                connection.release();
+               // connection.release();
                 logger.error(`전체일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
     }
@@ -322,7 +337,7 @@ exports.deleteschedule = async function (req, res) {
             message: "정확한 일정 고유번호를 입력해주세요"
         });
     }
-    try {
+    try { 
         const connection = await pool.getConnection(async (conn) => conn);
         
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(scheduleID);
@@ -529,13 +544,14 @@ exports.getschedulemonth = async function (req, res) {
     try {
         const connection = await pool.getConnection(async (conn) => conn);
         const getschedulemonthrows = await scheduleDao.getschedulemonthInfo(userID,month,year);
-            
+        const getscheduledayrows = await scheduleDao.getscheduledayInfo(userID,month,year);
             if (getschedulemonthrows) {
                 res.json({
                        isSuccess: true,
                        code: 100,
                        message: userID+"번 유저"+year+"년"+month+"월 일정조회 성공",
-                       data : getschedulemonthrows[0]
+                       data : getschedulemonthrows[0],
+                       result : getscheduledayrows[0]
                    });
                }else{
                 res.json({
@@ -617,10 +633,12 @@ exports.getscheduledetails = async function (req, res) {
 //즐겨찾기한 일정조회
 exports.getpickschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
+    const offset = req.query.offset;
+    const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getpickschedulerows = await scheduleDao.getpickscheduleInfo(userID);
+        const getpickschedulerows = await scheduleDao.getpickscheduleInfo(userID,offset,limit);
 
         if (getpickschedulerows) {
             res.json({
@@ -647,10 +665,12 @@ exports.getpickschedule = async function (req, res) {
 //최근 생성 일정조회
 exports.getrecentschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
+    const offset = req.query.offset;
+    const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const getrecentschedulerows = await scheduleDao.getrecentscheduleInfo(userID);
+        const getrecentschedulerows = await scheduleDao.getrecentscheduleInfo(userID,offset,limit);
 
         if (getrecentschedulerows) {
             res.json({
@@ -679,10 +699,12 @@ exports.getschedulebycategorysort = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const schedulecategoryID = req.query.scheduleCategoryID;
     const sort = req.query.sort;
+    const offset = req.query.offset;
+    const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
         if(sort == null){
-            const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID);
+            const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
 
         if (getschedulebycategoryrows) {
 
@@ -704,7 +726,7 @@ exports.getschedulebycategorysort = async function (req, res) {
         }
         }
         else if(sort =='recent'/* 최신순 */){
-            const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,sort);
+            const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,sort,offset,limit);
 
             if (getscategoryrecentrows) {
 
@@ -725,7 +747,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'left'/* 남은순 */){
-            const getscategoryleftrows = await scheduleDao.getscategoryleftInfo(userID,schedulecategoryID,sort);
+            const getscategoryleftrows = await scheduleDao.getscategoryleftInfo(userID,schedulecategoryID,sort,offset,limit);
 
             if (getscategoryleftrows) {
 
@@ -746,7 +768,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'done'/* 완료순 */){
-            const getscategorydonerows = await scheduleDao.getscategorydoneInfo(userID,schedulecategoryID,sort);
+            const getscategorydonerows = await scheduleDao.getscategorydoneInfo(userID,schedulecategoryID,sort,offset,limit);
 
             if (getscategorydonerows) {
 
@@ -767,7 +789,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'pick'/* 즐겨찾기순 */){
-            const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,sort);
+            const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,sort,offset,limit);
 
             if (getscategorypickrows) {
 
@@ -825,7 +847,6 @@ exports.getdoneschedulemonth = async function (req, res) {
             }
 
         };
-        console.log(doneRate);
 
         
         if (getdoneschedulemonthrows) {
@@ -886,7 +907,6 @@ exports.searchSchedule = async function (req, res) {
     const { searchWord } = req.body;
     //유저 인덱스
     const userID = req.verifiedToken.userID;
-  
     let searchscheduleID = [];
   
     if(!searchWord)
@@ -895,7 +915,7 @@ exports.searchSchedule = async function (req, res) {
       code: 223,
       message: "검색어를 입력해 주세요.",
     });
-    const insertSearchHistoryRows = await scheduleDao.insertSearchHistoryInfo(userID,searchWord,userID);
+    const insertSearchHistoryRows = await scheduleDao.insertSearchHistoryInfo(userID,searchWord);
      //검색어로 일정제목에서 인덱스받아오기
     const getIdFromScheduleNameRows = await scheduleDao.getIdFromScheduleNameInfo(searchWord,userID);
     
@@ -926,7 +946,7 @@ exports.searchSchedule = async function (req, res) {
                 code: 100,
                 message: searchWord + " 검색어 관련 일정 조회성공",
                 data : data
-            });
+            }); 
         }else{
             res.json({
                 isSuccess: false,
@@ -971,3 +991,38 @@ exports.gethistory = async function (req, res) {
         res.status(401).send(`Error: ${err.message}`);
     }
 };
+//일정순서변경
+/* exports.updateOrder = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const {scheduleID,scheduleOrder} = req.body;
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const updateOrderrows = await scheduleDao.updateOrderInfo(userID,scheduleID,scheduleOrder);
+        var getOrderrows = await scheduleDao.getOrder2Info(userID);
+        console.log(getOrderrows[0]);
+        const updateOrder2rows = await scheduleDao.updateOrder2Info(userID,scheduleID,scheduleOrder);
+        var getOrderrows = await scheduleDao.getOrder2Info(userID);
+        console.log(getOrderrows[0]);
+        if (updateOrder2rows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번유저가"+scheduleID+"번일정위치를"+scheduleOrder+"번으로이동",
+                
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 342,
+                message: "일정순서변경 실패"
+            });
+        }
+        connection.release();
+    } catch (err) {
+       // connection.release();
+        logger.error(`일정순서변경\n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+}; */
