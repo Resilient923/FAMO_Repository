@@ -996,31 +996,66 @@ exports.gethistory = async function (req, res) {
     }
 };
 //일정순서변경
-/* exports.updateOrder = async function (req, res) {
+exports.updateOrder = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const {scheduleID,scheduleOrder} = req.body;
+    
     try {
         const connection = await pool.getConnection(async (conn) => conn);
 
-        const updateOrderrows = await scheduleDao.updateOrderInfo(userID,scheduleID,scheduleOrder);
-        var getOrderrows = await scheduleDao.getOrder2Info(userID);
-        console.log(getOrderrows[0]);
-        const updateOrder2rows = await scheduleDao.updateOrder2Info(userID,scheduleID,scheduleOrder);
-        var getOrderrows = await scheduleDao.getOrder2Info(userID);
-        console.log(getOrderrows[0]);
-        if (updateOrder2rows) {
-            res.json({
+      //  const updateOrderrows = await scheduleDao.updateOrderInfo(userID,scheduleID,scheduleOrder);
+       // var getOrderrows = await scheduleDao.getOrder2Info(userID);
+        
+        let a = await scheduleDao.getscheduleIDInfo(scheduleID);
+        let x = a[0][0].scheduleOrder;
+        
+        const y = req.body.scheduleOrder;
+        if (x>y){
+            
+            const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
+            
+            const change2 = await scheduleDao.updateOrder1Info(userID,scheduleID,x,y);
+            
+            if (change2) {
+                res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번유저가"+scheduleID+"번일정위치를"+y+"번으로이동",
+                    
+                });
+    
+            }else{
+               return res.json({
+                    isSuccess: false,
+                    code: 343,
+                    message: "(x>y)일정순서변경 실패"
+                });
+            }
+            
+        }else if(x<y){
+            const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
+            const updateOrderParams = [userID,scheduleID,x,y];
+            const change4 = await scheduleDao.updateOrder2Info(updateOrderParams);
+            if (change4) {
+                res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID +"번유저가"+scheduleID+"번일정위치를"+y+"번으로이동",
+                    
+                });
+    
+            }else{
+                return res.json({
+                    isSuccess: false,
+                    code: 344,
+                    message: "(x<y)일정순서변경 실패"
+                });
+            }
+        }else if(x==y){
+            return res.json({
                 isSuccess: true,
-                code: 100,
-                message: userID + "번유저가"+scheduleID+"번일정위치를"+scheduleOrder+"번으로이동",
-                
-            });
-
-        }else{
-            res.json({
-                isSuccess: false,
-                code: 342,
-                message: "일정순서변경 실패"
+                code: 345,
+                message: "같은번호로는 이동할수없습니다"
             });
         }
         connection.release();
@@ -1029,4 +1064,4 @@ exports.gethistory = async function (req, res) {
         logger.error(`일정순서변경\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
-}; */
+};

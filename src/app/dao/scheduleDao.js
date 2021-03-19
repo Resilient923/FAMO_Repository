@@ -709,13 +709,30 @@ limit 10;
   connection.release();
   return gethistoryRow;
 }
-//일정순서변경 자리생성
-/* async function updateOrderInfo(userID,scheduleID,scheduleOrder) {
+//일정순서변경 자리생성(x<y)
+async function updateOrder2Info(updateOrderParams) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const updateOrder2Query = `
+  update schedule
+set scheduleOrder = scheduleOrder-1
+where userID=? and scheduleID !=? and ?>=scheduleOrder>?;
+`; 
+  
+  const updateOrder2Row = await connection.query(
+    updateOrder2Query, 
+    updateOrderParams
+    
+  );
+  connection.release();
+  return updateOrder2Row;
+}
+//일정순서변경 자리생성(x>y)
+async function updateOrder1Info(userID,scheduleID,x,scheduleOrder) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrderQuery = `
   update schedule
 set scheduleOrder = scheduleOrder+1
-where userID='${userID}' and scheduleID!='${scheduleID}' and '${scheduleID}'>scheduleOrder>'${scheduleOrder}';
+where userID='${userID}' and scheduleID !='${scheduleID}' and '${x}'>scheduleOrder>='${scheduleOrder}';
 `; 
   
   const updateOrderRow = await connection.query(
@@ -725,11 +742,11 @@ where userID='${userID}' and scheduleID!='${scheduleID}' and '${scheduleID}'>sch
   connection.release();
   return updateOrderRow;
 }
-async function updateOrder2Info(userID,scheduleID,scheduleOrder) {
+async function updateOrder0Info(userID,scheduleID,scheduleOrder) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrder2Query = `
   update schedule
-  set scheduleOrder = '${scheduleOrder}' where userID ='${userID}' and scheduleID ='${scheduleID}'
+  set scheduleOrder = '${scheduleOrder}' where userID ='${userID}' and scheduleID ='${scheduleID}';
 `; 
   
   const updateOrder2Row = await connection.query(
@@ -739,26 +756,23 @@ async function updateOrder2Info(userID,scheduleID,scheduleOrder) {
   connection.release();
   return updateOrder2Row;
 }
-//test
-async function getOrder2Info(userID) {
+//순서변경하고자 하는 일정ID 가져오기
+async function getscheduleIDInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getOrder2Query = `
-  select scheduleName,
-  scheduleOrder
-  from schedule
-  where userID = '${userID}';
+  const getscheduleIDQuery = `
+ select scheduleOrder from schedule where scheduleID = '${scheduleID}';
 `; 
   
-  const getOrder2Row = await connection.query(
-    getOrder2Query, 
+  const getscheduleIDRow = await connection.query(
+    getscheduleIDQuery, 
     
   );
   connection.release();
-  return getOrder2Row;
-} */
-
+  return getscheduleIDRow;
+}
 
 module.exports = {
+  getscheduleIDInfo,
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
@@ -795,9 +809,9 @@ module.exports = {
   gethistoryInfo,
 
   //일정순서관려
-  getOrderInfo/* ,
-  updateOrderInfo,
-  updateOrder2Info,
-  getOrder2Info */
+  getOrderInfo,
+  updateOrder0Info,
+  updateOrder1Info,
+  updateOrder2Info
   
 };
