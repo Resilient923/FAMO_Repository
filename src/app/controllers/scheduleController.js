@@ -528,14 +528,14 @@ exports.getschedulebydate = async function (req, res) {
                }
                connection.release();
             }catch (err) {
-               // connection.release();
+                connection.release();
                 logger.error(`일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
         
 
 };
-//월별일정조회
+//월별일정조회+월별날짜조회
 exports.getschedulemonth = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const month = req.query.month;
@@ -562,7 +562,7 @@ exports.getschedulemonth = async function (req, res) {
                }
                connection.release();
             }catch (err) {
-               // connection.release();
+                connection.release();
                 logger.error(`월별일정조회 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
