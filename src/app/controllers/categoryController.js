@@ -19,7 +19,6 @@ exports.insertcategory = async function (req, res) {
         });
     }
     if (categoryName.length>=10) {
-
         return res.json({
 
             isSuccess: false,
@@ -28,7 +27,6 @@ exports.insertcategory = async function (req, res) {
         });
     }
     if(!categoryColor){
-
         return res.json({
 
             isSuccess : false,
