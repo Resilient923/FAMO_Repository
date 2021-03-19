@@ -710,17 +710,16 @@ limit 10;
   return gethistoryRow;
 }
 //일정순서변경 자리생성(x<y)
-async function updateOrder2Info(updateOrderParams) {
+async function updateOrder2Info(userID,scheduleID,x,y) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrder2Query = `
   update schedule
 set scheduleOrder = scheduleOrder-1
-where userID=? and scheduleID !=? and ?>=scheduleOrder>?;
+where userID='${userID}' and scheduleID !='${scheduleID}' and ${y}>=scheduleOrder>${x};
 `; 
   
   const updateOrder2Row = await connection.query(
     updateOrder2Query, 
-    updateOrderParams
     
   );
   connection.release();
