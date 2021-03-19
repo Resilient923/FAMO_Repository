@@ -1034,8 +1034,8 @@ exports.updateOrder = async function (req, res) {
             
         }else if(x<y){
             const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
-            const updateOrderParams = [userID,scheduleID,x,y];
-            const change4 = await scheduleDao.updateOrder2Info(updateOrderParams);
+            
+            const change4 = await scheduleDao.updateOrder2Info(userID,scheduleID,x,y);
             if (change4) {
                 res.json({
                     isSuccess: true,
