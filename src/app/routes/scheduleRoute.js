@@ -14,7 +14,7 @@ module.exports = function(app){
     
     app.post('/schedules/picks',jwtMiddleware,schedule.patchschedulepick);//즐겨찾기
     app.post('/schedules/achievements/today',jwtMiddleware,schedule.updateachievementschedule);//일정완료버튼
-    app.get('/schedules/achievements',jwtMiddleware,schedule.getdoneschedulecount);//총해낸일정조회
+  //  app.get('/schedules/achievements',jwtMiddleware,schedule.getdoneschedulecount);//총해낸일정수조회
     app.get('/schedules/dates',jwtMiddleware,schedule.getschedulebydate);//날짜별일정조회
     app.get('/schedules/left-over',jwtMiddleware,schedule.getremainschedule);//남은일정수조회
     app.get('/schedules/:scheduleID/details',jwtMiddleware,schedule.getscheduledetails);//일정상세조회
@@ -31,7 +31,8 @@ module.exports = function(app){
     //app.get('/category-schedules',jwtMiddleware,schedule.getschedulebycategory);
     app.get('/schedules/months',jwtMiddleware,schedule.getschedulemonth);//월별일정조회
     app.get('/schedules/months/achievements',jwtMiddleware,schedule.getdoneschedulemonth);//월별달성률조회
-    app.get('/schedules/totals',jwtMiddleware,schedule.gettotalschedule);//전체일정수조회
+    app.get('/schedules/counts',jwtMiddleware,schedule.gettotalschedule);
+    //전체일정수,총해낸일정수조회
   
     app.get('/schedules/search',jwtMiddleware,schedule.searchSchedule);//일정검색
     app.get('/schedules/search/histories',jwtMiddleware,schedule.gethistory);//검색기록조회

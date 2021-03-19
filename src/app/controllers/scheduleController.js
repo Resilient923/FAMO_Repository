@@ -696,6 +696,7 @@ exports.getrecentschedule = async function (req, res) {
 };
 //카테고리별 일정 정렬 조회
 exports.getschedulebycategorysort = async function (req, res) {
+    
     const userID = req.verifiedToken.userID;
     const schedulecategoryID = req.query.scheduleCategoryID;
     const sort = req.query.sort;
@@ -703,27 +704,28 @@ exports.getschedulebycategorysort = async function (req, res) {
     const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
+        
         if(sort == null){
             const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
 
-        if (getschedulebycategoryrows) {
+            if (getschedulebycategoryrows) {
 
-         res.json({
-                isSuccess: true,
-                code: 100,
-                message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 일정 조회 성공",
-                data : getschedulebycategoryrows[0]
-                
+            res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 일정 조회 성공",
+                    data : getschedulebycategoryrows[0]
+                    
 
-            });
+                });
 
-        }else{
-         res.json({
-                isSuccess: false,
-                code: 311,
-                message: "카테고리별 일정 조회 실패"
-            });
-        }
+            }else{
+            res.json({
+                    isSuccess: false,
+                    code: 311,
+                    message: "카테고리별 일정 조회 실패"
+                });
+            }
         }
         else if(sort =='recent'/* 최신순 */){
             const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,sort,offset,limit);
@@ -790,7 +792,7 @@ exports.getschedulebycategorysort = async function (req, res) {
             }
         }else if(sort == 'pick'/* 즐겨찾기순 */){
             const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,sort,offset,limit);
-
+        
             if (getscategorypickrows) {
 
             res.json({
@@ -878,20 +880,22 @@ exports.gettotalschedule = async function (req, res) {
         const connection = await pool.getConnection(async (conn) => conn);
 
         const gettotalschedulerows = await scheduleDao.gettotalscheduleInfo(userID);
+        const getdoneschedulecountrows = await scheduleDao.getdoneschedulecountInfo(userID);
 
         if (gettotalschedulerows) {
             res.json({
                 isSuccess: true,
                 code: 100,
-                message: userID + "번 유저 전체 일정수조회 성공",
-                data :gettotalschedulerows[0]
+                message: userID + "번 유저 전체 일정수,총 해낸 일정수조회 성공",
+                totaldata : gettotalschedulerows[0],
+                totaldonedata : getdoneschedulecountrows[0]
             });
 
         }else{
             res.json({
                 isSuccess: false,
                 code: 339,
-                message: "전체 일정수조회  실패"
+                message: "전체 일정수, 총 해낸 일정수 조회 실패"
             });
         }
         connection.release();

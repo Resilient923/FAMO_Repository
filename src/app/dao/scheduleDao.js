@@ -147,7 +147,7 @@ order by scheduleOrder desc;
   return getscheduletodayRow;
 }
 //카테고리별 일정 조회
-async function getschedulebycategoryInfo(userID,schedulecategoryID) {
+async function getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getschedulebycategoryQuery = `
         
@@ -163,7 +163,8 @@ from schedule
 where scheduleDelete = 1
 and schedule.userID = '${userID}'
 and scheduleCategoryID = '${schedulecategoryID}'
-limit ${offset},${limit};
+limit ${offset},${limit}
+;
 `; 
   
   const getschedulebycategoryRow = await connection.query(
@@ -461,7 +462,8 @@ where scheduleDelete = 1
   and schedule.userID = '${userID}'
   and scheduleCategoryID = '${schedulecategoryID}'
 order by scheduleDate desc 
-limit ${offset},${limit};
+limit ${offset},${limit}
+;
 `; 
   
   const  getscategoryrecentRow = await connection.query(
@@ -487,8 +489,9 @@ from schedule
 where scheduleDelete = 1
   and schedule.userID = '${userID}'
   and scheduleCategoryID = '${schedulecategoryID}'
-order by scheduleStatus 
-limit ${offset},${limit} ;
+order by scheduleStatus
+limit ${offset},${limit} 
+;
 `; 
   
   const  getscategoryleftRow = await connection.query(
@@ -514,8 +517,9 @@ left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
   and schedule.userID = '${userID}'
   and scheduleCategoryID = '${schedulecategoryID}'
-order by scheduleStatus desc 
-limit ${offset},${limit};
+order by scheduleStatus desc
+limit ${offset},${limit}
+;
 `; 
   
   const  getscategorydoneRow = await connection.query(
@@ -543,6 +547,7 @@ where scheduleDelete = 1
   and scheduleCategoryID = '${schedulecategoryID}'
 order by scheduleDate desc
 limit ${offset},${limit};
+
 `; 
   
   const  getscategorypickRow = await connection.query(
