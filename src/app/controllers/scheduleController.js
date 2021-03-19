@@ -1055,7 +1055,7 @@ exports.updateOrder = async function (req, res) {
             return res.json({
                 isSuccess: true,
                 code: 345,
-                message: "같은번호로는 이동할수없습니다"
+                message: "같은자리로는 이동할수없습니다"
             });
         }
         connection.release();
