@@ -36,5 +36,5 @@ module.exports = function(app){
   
     app.get('/schedules/search',jwtMiddleware,schedule.searchSchedule);//일정검색
     app.get('/schedules/search/histories',jwtMiddleware,schedule.gethistory);//검색기록조회
-    app.post('/schedules/order',jwtMiddleware,schedule.updateOrder);//일정순서변경
+    app.post('/schedules/orderchanges',jwtMiddleware,schedule.updateOrder);//일정순서변경
   };

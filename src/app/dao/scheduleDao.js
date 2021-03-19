@@ -715,7 +715,7 @@ async function updateOrder2Info(userID,scheduleID,x,y) {
   const updateOrder2Query = `
   update schedule
 set scheduleOrder = scheduleOrder-1
-where userID='${userID}' and scheduleID !='${scheduleID}' and ${y}>=scheduleOrder>${x};
+where userID='${userID}' and scheduleID !='${scheduleID}' and scheduleOrder>${x} and ${y}>=scheduleOrder;
 `; 
   
   const updateOrder2Row = await connection.query(
@@ -731,7 +731,7 @@ async function updateOrder1Info(userID,scheduleID,x,scheduleOrder) {
   const updateOrderQuery = `
   update schedule
 set scheduleOrder = scheduleOrder+1
-where userID='${userID}' and scheduleID !='${scheduleID}' and '${x}'>scheduleOrder>='${scheduleOrder}';
+where userID='${userID}' and scheduleID !='${scheduleID}' and scheduleOrder>='${scheduleOrder}' and '${x}'>scheduleOrder;
 `; 
   
   const updateOrderRow = await connection.query(
