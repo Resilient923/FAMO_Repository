@@ -322,7 +322,7 @@ exports.getscheduletoday = async function (req, res) {
 //일정 삭제
 exports.deleteschedule = async function (req, res) {
     const scheduleID = req.params.scheduleID;
-
+    const userID = req.verifiedToken.userID;
     if (!scheduleID) {
         return res.json({ 
             isSuccess: false, 
@@ -343,6 +343,9 @@ exports.deleteschedule = async function (req, res) {
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(scheduleID);
 
          if (deleteschedulerows[0].affectedRows == 1) {
+            const orderrefresh1rows = await scheduleDao.orderrefresh1();
+            const orderrefresh2rows = await scheduleDao.orderrefresh2(userID);
+            
             res.json({
                 isSuccess: true,
                 code: 100,

@@ -193,6 +193,33 @@ async function deletescheduleInfo(scheduleID) {
   connection.release();
   return deletescheduleRow;
 }
+//일정삭제 순서초기화
+async function orderrefresh1() {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const orderrefresh1Query = `
+        select  @scheduleOrder:=0;
+`;
+ const orderrefresh1Row = await connection.query(
+    orderrefresh1Query, 
+   
+  );
+  connection.release();
+  return orderrefresh1Row;
+}
+async function orderrefresh2(userID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const orderrefresh2Query = `
+  update schedule
+  set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
+  where userID = '${userID}' and scheduleDelete = 1;
+`;
+ const orderrefresh2Row = await connection.query(
+  orderrefresh2Query, 
+   
+  );
+  connection.release();
+  return orderrefresh2Row;
+}
 //일정 즐겨찾기,즐겨찾기 취소
 async function patchschedulepickInfo(scheduleID,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -759,7 +786,7 @@ async function updateOrder0Info(userID,scheduleID,scheduleOrder) {
 async function getscheduleIDInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduleIDQuery = `
- select scheduleOrder from schedule where scheduleID = '${scheduleID}';
+ select scheduleOrder,scheduleDelete from schedule where scheduleID = '${scheduleID}';
 `; 
   
   const getscheduleIDRow = await connection.query(
@@ -775,6 +802,8 @@ module.exports = {
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
+  orderrefresh1,
+  orderrefresh2,
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
