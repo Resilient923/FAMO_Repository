@@ -58,7 +58,7 @@ const scheduleDao = require('../dao/scheduleDao');
 }; */
 //일정생성
 exports.insertschedule = async function (req, res) {
-    const {
+    var {
          scheduleName,scheduleTime,scheduleDate,scheduleCategoryID,scheduleMemo
      } = req.body;
      
@@ -89,15 +89,20 @@ exports.insertschedule = async function (req, res) {
         const connection = await pool.getConnection(async (conn) => conn);
         
         try{
+            var date = new Date();
             if (!scheduleDate) {
+                const Date = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();
+                
                 const userID = req.verifiedToken.userID;
-                const getOrderRows = await scheduleDao.getOrderInfo(userID);
-                if(!getOrderRows){
+                const getOrderParams = [userID,Date];
+                const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
+                console.log(getOrderRows[0][0].maxScheduleOrder)
+                if(getOrderRows==null){
                     var scheduleOrder = -1;
-                }else if(getOrderRows){
+                }else if(getOrderRows>=0){
                     var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
                 }
-                const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
+                const inserttodayscheduleParams = [userID,scheduleName,Date,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
                 const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
                 
                 //유저가 가지고있는 Orer중 가장 큰값
@@ -112,13 +117,16 @@ exports.insertschedule = async function (req, res) {
             }else{
                 // 오늘일정생성
              const userID = req.verifiedToken.userID;
-             const getOrderRows = await scheduleDao.getOrderInfo(userID);
-             if(!getOrderRows){
+             const getOrderParams = [userID,scheduleDate];
+             const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
+                console.log(getOrderRows[0][0].maxScheduleOrder)
+             if(getOrderRows==null){
                 var scheduleOrder = -1;
-            }else if(getOrderRows){
+            }else if(getOrderRows>=0){
                 var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
             } 
-             const insertscheduleParams = [userID, scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
+             const insertscheduleParams = [userID,scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
+            console.log(insertscheduleParams);
              const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
         
              res.json({

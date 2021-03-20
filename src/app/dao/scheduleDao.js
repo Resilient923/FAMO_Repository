@@ -7,7 +7,7 @@ async function inserttodayscheduleInfo(inserttodayscheduleParams) {
   insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
     scheduleCategoryID,scheduleMemo,scheduleStatus,scheduleDelete,
     scheduleCreatedAt,scheduleUpdatedAt,schedulePick,scheduleOrder)
-  values (?,?,current_date(),?,?,?,default,default,default,default,default,?+1);
+  values (?,?,?,?,?,?,default,default,default,default,default,?+1);
   `;
 
   await connection.query(
@@ -33,21 +33,22 @@ async function insertscheduleInfo(insertscheduleParams) {
   connection.release();
 }
 //일정 생성시 Order값 받기
-async function getOrderInfo(userID) {
+async function getOrderInfo(getOrderParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getOrderQuery = `
   select max(scheduleOrder) as 'maxScheduleOrder'
 from schedule
-where userID='${userID}';
+where userID=? and scheduleDate=?;
   `;
 
   const getOrderRow = await connection.query(
     getOrderQuery,
-    
+    getOrderParams
   );
   connection.release();
   return getOrderRow;
 }
+
 
 
 //일정 수정
