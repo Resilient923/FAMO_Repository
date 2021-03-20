@@ -1011,8 +1011,17 @@ exports.updateOrder = async function (req, res) {
         
         let a = await scheduleDao.getscheduleIDInfo(scheduleID);
         let x = a[0][0].scheduleOrder;
-        
+        let deletestatus = a[0][0].scheduleDelete;
+        console.log(deletestatus);
         const y = req.body.scheduleOrder;
+        if(deletestatus==-1){
+            return res.json({
+                isSuccess: false,
+                code: 224,
+                message: "삭제된일정입니다"
+            });
+        }
+
         if (x>y){
             
             const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
