@@ -87,56 +87,64 @@ exports.insertschedule = async function (req, res) {
      }  
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        
         try{
-            var date = new Date();
+            const userID = req.verifiedToken.userID;
+
             if (!scheduleDate) {
-                const Date = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();
-                
-                const userID = req.verifiedToken.userID;
-                const getOrderParams = [userID,Date];
+                var date = new Date();
+                var year = date.getFullYear(); 
+                var month = new String(date.getMonth()+1); 
+                var day = new String(date.getDate()); 
+
+                if(month.length == 1){ 
+                    month = "0" + month; 
+                } 
+                if(day.length == 1){ 
+                    day = "0" + day; 
+                } 
+            
+                const dateFormat = year + "-" + month + "-" + day;
+            
+                const getOrderParams = [userID, dateFormat];
                 const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
-                console.log(getOrderRows[0][0].maxScheduleOrder)
-                if(getOrderRows==null){
-                    var scheduleOrder = -1;
-                }else if(getOrderRows>=0){
-                    var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
-                }
-                const inserttodayscheduleParams = [userID,scheduleName,Date,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
-                const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
+                
+                var scheduleOrder = -1;
+
+                if(getOrderRows[0][0].maxScheduleOrder !== null){
+                    scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+                };
+
+                const inserttodayscheduleParams = [userID, scheduleName, dateFormat, scheduleTime, scheduleCategoryID, scheduleMemo, scheduleOrder];
+                await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
                 
                 //유저가 가지고있는 Orer중 가장 큰값
-            res.json({
+                res.json({
                     isSuccess: true,
                     code: 100,
                     message: "오늘 일정 생성 성공"
-        
-            });
-            connection.release();
-    
+                });
+
             }else{
-                // 오늘일정생성
-             const userID = req.verifiedToken.userID;
-             const getOrderParams = [userID,scheduleDate];
-             const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
-                console.log(getOrderRows[0][0].maxScheduleOrder)
-             if(getOrderRows==null){
+                const getOrderParams = [userID, scheduleDate];
+                const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
+             
                 var scheduleOrder = -1;
-            }else if(getOrderRows>=0){
-                var scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
-            } 
-             const insertscheduleParams = [userID,scheduleName,scheduleDate,scheduleTime,scheduleCategoryID,scheduleMemo,scheduleOrder];
-            console.log(insertscheduleParams);
-             const insertscheduleInfoRows = await scheduleDao.insertscheduleInfo(insertscheduleParams);
+
+                if(getOrderRows[0][0].maxScheduleOrder !== null){
+                    scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+                }
+                const insertscheduleParams = [userID, scheduleName, scheduleDate, scheduleTime, scheduleCategoryID, scheduleMemo, scheduleOrder];
+
+                await scheduleDao.insertscheduleInfo(insertscheduleParams);
+            
+                res.json({
+                    isSuccess: true,
+                    code: 100,
+                    message: "일정 생성 성공"
         
-             res.json({
-                isSuccess: true,
-                code: 100,
-                message: "일정 생성 성공"
-    
-             });
-             connection.release();
+                });
             }
+            connection.release();
         }catch (err) {
             connection.release();
             logger.error(`일정생성 에러\n: ${err.message}`);
