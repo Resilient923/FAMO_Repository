@@ -265,7 +265,7 @@ async function getdoneschedulecountInfo(userID) {
   const getdoneschedulecountQuery = `
   select count(scheduleID) as 'doneScheduleCount'
   from schedule
-  where userID ='${userID}' and scheduleStatus = 1
+  where userID ='${userID}' and scheduleStatus = 1 and scheduleDelete = 1
 `; 
   
   const  getdoneschedulecountRow = await connection.query(
@@ -281,7 +281,7 @@ async function getremaintotalscheduleInfo(userID) {
   const getremainscheduleQuery = `
   select count(scheduleID) as 'remainScheduleCount'
 from schedule
-where userID ='${userID}' and scheduleStatus = -1 ;
+where userID ='${userID}' and scheduleStatus = -1 and scheduleDelete = 1 ;
 `; 
   
   const  getremainscheduleRow = await connection.query(
@@ -297,7 +297,7 @@ async function getremaintodayscheduleInfo(userID) {
   const getremaintodayscheduleQuery = `
   select count(scheduleID) as 'remainScheduleCount'
 from schedule
-where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = current_date();
+where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = current_date() and scheduleDelete = 1;
 `; 
   
   const  getremaintodayscheduleRow = await connection.query(
@@ -351,7 +351,7 @@ FROM schedule
 left join category  on schedule.scheduleCategoryID = category.categoryID
 left join categoryColor on categoryColor = colorID
 where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
-and Year(scheduleDate) = '${year}'
+and Year(scheduleDate) = '${year}' and scheduleDelete = 1
 order by scheduleOrder desc;
 `; 
   
@@ -369,7 +369,7 @@ async function getscheduledayInfo(userID,month,year) {
   select distinct date_format(scheduleDate,'%e일') as 'date'
 from schedule
 where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
-and Year(scheduleDate) = '${year}'
+and Year(scheduleDate) = '${year}' and scheduleDelete = 1
 order by scheduleDate;
 `; 
   
@@ -410,7 +410,7 @@ async function getdonemonthcountInfo(userID,scheduleDate) {
   const getdoneschedulecountQuery = `
   select count(scheduleID) as 'doneScheduleCount'
 from schedule
-where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
+where userID ='${userID}' and scheduleDelete = 1 and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
 `; 
   
   const  getdoneschedulecountRow = await connection.query(
@@ -434,7 +434,7 @@ async function getpickscheduleInfo(userID,offset,limit) {
 from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where schedule.userID = '${userID}' and schedulePick = 1 
+where schedule.userID = '${userID}' and schedulePick = 1 and scheduleDelete = 1
 order by schedulePick desc 
 limit ${offset},${limit}
 ;
@@ -461,7 +461,7 @@ async function getrecentscheduleInfo(userID,offset,limit) {
 from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where schedule.userID = '${userID}'
+where schedule.userID = '${userID}' and scheduleDelete = 1
 order by scheduleDate desc 
 limit ${offset},${limit};
 `; 
@@ -596,7 +596,7 @@ async function getdoneschedulemonthInfo(userID) {
 FROM schedule
 WHERE scheduleDate
 
-  and userID = '${userID}' and scheduleStatus = 1
+  and userID = '${userID}' and scheduleStatus = 1 and scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
 order by extract(year_month from scheduleDate) desc
 limit 6;
@@ -617,9 +617,9 @@ async function getdonescheduletotalInfo(userID) {
   concat((extract(year from scheduleDate)), '-', date_format(scheduleDate,'%m')) as 'yearmonth',
        COUNT(*) as 'scheduleCount'
 FROM schedule
-WHERE scheduleDate
+WHERE scheduleDate 
 
-  and userID = '${userID}'
+  and userID = '${userID}' and scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
 order by extract(year_month from scheduleDate) desc
 limit 6;
@@ -637,7 +637,7 @@ async function gettotalscheduleInfo(userID) {
   const gettotalscheduleQuery = `
   select count(scheduleID) as 'totalScheduleCount'
   from schedule
-  where userID='${userID}';
+  where userID='${userID}' and scheduleDelete = 1;
 `; 
   
   const gettotalscheduleRow = await connection.query(
@@ -653,7 +653,8 @@ async function getIdFromScheduleNameInfo(searchWord,userID) {
   const getIdFromScheduleNameQuery = `
   select scheduleID
 from schedule
-where scheduleName like concat('%','${searchWord}','%') and userID = '${userID}';
+where scheduleName like concat('%','${searchWord}','%') and userID = '${userID}'
+and scheduleDelete = 1;
 `; 
   
   const [getIdFromScheduleNameRow] = await connection.query(
@@ -670,7 +671,8 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%','${searchWord}','%') and userID = '${userID}';
+where scheduleMemo like concat('%','${searchWord}','%') and userID = '${userID}'
+and scheduleDelete = 1;
 `; 
   
   const [getIdFromScheduleMemoRow] = await connection.query(
@@ -693,7 +695,7 @@ async function getscheduleFromMemoInfo(scheduleID) {
 FROM schedule
          left join category on schedule.scheduleCategoryID = category.categoryID
          left join categoryColor on categoryColor = colorID
-where scheduleID='${scheduleID}'
+where scheduleID='${scheduleID}' and scheduleDelete = 1
 
 `; 
   
