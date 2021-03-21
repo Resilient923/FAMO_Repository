@@ -207,12 +207,12 @@ async function orderrefresh1() {
   connection.release();
   return orderrefresh1Row;
 }
-async function orderrefresh2(userID) {
+async function orderrefresh2(userID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh2Query = `
   update schedule
   set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-  where userID = '${userID}' and scheduleDelete = 1;
+  where userID = '${userID}' and scheduleDelete = 1 and scheduleDate = '${Date}';
 `;
  const orderrefresh2Row = await connection.query(
   orderrefresh2Query, 
@@ -220,6 +220,19 @@ async function orderrefresh2(userID) {
   );
   connection.release();
   return orderrefresh2Row;
+}
+//삭제할때 일정날짜받아오기
+async function orderrefresh3(scheduleID) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const orderrefresh3Query = `
+  select scheduleDate from schedule where scheduleID = '${scheduleID}';
+`;
+ const orderrefresh3Row = await connection.query(
+  orderrefresh3Query, 
+   
+  );
+  connection.release();
+  return orderrefresh3Row;
 }
 //일정 즐겨찾기,즐겨찾기 취소
 async function patchschedulepickInfo(scheduleID,userID) {
@@ -366,7 +379,7 @@ order by scheduleOrder desc;
 async function getscheduledayInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduledayQuery = `
-  select distinct date_format(scheduleDate,'%e일') as 'date'
+  select distinct date_format(scheduleDate,'%Y-%m-%d') as 'date'
 from schedule
 where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
 and Year(scheduleDate) = '${year}' and scheduleDelete = 1
@@ -807,6 +820,7 @@ module.exports = {
   updatescheduleInfo,
   orderrefresh1,
   orderrefresh2,
+  orderrefresh3,
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
