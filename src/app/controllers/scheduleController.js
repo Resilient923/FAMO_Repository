@@ -724,8 +724,9 @@ exports.getschedulebycategorysort = async function (req, res) {
     const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        
-        if(sort == null){
+
+        try {
+            if(sort == null){
             const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
 
             if (getschedulebycategoryrows) {
@@ -833,8 +834,15 @@ exports.getschedulebycategorysort = async function (req, res) {
             }
         }
         connection.release();
+        }catch (err) {
+            connection.release();
+            logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);    
+        }
     } catch (err) {
+
        // connection.release();
+
         logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
