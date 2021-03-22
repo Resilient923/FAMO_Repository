@@ -92,11 +92,11 @@ exports.insertschedule = async function (req, res) {
             var date = new Date();
             if (!scheduleDate) {
                 const Date = date.getFullYear()+"-"+date.getMonth()+"-"+date.getDate();
-                
+                console.log(Date);                
                 const userID = req.verifiedToken.userID;
-                const getOrderParams = [userID,Date];
+                const getOrderParams = [userID, Date];
                 const getOrderRows = await scheduleDao.getOrderInfo(getOrderParams);
-                console.log(getOrderRows[0][0].maxScheduleOrder)
+                console.log(getOrderRows[0].maxScheduleOrder);
                 if(getOrderRows==null){
                     var scheduleOrder = -1;
                 }else if(getOrderRows>=0){

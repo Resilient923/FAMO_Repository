@@ -37,8 +37,8 @@ async function getOrderInfo(getOrderParams) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getOrderQuery = `
   select max(scheduleOrder) as 'maxScheduleOrder'
-from schedule
-where userID=? and scheduleDate=?;
+  from schedule
+  where userID=? and scheduleDate=?;
   `;
 
   const getOrderRow = await connection.query(
