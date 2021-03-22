@@ -677,7 +677,7 @@ exports.getpickschedule = async function (req, res) {
         }
         connection.release();
     } catch (err) {
-        connection.release();
+        //connection.release();
         logger.error(`즐겨찾기한일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -834,7 +834,7 @@ exports.getschedulebycategorysort = async function (req, res) {
         }
         connection.release();
     } catch (err) {
-       // connection.release();
+        connection.release();
         logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
