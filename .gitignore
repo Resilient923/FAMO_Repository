@@ -5,3 +5,4 @@ log/*
 .DS_Store
 databasepwd.js
 secret.js
+famo_firebase.json

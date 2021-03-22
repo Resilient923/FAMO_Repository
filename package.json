@@ -21,6 +21,7 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "express": "^4.17.1",
+    "firebase-admin": "^9.5.0",
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "memory-cache": "^0.2.0",
