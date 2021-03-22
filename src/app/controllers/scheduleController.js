@@ -724,8 +724,9 @@ exports.getschedulebycategorysort = async function (req, res) {
     const limit = req.query.limit;
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        
-        if(sort == null){
+
+        try {
+            if(sort == null){
             const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
 
             if (getschedulebycategoryrows) {
@@ -748,7 +749,7 @@ exports.getschedulebycategorysort = async function (req, res) {
             }
         }
         else if(sort =='recent'/* 최신순 */){
-            const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,sort,offset,limit);
+            const getscategoryrecentrows = await scheduleDao.getscategoryrecentInfo(userID,schedulecategoryID,offset,limit);
 
             if (getscategoryrecentrows) {
 
@@ -769,7 +770,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'left'/* 남은순 */){
-            const getscategoryleftrows = await scheduleDao.getscategoryleftInfo(userID,schedulecategoryID,sort,offset,limit);
+            const getscategoryleftrows = await scheduleDao.getscategoryleftInfo(userID,schedulecategoryID,offset,limit);
 
             if (getscategoryleftrows) {
 
@@ -790,7 +791,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'done'/* 완료순 */){
-            const getscategorydonerows = await scheduleDao.getscategorydoneInfo(userID,schedulecategoryID,sort,offset,limit);
+            const getscategorydonerows = await scheduleDao.getscategorydoneInfo(userID,schedulecategoryID,offset,limit);
 
             if (getscategorydonerows) {
 
@@ -811,7 +812,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }else if(sort == 'pick'/* 즐겨찾기순 */){
-            const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,sort,offset,limit);
+            const getscategorypickrows = await scheduleDao.getscategorypickInfo(userID,schedulecategoryID,offset,limit);
         
             if (getscategorypickrows) {
 
@@ -833,8 +834,15 @@ exports.getschedulebycategorysort = async function (req, res) {
             }
         }
         connection.release();
+        }catch (err) {
+            connection.release();
+            logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);    
+        }
     } catch (err) {
-        connection.release();
+
+       // connection.release();
+
         logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
