@@ -727,6 +727,7 @@ exports.getschedulebycategorysort = async function (req, res) {
 
         try {
             if(sort == null){
+                //여기에 카테고리미선택 if문 추가해서 schedulecategoryID 없을때 함수받아오기
             const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
 
             if (getschedulebycategoryrows) {
@@ -936,7 +937,7 @@ exports.gettotalschedule = async function (req, res) {
 //일정검색
 exports.searchSchedule = async function (req, res) {
     //const { page,limit } = req.query;
-    const { searchWord } = req.body;
+    const  searchWord  = req.query.searchWord;
     //유저 인덱스
     const userID = req.verifiedToken.userID;
     let searchscheduleID = [];
@@ -988,7 +989,7 @@ exports.searchSchedule = async function (req, res) {
         }
         connection.release();
     }catch(err){
-        connection.release();
+        //connection.release();
         logger.error(`검색어 관련 일정 조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }

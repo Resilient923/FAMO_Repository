@@ -486,7 +486,7 @@ limit ${offset},${limit};
   connection.release();
   return getrecentscheduleRow;
 }
-//카테고리가 미선택된 일정 조회
+//카테고리가 미선택된 일정 조회/////////////////////////////////////////////////////////////////////////////////////////////////
 async function getnocategory(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getnocategoryQuery = `
@@ -689,7 +689,7 @@ async function getIdFromScheduleNameInfo(searchWord,userID) {
   const getIdFromScheduleNameQuery = `
   select scheduleID
 from schedule
-where scheduleName like concat('%','${searchWord}','%') and userID = '${userID}'
+where scheduleName like concat('%',${searchWord},'%') and userID = '${userID}'
 and scheduleDelete = 1;
 `; 
   
@@ -707,7 +707,7 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%','${searchWord}','%') and userID = '${userID}'
+where scheduleMemo like concat('%',${searchWord},'%') and userID = '${userID}'
 and scheduleDelete = 1;
 `; 
   
@@ -747,7 +747,7 @@ async function insertSearchHistoryInfo(userID,searchWord) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertSearchHistoryQuery = `
   insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
-values ('${userID}','${searchWord}',default,default);
+values (${userID},${searchWord},default,default);
 `; 
   
   const insertSearchHistoryRow = await connection.query(
