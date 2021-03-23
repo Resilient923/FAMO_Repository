@@ -486,6 +486,29 @@ limit ${offset},${limit};
   connection.release();
   return getrecentscheduleRow;
 }
+//카테고리가 미선택된 일정 조회
+async function getnocategory(userID,offset,limit) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getnocategoryQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick
+from schedule
+where scheduleDelete = 1 
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID is NULL
+order by scheduleDate desc
+limit ${offset},${limit};
+`; 
+  const getnocategoryRow = await connection.query(
+    getnocategoryQuery, 
+    
+  );
+  connection.release();
+  return getnocategoryRow;
+}
 //카테고리별 최신순 정렬 일정 조회
 async function getscategoryrecentInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -824,6 +847,7 @@ module.exports = {
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
+  getnocategory,
   getschedulebycategoryInfo,
   deletescheduleInfo,
   patchschedulepickInfo,

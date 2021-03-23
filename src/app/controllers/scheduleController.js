@@ -969,7 +969,7 @@ exports.searchSchedule = async function (req, res) {
         let scheduleData = [...x];
         data = [];
         for(let i=0;i<scheduleData.length;i++){
-            const getscheduleFromMemoRows = await scheduleDao.getscheduleFromMemoInfo(searchscheduleID[i]);
+            const [getscheduleFromMemoRows] = await scheduleDao.getscheduleFromMemoInfo(searchscheduleID[i]);
             data.push(getscheduleFromMemoRows);
         }
         if (data) {
