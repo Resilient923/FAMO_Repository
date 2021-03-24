@@ -1,61 +1,6 @@
 const {pool} = require('../../../config/database');
 const {logger} = require('../../../config/winston');
 const scheduleDao = require('../dao/scheduleDao');
-//오늘일정생성
-
-/* exports.inserttodayschedule = async function (req, res) {
-   const {
-
-
-        scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo
-     } = req.body;
-
-     if (!scheduleName) {
-        res.json({
-            isSuccess: false,
-            code: 206,
-            message: "일정제목을 입력해주세요."
-        });
-     }
-
-    if (scheduleName.length >=50) {
-     res.json({
-            isSuccess: false,
-            code: 310,
-            message: "일정제목길이는 최대 50자입니다."
-        });
-    } 
-    if(scheduleMemo){
-        if (scheduleMemo.length >= 100){
-         res.json({
-                isSuccess: false,
-                code: 309,
-                message: "메모최대길이는 100자입니다"
-            });
-        }
-    }  
-
-    try {
-        // 오늘일정생성
-        const userID = req.verifiedToken.userID;
-        const inserttodayscheduleParams = [userID, scheduleName,scheduleTime,scheduleCategoryID,scheduleMemo];
-        const inserttodayscheduleInfoRows = await scheduleDao.inserttodayscheduleInfo(inserttodayscheduleParams);
-
-     res.json({
-            isSuccess: true,
-            code: 100,
-            message: "오늘 일정 생성 성공"
-
-        });
-        connection.release();
-     } catch (err) {
-        // await connection.rollback(); // ROLLBACK
-        connection.release();
-        logger.error(`오늘일정생성 에러\n: ${err.message}`);
-         res.status(401).send(`Error: ${err.message}`);
-
-        }
-}; */
 //일정생성
 exports.insertschedule = async function (req, res) {
     var {
@@ -86,7 +31,6 @@ exports.insertschedule = async function (req, res) {
          }
      }  
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
         try{
             const userID = req.verifiedToken.userID;
 
@@ -144,9 +88,7 @@ exports.insertschedule = async function (req, res) {
         
                 });
             }
-            connection.release();
         }catch (err) {
-            connection.release();
             logger.error(`일정생성 에러\n: ${err.message}`);
             res.status(401).send(`Error: ${err.message}`);
         }
@@ -184,7 +126,6 @@ exports.updateschedule = async function (req, res) {
         });
     }
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
         try {
             var updatescheduleParams = [
                 scheduleName,
@@ -230,9 +171,7 @@ exports.updateschedule = async function (req, res) {
                     message: "일정 수정 실패"
                 });
             }
-            connection.release();
-        }catch (err) {
-            connection.release();   
+        }catch (err) {  
             logger.error(`일정수정에러\n ${err.message}`);
             res.status(401).send(`Error: ${err.message}`);
         }
@@ -247,7 +186,6 @@ exports.getschedule = async function (req, res) {
     const offset = req.query.offset;
     const limit = req.query.limit;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
         const getschedulerows = await scheduleDao.getscheduleInfo(userID,offset,limit);
 
@@ -265,9 +203,7 @@ exports.getschedule = async function (req, res) {
                    message: "전체 일정 조회 실패"
             });
         }
-        connection.release();
     }catch (err) {
-               // connection.release();
                 logger.error(`전체일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
     }
@@ -276,8 +212,6 @@ exports.getschedule = async function (req, res) {
 exports.getscheduletoday = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const getscheduletodayrows = await scheduleDao.getscheduletodayInfo(userID);
 
         if (getscheduletodayrows) {
@@ -294,9 +228,7 @@ exports.getscheduletoday = async function (req, res) {
                    message: "오늘일정 조회 실패"
             });
         }
-        connection.release();
-    }catch (err) {
-                connection.release();
+}catch (err) {
                 logger.error(`오늘일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
     }
@@ -354,8 +286,6 @@ exports.deleteschedule = async function (req, res) {
         });
     }
     try { 
-        const connection = await pool.getConnection(async (conn) => conn);
-        
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(scheduleID);
         const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
         var Date = scheduleDate[0][0].scheduleDate;
@@ -375,9 +305,9 @@ exports.deleteschedule = async function (req, res) {
                 message: "일정 삭제 실패"
             });
         }
-        connection.release();
+     
     } catch (err) {
-        //connection.release();
+      
         logger.error(`일정 삭제 error: ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -387,8 +317,6 @@ exports.patchschedulepick = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const scheduleID = req.body.scheduleID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const patchschedulepickrows = await scheduleDao.patchschedulepickInfo(scheduleID,userID);
         
         if (patchschedulepickrows) {
@@ -405,9 +333,7 @@ exports.patchschedulepick = async function (req, res) {
                 message: "일정 즐겨찾기수정 실패"
             });
         }
-        connection.release();
     } catch (err) {
-        connection.release();
         logger.error(`일정 즐겨찾기수정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -417,7 +343,6 @@ exports.updateachievementschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const scheduleID = req.body.scheduleID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
         const updateachievementschedulerows = await scheduleDao.updateachievementscheduleInfo(scheduleID,userID);
         
@@ -434,9 +359,7 @@ exports.updateachievementschedule = async function (req, res) {
                 message: "일정 완료수정 실패"
             });
         }
-        connection.release();
     } catch (err) {
-        connection.release();
         logger.error(`일정 완료수정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -445,7 +368,6 @@ exports.updateachievementschedule = async function (req, res) {
 exports.getdoneschedulecount = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
         const getdoneschedulecountrows = await scheduleDao.getdoneschedulecountInfo(userID);
 
@@ -464,9 +386,7 @@ exports.getdoneschedulecount = async function (req, res) {
                 message: "해낸 일정 개수 조회 실패"
             });
         }
-        connection.release();
     } catch (err) {
-        connection.release();
         logger.error(`해낸 일정 개수 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -476,8 +396,6 @@ exports.getremainschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const filter = req.query.filter;
     try {
-
-        const connection = await pool.getConnection(async (conn) => conn);
         if(filter == 'total'){
         const getremainschedulerows = await scheduleDao.getremaintotalscheduleInfo(userID);
 
@@ -517,9 +435,7 @@ exports.getremainschedule = async function (req, res) {
             });
         }
     }
-        connection.release();
     } catch (err) {
-        //connection.release();
         logger.error(` 남은 일정 개수 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -529,7 +445,6 @@ exports.getschedulebydate = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const scheduleDate = req.query.scheduleDate;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
         const getschedulebydaterows = await scheduleDao.getschedulebydateInfo(userID,scheduleDate);
 
             if (getschedulebydaterows) {
@@ -546,9 +461,7 @@ exports.getschedulebydate = async function (req, res) {
                        message: "날짜별일정 조회 실패"
                    });
                }
-               connection.release();
             }catch (err) {
-                connection.release();
                 logger.error(`일정 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
@@ -562,7 +475,6 @@ exports.getschedulemonth = async function (req, res) {
     const year = req.query.year;
    
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
         const getschedulemonthrows = await scheduleDao.getschedulemonthInfo(userID,month,year);
         const getscheduledayrows = await scheduleDao.getscheduledayInfo(userID,month,year);
             if (getschedulemonthrows) {
@@ -580,9 +492,7 @@ exports.getschedulemonth = async function (req, res) {
                        message: "월별일정조회 실패"
                    });
                }
-               connection.release();
             }catch (err) {
-                connection.release();
                 logger.error(`월별일정조회 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
@@ -594,7 +504,6 @@ exports.getscheduledetails = async function (req, res) {
     const scheduleID = req.params.scheduleID;
    
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
         const getscheduledetailsrows = await scheduleDao.getscheduledetailsInfo(scheduleID);
             
             if (getscheduledetailsrows) {
@@ -611,53 +520,20 @@ exports.getscheduledetails = async function (req, res) {
                        message: "일정상세조회 실패"
                    });
                }
-               connection.release();
             }catch (err) {
-               // connection.release();
+
                 logger.error(`일정상세 조회\n ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
             }
         
 
 }; 
-//월별해낸일정수조회
-/* exports.getdonemonthcount = async function (req, res) {
-    const userID = req.verifiedToken.userID;
-    try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
-        const getdonemonthcountrows = await scheduleDao.getdonemonthcountInfo(userID);
-
-        if (getdonemonthcountrows) {
-            res.json({
-                isSuccess: true,
-                code: 100,
-                message: userID + "번 유저 월별 해낸 일정 개수 조회 성공",
-                data :getdonemonthcountrows[0]
-            });
-
-        }else{
-            res.json({
-                isSuccess: false,
-                code: 307,
-                message: "월별 해낸 일정 개수 조회 실패"
-            });
-        }
-        connection.release();
-    } catch (err) {
-       // connection.release();
-        logger.error(`월별 해낸 일정 개수 조회\n ${err.message}`);
-        res.status(401).send(`Error: ${err.message}`);
-    }
-}; */
 //즐겨찾기한 일정조회
 exports.getpickschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const offset = req.query.offset;
     const limit = req.query.limit;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const getpickschedulerows = await scheduleDao.getpickscheduleInfo(userID,offset,limit);
 
         if (getpickschedulerows) {
@@ -675,9 +551,8 @@ exports.getpickschedule = async function (req, res) {
                 message: "즐겨찾기한일정 조회 실패"
             });
         }
-        connection.release();
+
     } catch (err) {
-        //connection.release();
         logger.error(`즐겨찾기한일정 조회\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -688,7 +563,6 @@ exports.getrecentschedule = async function (req, res) {
     const offset = req.query.offset;
     const limit = req.query.limit;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
         const getrecentschedulerows = await scheduleDao.getrecentscheduleInfo(userID,offset,limit);
 
@@ -707,9 +581,7 @@ exports.getrecentschedule = async function (req, res) {
                 message: " 최근생성일정 조회  실패"
             });
         }
-        connection.release();
     } catch (err) {
-        connection.release();
         logger.error(` 최근생성일정 조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -723,9 +595,29 @@ exports.getschedulebycategorysort = async function (req, res) {
     const offset = req.query.offset;
     const limit = req.query.limit;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         try {
+            if (schedulecategoryID == null){
+                const getnocategoryRows = await scheduleDao.getnocategory(userID,offset,limit);
+                if (getnocategoryRows) {
+
+                    res.json({
+                            isSuccess: true,
+                            code: 100,
+                            message: userID + "번 유저 미선택된 카테고리 일정 조회 성공",
+                            data : getnocategoryRows[0]
+                            
+        
+                        });
+        
+                    }else{
+                    res.json({
+                            isSuccess: false,
+                            code: 346,
+                            message: "미선택된 카테고리 일정 조회 실패"
+                        });
+                    }
+            }
+            
             if(sort == null){
                 //여기에 카테고리미선택 if문 추가해서 schedulecategoryID 없을때 함수받아오기
             const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit);
@@ -834,9 +726,7 @@ exports.getschedulebycategorysort = async function (req, res) {
                 });
             }
         }
-        connection.release();
         }catch (err) {
-            connection.release();
             logger.error(`카테고리별 정렬 일정 조회\n ${err.message}`);
             res.status(401).send(`Error: ${err.message}`);    
         }
@@ -852,8 +742,6 @@ exports.getschedulebycategorysort = async function (req, res) {
 exports.getdoneschedulemonth = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         var getdoneschedulemonthrows = await scheduleDao.getdoneschedulemonthInfo(userID);//해낸일정 수
         var getdonescheduletotalrows = await scheduleDao.getdonescheduletotalInfo(userID);//전체 수
        
@@ -895,9 +783,7 @@ exports.getdoneschedulemonth = async function (req, res) {
                 message: "월별 달성률조회 실패"
             });
         }
-        connection.release();
     } catch (err) {
-       // connection.release();
         logger.error(`월별 달성률조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -906,8 +792,6 @@ exports.getdoneschedulemonth = async function (req, res) {
 exports.gettotalschedule = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const gettotalschedulerows = await scheduleDao.gettotalscheduleInfo(userID);
         const getdoneschedulecountrows = await scheduleDao.getdoneschedulecountInfo(userID);
 
@@ -927,9 +811,7 @@ exports.gettotalschedule = async function (req, res) {
                 message: "전체 일정수, 총 해낸 일정수 조회 실패"
             });
         }
-        connection.release();
     } catch (err) {
-        connection.release();
         logger.error(`전체 일정수조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -965,7 +847,6 @@ exports.searchSchedule = async function (req, res) {
     }
     try{
         
-        const connection = await pool.getConnection(async (conn) => conn);
         let x = new Set(searchscheduleID);
         let scheduleData = [...x];
         data = [];
@@ -987,9 +868,7 @@ exports.searchSchedule = async function (req, res) {
                 message: "검색어 일정 조회 실패"
             });
         }
-        connection.release();
     }catch(err){
-        //connection.release();
         logger.error(`검색어 관련 일정 조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -998,8 +877,6 @@ exports.searchSchedule = async function (req, res) {
 exports.gethistory = async function (req, res) {
     const userID = req.verifiedToken.userID;
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
         const gethistoryrows = await scheduleDao.gethistoryInfo(userID);
 
         if (gethistoryrows) {
@@ -1017,9 +894,8 @@ exports.gethistory = async function (req, res) {
                 message: "유저별 검색기록조회 실패"
             });
         }
-        connection.release();
+       
     } catch (err) {
-        connection.release();
         logger.error(`검색기록조회 \n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
@@ -1030,7 +906,6 @@ exports.updateOrder = async function (req, res) {
     const {scheduleID,scheduleOrder} = req.body;
     
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
 
       //  const updateOrderrows = await scheduleDao.updateOrderInfo(userID,scheduleID,scheduleOrder);
        // var getOrderrows = await scheduleDao.getOrder2Info(userID);
@@ -1038,7 +913,7 @@ exports.updateOrder = async function (req, res) {
         let a = await scheduleDao.getscheduleIDInfo(scheduleID);
         let x = a[0][0].scheduleOrder;
         let deletestatus = a[0][0].scheduleDelete;
-        console.log(deletestatus);
+        
         const y = req.body.scheduleOrder;
         if(deletestatus==-1){
             return res.json({
@@ -1051,17 +926,13 @@ exports.updateOrder = async function (req, res) {
         if (x>y){
             
             const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
-            
             const change2 = await scheduleDao.updateOrder1Info(userID,scheduleID,x,y);
-            
             if (change2) {
                 res.json({
                     isSuccess: true,
                     code: 100,
                     message: userID + "번유저가"+scheduleID+"번일정위치를"+y+"번으로이동",
-                    
                 });
-    
             }else{
                return res.json({
                     isSuccess: false,
@@ -1069,7 +940,6 @@ exports.updateOrder = async function (req, res) {
                     message: "(x>y)일정순서변경 실패"
                 });
             }
-            
         }else if(x<y){
             const change1 = await scheduleDao.updateOrder0Info(userID,scheduleID,y);
             
@@ -1081,7 +951,6 @@ exports.updateOrder = async function (req, res) {
                     message: userID +"번유저가"+scheduleID+"번일정위치를"+y+"번으로이동",
                     
                 });
-    
             }else{
                 return res.json({
                     isSuccess: false,
@@ -1096,9 +965,7 @@ exports.updateOrder = async function (req, res) {
                 message: "같은자리로는 이동할수없습니다"
             });
         }
-        connection.release();
     } catch (err) {
-       // connection.release();
         logger.error(`일정순서변경\n ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
