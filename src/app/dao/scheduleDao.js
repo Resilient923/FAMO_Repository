@@ -212,7 +212,7 @@ async function orderrefresh2(userID,Date) {
   const orderrefresh2Query = `
   update schedule
   set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-  where userID = '${userID}' and scheduleDelete = 1 and scheduleDate = '${Date}';
+  where userID = '${userID}' and scheduleDelete = 1 and scheduleDate = '${Date}' order by scheduleOrder ;
 `;
  const orderrefresh2Row = await connection.query(
   orderrefresh2Query, 
