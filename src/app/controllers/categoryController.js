@@ -34,12 +34,10 @@ exports.insertcategory = async function (req, res) {
             message : "카테고리 색상을 선택해주세요"
         });
     }
-    try {
-        const connection = await pool.getConnection(async (conn) => conn);
         try {
             const insertcategoryCountCheckRows = await categoryDao.insertcategoryCountCheck(userID);
             if (insertcategoryCountCheckRows[0].categoryCount>=10){
-                connection.release();
+               
                 return res.json({
     
                     isSuccess: false,
@@ -50,7 +48,7 @@ exports.insertcategory = async function (req, res) {
             
             const insertcategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName,userID);
             if (insertcategoryCheckRows.length > 0){
-                connection.release();
+                
                 return res.json({
     
                     isSuccess: false,
@@ -60,7 +58,7 @@ exports.insertcategory = async function (req, res) {
             }
             const insertcategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
             if (insertcategoryColorCheckRows.length > 0){
-                connection.release();
+                
                 return res.json({
     
                     isSuccess: false,
@@ -79,18 +77,14 @@ exports.insertcategory = async function (req, res) {
                 message: "카테고리생성 성공",
                 data : "생성된 카테고리번호 : "+ insertcategoryRows.insertId
             });
-            connection.release();
+            
             }catch (err) {
-                connection.release();
+                
                 logger.error(`카테고리생성 에러\n: ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);    
             }
 
-        }catch (err) {
-            // await connection.rollback(); // ROLLBACK
-            logger.error(`카테고리생성 에러\n: ${err.message}`);
-            res.status(401).send(`Error: ${err.message}`);
-        }
+        
 };
 //카테고리수정
 exports.updatecategory = async function(req,res){
@@ -133,12 +127,9 @@ exports.updatecategory = async function(req,res){
             message: "카테고리제목길이는 최대 10자입니다."
         });
     } 
-    try{
-        const connection = await pool.getConnection(async (conn) => conn);
         try {
             const updatecategoryCheckRows = await categoryDao.insertcategoryCheck(categoryName, userID);
             if (updatecategoryCheckRows.length > 0){
-                connection.release();
                 return res.json({
     
                     isSuccess: false,
@@ -148,7 +139,6 @@ exports.updatecategory = async function(req,res){
             }
             const updatecategoryColorCheckRows = await categoryDao.insertcategoryColorCheck(categoryColor,userID);
                 if (updatecategoryColorCheckRows.length > 0){
-                    connection.release();
                     return res.json({
         
                         isSuccess: false,
@@ -167,16 +157,10 @@ exports.updatecategory = async function(req,res){
                 message: "카테고리수정 성공"
     
             });
-            connection.release();
         }catch (err){
-                connection.release();
                 logger.error(`카테고리수정 에러\n: ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);
         }
-    }catch (err){
-            logger.error(`카테고리수정 에러\n: ${err.message}`);
-            res.status(401).send(`Error: ${err.message}`);
-    }
 };
 //카테고리삭제
 exports.deletecategory = async function (req, res) {
@@ -191,10 +175,7 @@ exports.deletecategory = async function (req, res) {
                 message: "카테고리고유번호를 입력해주세요" 
             });
         }
-    
         try {
-            const connection = await pool.getConnection(async (conn) => conn);
-            try {
                 const deletecategoryrows = await categoryDao.deletecategoryInfo(categoryID);
                 if (deletecategoryrows.affectedRows==1) {
                     res.json({
@@ -211,23 +192,20 @@ exports.deletecategory = async function (req, res) {
                         message: "카테고리 삭제 실패"
                     });
                 }
-                connection.release();
+                
             }catch (err) {
-                connection.release();
+                
                 logger.error(`카테고리 삭제 error: ${err.message}`);
                 res.status(401).send(`Error: ${err.message}`);        
             }
-    }catch (err) {
-        logger.error(`카테고리 삭제 error: ${err.message}`);
-        res.status(401).send(`Error: ${err.message}`);
-    }
+    
 };
 //카테고리조회
 exports.getcategory = async function (req, res) {
     const userID = req.verifiedToken.userID;
 
         try{
-            const connection = await pool.getConnection(async (conn) => conn);
+           
             const getcategoryrows = await categoryDao.getcategoryInfo(userID);
 
             if (getcategoryrows) {
@@ -249,9 +227,9 @@ exports.getcategory = async function (req, res) {
                     message: userID + "번 유저 카테고리 조회 실패"
                 })
             };
-            connection.release();
+           
         }catch (err) {
-            connection.release();
+            
 
             logger.error(` 카테고리 조회\n ${err.message}`);
              res.status(401).send(`Error: ${err.message}`);
