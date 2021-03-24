@@ -244,13 +244,17 @@ exports.deleteschedule = async function (req, res) {
         });
     }
     try { 
+        const connection = await pool.getConnection(async conn => conn);
+        try{
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(scheduleID);
         const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
         var Date = scheduleDate[0][0].scheduleDate;
          if (deleteschedulerows[0].affectedRows == 1) {
+
+            await connection.beginTransaction();
             const orderrefresh1rows = await scheduleDao.orderrefresh1();
             const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
-            
+            await connection.commit();
             res.json({
                 isSuccess: true,
                 code: 100,
@@ -263,8 +267,14 @@ exports.deleteschedule = async function (req, res) {
                 message: "일정 삭제 실패"
             });
         }
-     
-    } catch (err) {   
+        connection.release();
+        } catch (err) {   
+            await connection.rollback();
+            connection.release();
+            logger.error(`일정 삭제 error: ${err.message}`);
+            res.status(401).send(`Error: ${err.message}`);
+        }
+    }catch(err){
         logger.error(`일정 삭제 error: ${err.message}`);
         res.status(401).send(`Error: ${err.message}`);
     }
