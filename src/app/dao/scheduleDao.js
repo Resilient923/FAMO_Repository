@@ -198,7 +198,7 @@ async function deletescheduleInfo(scheduleID) {
 async function orderrefresh1() {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh1Query = `
-        select  @scheduleOrder:=-1;
+        set  @scheduleOrder:=-1;
 `;
  const orderrefresh1Row = await connection.query(
     orderrefresh1Query, 
