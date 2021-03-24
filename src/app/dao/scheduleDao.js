@@ -211,8 +211,9 @@ async function orderrefresh2(userID,scheduleID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh2Query = `
   update schedule
-  set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-  where userID = '${userID}' and scheduleID != ${scheduleID} and scheduleDate = '${Date}' order by scheduleOrder ;
+inner join(select @scheduleOrder:=-1) test
+set scheduleOrder=@scheduleOrder:= @scheduleOrder + 1
+where userID = ${userID} and scheduleID != ${scheduleID} and scheduleDate = ${Date};
 `;
  const orderrefresh2Row = await connection.query(
   orderrefresh2Query, 
