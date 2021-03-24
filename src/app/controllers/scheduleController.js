@@ -246,11 +246,10 @@ exports.deleteschedule = async function (req, res) {
     try { 
        // const connection = await pool.getConnection(async conn => conn);
         try{
-        const deleteschedulerows = await scheduleDao.deletescheduleInfo(scheduleID);
+        const deleteschedulerows = await scheduleDao.deletescheduleInfo(userID,scheduleID);
         const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
         var Date = scheduleDate[0][0].scheduleDate;
          if (deleteschedulerows[0].affectedRows == 1) {
-            console.log(userID,Date);
            // await connection.beginTransaction();
             const orderrefresh1rows = await scheduleDao.orderrefresh1();
             const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
@@ -261,7 +260,7 @@ exports.deleteschedule = async function (req, res) {
                 message: "일정 삭제 성공",
              });
         }else{
-            res.json({
+            return res.json({
                 isSuccess: false,
                 code: 308,
                 message: "일정 삭제 실패"
