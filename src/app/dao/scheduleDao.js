@@ -176,13 +176,13 @@ limit ${offset},${limit}
   return getschedulebycategoryRow;
 }
 //일정삭제
-async function deletescheduleInfo(scheduleID) {
+async function deletescheduleInfo(userID,scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const deletescheduleQuery = `
         
   update schedule
   set scheduleDelete = -1
-  where scheduleID='${scheduleID}';
+  where scheduleID='${scheduleID}' and userID ='${userID}';
 
     
     `;
