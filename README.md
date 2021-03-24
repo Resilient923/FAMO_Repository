@@ -6,6 +6,7 @@
 * [오소정(Soi)](https://github.com/sojungoh) : 서버 개발
 * [정재원(James)](https://github.com/BingoTop) : 안드로이드 개발
 * [박지훈(Blue)](https://github.com/jihoon2651) : 안드로이드 개발
+* 손현주(Sunny) : 앱디자이너
 ---
 ## 개발 셋업 환경
 >AWS EC2, AWS RDS, Node.js, MySQL
