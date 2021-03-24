@@ -207,12 +207,12 @@ async function orderrefresh1() {
   connection.release();
   return orderrefresh1Row;
 }
-async function orderrefresh2(userID,Date) {
+async function orderrefresh2(userID,scheduleID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh2Query = `
   update schedule
   set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-  where userID = '${userID}' and scheduleDelete = 1 and scheduleDate = '${Date}' order by scheduleOrder ;
+  where userID = '${userID}' and !scheduleID = ${scheduleID} and scheduleDate = '${Date}' order by scheduleOrder ;
 `;
  const orderrefresh2Row = await connection.query(
   orderrefresh2Query, 

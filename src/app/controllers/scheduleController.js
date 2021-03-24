@@ -253,7 +253,7 @@ exports.deleteschedule = async function (req, res) {
 
             await connection.beginTransaction();
             const orderrefresh1rows = await scheduleDao.orderrefresh1();
-            const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
+            const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,scheduleID,Date);
             await connection.commit();
             res.json({
                 isSuccess: true,
