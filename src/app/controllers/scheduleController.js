@@ -225,41 +225,6 @@ exports.getscheduletoday = async function (req, res) {
     }
 };
 
-//카테고리별일정조회
-/* exports.getschedulebycategory = async function (req, res) {
-    const userID = req.verifiedToken.userID;
-    const schedulecategoryID = req.query.scheduleCategoryID;
-    try {
-        const connection = await pool.getConnection(async (conn) => conn);
-
-        const getschedulebycategoryrows = await scheduleDao.getschedulebycategoryInfo(userID,schedulecategoryID);
-
-        if (getschedulebycategoryrows) {
-
-         res.json({
-                isSuccess: true,
-                code: 100,
-                message: userID + "번 유저"+ schedulecategoryID+"번 카테고리 일정 조회 성공",
-                data : getschedulebycategoryrows[0]
-                
-
-            });
-
-        }else{
-         res.json({
-                isSuccess: false,
-                code: 311,
-                message: "카테고리별 일정 조회 실패"
-            });
-        }
-        connection.release();
-    } catch (err) {
-        connection.release();
-        logger.error(`카테고리별 일정 조회\n ${err.message}`);
-        res.status(401).send(`Error: ${err.message}`);
-    }
-}; */
-
 //일정 삭제
 exports.deleteschedule = async function (req, res) {
     const scheduleID = req.params.scheduleID;
@@ -464,7 +429,6 @@ exports.getschedulemonth = async function (req, res) {
     const userID = req.verifiedToken.userID;
     const month = req.query.month;
     const year = req.query.year;
-   
     try {
         const getschedulemonthrows = await scheduleDao.getschedulemonthInfo(userID,month,year);
         const getscheduledayrows = await scheduleDao.getscheduledayInfo(userID,month,year);
@@ -728,7 +692,6 @@ exports.getdoneschedulemonth = async function (req, res) {
                 doneRate[getdonescheduletotalrows[0][i].yearmonth] = doneData;
             }
         };
-
         if (getdoneschedulemonthrows) {
             res.json({
                 isSuccess: true,
@@ -736,7 +699,6 @@ exports.getdoneschedulemonth = async function (req, res) {
                 message: userID + "번 유저 월별 달성률조회 성공",
                 data :doneRate
             });
-
         }else{
             res.json({
                 isSuccess: false,
@@ -765,7 +727,6 @@ exports.gettotalschedule = async function (req, res) {
                 totaldata : gettotalschedulerows[0],
                 totaldonedata : getdoneschedulecountrows[0]
             });
-
         }else{
             res.json({
                 isSuccess: false,
