@@ -250,7 +250,7 @@ exports.deleteschedule = async function (req, res) {
         const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
         var Date = scheduleDate[0][0].scheduleDate;
          if (deleteschedulerows[0].affectedRows == 1) {
-
+            console.log(userID,scheduleID,Date);
             await connection.beginTransaction();
             const orderrefresh1rows = await scheduleDao.orderrefresh1();
             const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,scheduleID,Date);
