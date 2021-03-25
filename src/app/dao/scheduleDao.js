@@ -775,6 +775,20 @@ limit 10;
   connection.release();
   return gethistoryRow;
 }
+//검색기록삭제
+async function deletehistoryInfo(userID,searchHistory) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const deletehistoryQuery = `
+  delete from searchHistory where userID='${userID}' and searchHistory =${searchHistory}; 
+`; 
+  
+  const deletehistoryRow = await connection.query(
+    deletehistoryQuery
+    
+  );
+  connection.release();
+  return deletehistoryRow;
+}
 //일정순서변경 자리생성(x<y)
 async function updateOrder2Info(userID,scheduleID,x,y) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -881,6 +895,9 @@ module.exports = {
   getOrderInfo,
   updateOrder0Info,
   updateOrder1Info,
-  updateOrder2Info
+  updateOrder2Info,
+
+  //검색기록삭제
+  deletehistoryInfo
   
 };
