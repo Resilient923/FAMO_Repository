@@ -835,6 +835,35 @@ exports.gethistory = async function (req, res) {
         res.status(401).send(`Error: ${err.message}`);
     }
 };
+//유저별 검색기록삭제
+exports.deletehistory = async function (req, res) {
+    const userID = req.verifiedToken.userID;
+    const searchHistory = req.query.searchHistory;
+   // const historyID = req.params.historyID;히스토리아이디생성해주기
+    try {
+        const deletehistoryrows = await scheduleDao.deletehistoryInfo(userID,searchHistory);
+
+        if (deletehistoryrows) {
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: userID + "번유저"+searchHistory+"검색기록 삭제성공"
+                
+            });
+
+        }else{
+            res.json({
+                isSuccess: false,
+                code: 347,
+                message: "유저별 검색기록삭제 실패"
+            });
+        }
+       
+    } catch (err) {
+        logger.error(`검색기록조회 \n ${err.message}`);
+        res.status(401).send(`Error: ${err.message}`);
+    }
+};
 
 //일정순서변경
 exports.updateOrder = async function (req, res) {
