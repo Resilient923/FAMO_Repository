@@ -18,7 +18,8 @@ const pool = mysql.createPool({
 //     user: 'soi',
 //     port: 3306,
 //     password: databaseInfo.soipwd,
-//     database: 'famodb'
+//     database: 'famodb',
+//     dateStrings: 'date'
 // });
 
 /* steady test DB */

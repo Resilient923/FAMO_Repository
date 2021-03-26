@@ -225,14 +225,28 @@ where userID = '${userID}' and scheduleDelete =1 and scheduleDate = '${Date}' or
 async function orderrefresh3(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh3Query = `
-  select scheduleDate from schedule where scheduleID = '${scheduleID}';
+  select scheduleDate, scheduleOrder from schedule where scheduleID = '${scheduleID}';
 `;
- const orderrefresh3Row = await connection.query(
-  orderrefresh3Query, 
-   
-  );
+
+const orderrefresh3Row = await connection.query(
+  orderrefresh3Query,   
+);
   connection.release();
   return orderrefresh3Row;
+}
+async function orderrefresh(userID, scheduleDate, scheduleOrder){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const orderrefreshQuery = `
+  UPDATE schedule
+SET scheduleOrder = scheduleOrder - 1
+WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
+ORDER BY scheduleOrder;
+`;
+
+await connection.query(
+  orderrefreshQuery,
+);
+  connection.release();
 }
 //일정 즐겨찾기,즐겨찾기 취소
 async function patchschedulepickInfo(scheduleID,userID) {
@@ -858,6 +872,7 @@ module.exports = {
   orderrefresh1,
   orderrefresh2,
   orderrefresh3,
+  orderrefresh,
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
