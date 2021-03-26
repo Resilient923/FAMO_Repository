@@ -247,20 +247,26 @@ exports.deleteschedule = async function (req, res) {
        // const connection = await pool.getConnection(async conn => conn);
         try{
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(userID,scheduleID);
-        const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
-        var Date = scheduleDate[0][0].scheduleDate;
-         if (deleteschedulerows[0].affectedRows == 1) {
+        const deletescheduleinfo = await scheduleDao.orderrefresh3(scheduleID);
+        var scheduleDate = deletescheduleinfo[0][0].scheduleDate;
+        var scheduleOrder = deletescheduleinfo[0][0].scheduleOrder;
+         
+        if (deleteschedulerows[0].affectedRows == 1) {
            // await connection.beginTransaction();
-            const orderrefresh1rows = await scheduleDao.orderrefresh1();
-            const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
+           // const orderrefresh1rows = await scheduleDao.orderrefresh1();
+           // const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
            // await connection.commit();
-            res.json({
-                isSuccess: true,
-                code: 100,
-                message: "일정 삭제 성공",
-             });
+           
+           await scheduleDao.orderrefresh(userID, scheduleDate, scheduleOrder);
+           
+           res.json({
+            isSuccess: true,
+            code: 100,
+            message: "일정 삭제 성공",
+           });
+
         }else{
-            return res.json({
+            res.json({
                 isSuccess: false,
                 code: 308,
                 message: "일정 삭제 실패"
