@@ -863,12 +863,26 @@ async function getscheduleIDInfo(scheduleID) {
   connection.release();
   return getscheduleIDRow;
 }
+async function orderrefresh(userID, scheduleDate, scheduleOrder){
+  const connection = await pool.getConnection(async (conn) => conn);
+  const orderrefreshQuery = `
+  UPDATE schedule
+SET scheduleOrder = scheduleOrder - 1
+WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
+ORDER BY scheduleOrder;
+`;
 
+await connection.query(
+  orderrefreshQuery,
+);
+  connection.release();
+}
 module.exports = {
   getscheduleIDInfo,
   inserttodayscheduleInfo,
   insertscheduleInfo,
   updatescheduleInfo,
+  orderrefresh,
   orderrefresh1,
   orderrefresh2,
   orderrefresh3,

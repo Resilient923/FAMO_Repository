@@ -248,6 +248,7 @@ exports.deleteschedule = async function (req, res) {
         try{
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(userID,scheduleID);
 
+
         const deletescheduleinfo = await scheduleDao.orderrefresh3(scheduleID);
         var scheduleDate = deletescheduleinfo[0][0].scheduleDate;
         var scheduleOrder = deletescheduleinfo[0][0].scheduleOrder;
