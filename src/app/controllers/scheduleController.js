@@ -247,11 +247,17 @@ exports.deleteschedule = async function (req, res) {
        // const connection = await pool.getConnection(async conn => conn);
         try{
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(userID,scheduleID);
+
+        const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
+        var Date = scheduleDate[0][0].scheduleDate;
+         if (scheduleDate) {
+
         const deletescheduleinfo = await scheduleDao.orderrefresh3(scheduleID);
         var scheduleDate = deletescheduleinfo[0][0].scheduleDate;
         var scheduleOrder = deletescheduleinfo[0][0].scheduleOrder;
          
         if (deleteschedulerows[0].affectedRows == 1) {
+
            // await connection.beginTransaction();
            // const orderrefresh1rows = await scheduleDao.orderrefresh1();
            // const orderrefresh2rows = await scheduleDao.orderrefresh2(userID,Date);
