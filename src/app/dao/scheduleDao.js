@@ -131,7 +131,8 @@ async function getscheduletodayInfo(userID) {
        categoryID,
        categoryName,
        colorInfo,
-       scheduleOrder
+       scheduleOrder,
+       concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate'
 from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
@@ -345,7 +346,7 @@ async function getschedulebydateInfo(userID,scheduleDate) {
        categoryID,
        categoryName,
        colorInfo,
-       date_format(scheduleDate, '%Y-%m-%d') as 'scheduleFormDate',
+       concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate',
        scheduleOrder
 from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
