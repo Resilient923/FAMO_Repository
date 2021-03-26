@@ -35,6 +35,8 @@ module.exports = function(app){
     //전체일정수,총해낸일정수조회
   
     app.get('/schedules/search',jwtMiddleware,schedule.searchSchedule);//일정검색
-    app.get('/schedules/search/histories',jwtMiddleware,schedule.gethistory);//검색기록조회
     app.post('/schedules/orderchanges',jwtMiddleware,schedule.updateOrder);//일정순서변경
+    
+    app.get('/schedules/search/histories',jwtMiddleware,schedule.gethistory);//검색기록조회
+    app.delete('/schedules/search/histories',jwtMiddleware,schedule.deletehistory);//검색기록삭제
   };

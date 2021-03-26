@@ -176,13 +176,13 @@ limit ${offset},${limit}
   return getschedulebycategoryRow;
 }
 //일정삭제
-async function deletescheduleInfo(scheduleID) {
+async function deletescheduleInfo(userID,scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const deletescheduleQuery = `
         
   update schedule
   set scheduleDelete = -1
-  where scheduleID='${scheduleID}';
+  where scheduleID='${scheduleID}' and userID ='${userID}';
 
     
     `;
@@ -198,7 +198,7 @@ async function deletescheduleInfo(scheduleID) {
 async function orderrefresh1() {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh1Query = `
-        select  @scheduleOrder:=0;
+   select @scheduleOrder:=-1;
 `;
  const orderrefresh1Row = await connection.query(
     orderrefresh1Query, 
@@ -211,8 +211,8 @@ async function orderrefresh2(userID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh2Query = `
   update schedule
-  set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-  where userID = '${userID}' and scheduleDelete = 1 and scheduleDate = '${Date}';
+set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
+where userID = '${userID}' and scheduleDelete =1 and scheduleDate = '${Date}';
 `;
  const orderrefresh2Row = await connection.query(
   orderrefresh2Query, 
@@ -486,6 +486,29 @@ limit ${offset},${limit};
   connection.release();
   return getrecentscheduleRow;
 }
+//카테고리가 미선택된 일정 조회/////////////////////////////////////////////////////////////////////////////////////////////////
+async function getnocategory(userID,offset,limit) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const getnocategoryQuery = `
+  select scheduleID,
+       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+       scheduleName,
+       scheduleMemo,
+       schedulePick
+from schedule
+where scheduleDelete = 1 
+  and schedule.userID = '${userID}'
+  and scheduleCategoryID is NULL
+order by scheduleDate desc
+limit ${offset},${limit};
+`; 
+  const getnocategoryRow = await connection.query(
+    getnocategoryQuery, 
+    
+  );
+  connection.release();
+  return getnocategoryRow;
+}
 //카테고리별 최신순 정렬 일정 조회
 async function getscategoryrecentInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -666,7 +689,7 @@ async function getIdFromScheduleNameInfo(searchWord,userID) {
   const getIdFromScheduleNameQuery = `
   select scheduleID
 from schedule
-where scheduleName like concat('%','${searchWord}','%') and userID = '${userID}'
+where scheduleName like concat('%',${searchWord},'%') and userID = '${userID}'
 and scheduleDelete = 1;
 `; 
   
@@ -684,7 +707,7 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%','${searchWord}','%') and userID = '${userID}'
+where scheduleMemo like concat('%',${searchWord},'%') and userID = '${userID}'
 and scheduleDelete = 1;
 `; 
   
@@ -724,7 +747,7 @@ async function insertSearchHistoryInfo(userID,searchWord) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertSearchHistoryQuery = `
   insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
-values ('${userID}','${searchWord}',default,default);
+values (${userID},${searchWord},default,default);
 `; 
   
   const insertSearchHistoryRow = await connection.query(
@@ -751,6 +774,20 @@ limit 10;
   );
   connection.release();
   return gethistoryRow;
+}
+//검색기록삭제
+async function deletehistoryInfo(userID,searchHistory) {
+  const connection = await pool.getConnection(async (conn) => conn);
+  const deletehistoryQuery = `
+  delete from searchHistory where userID='${userID}' and searchHistory =${searchHistory}; 
+`; 
+  
+  const deletehistoryRow = await connection.query(
+    deletehistoryQuery
+    
+  );
+  connection.release();
+  return deletehistoryRow;
 }
 //일정순서변경 자리생성(x<y)
 async function updateOrder2Info(userID,scheduleID,x,y) {
@@ -824,6 +861,7 @@ module.exports = {
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
+  getnocategory,
   getschedulebycategoryInfo,
   deletescheduleInfo,
   patchschedulepickInfo,
@@ -857,6 +895,9 @@ module.exports = {
   getOrderInfo,
   updateOrder0Info,
   updateOrder1Info,
-  updateOrder2Info
+  updateOrder2Info,
+
+  //검색기록삭제
+  deletehistoryInfo
   
 };
