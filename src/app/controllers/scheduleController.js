@@ -243,14 +243,10 @@ exports.deleteschedule = async function (req, res) {
             message: "정확한 일정 고유번호를 입력해주세요"
         });
     }
-    try { 
+    try {
        // const connection = await pool.getConnection(async conn => conn);
         try{
         const deleteschedulerows = await scheduleDao.deletescheduleInfo(userID,scheduleID);
-
-        const scheduleDate = await scheduleDao.orderrefresh3(scheduleID);
-        var Date = scheduleDate[0][0].scheduleDate;
-         if (scheduleDate) {
 
         const deletescheduleinfo = await scheduleDao.orderrefresh3(scheduleID);
         var scheduleDate = deletescheduleinfo[0][0].scheduleDate;
