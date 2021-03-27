@@ -96,7 +96,8 @@ async function getscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduleQuery = `
         
-  select scheduleID, date_format(scheduleDate, '%e %b') as 'scheduleDate', 
+  select scheduleID, 
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate', 
   scheduleName,
   scheduleMemo,
   schedulePick,
@@ -154,7 +155,7 @@ async function getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit)
   const getschedulebycategoryQuery = `
         
   select scheduleID,
-  date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
   scheduleName,
   scheduleMemo,
   schedulePick,
@@ -506,7 +507,7 @@ async function getnocategory(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getnocategoryQuery = `
   select scheduleID,
-       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick
@@ -529,7 +530,7 @@ async function getscategoryrecentInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscategoryrecentQuery = `
   select scheduleID,
-       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -557,7 +558,7 @@ async function getscategoryleftInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscategoryleftQuery = `
   select scheduleID,
-       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -585,7 +586,7 @@ async function getscategorydoneInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscategorydoneQuery = `
   select scheduleID,
-       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -613,7 +614,7 @@ async function getscategorypickInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscategorypickQuery = `
   select scheduleID,
-       date_format(scheduleDate, '%Y %m %d') as 'scheduleDate',
+  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        scheduleName,
        scheduleMemo,
        schedulePick,
@@ -740,7 +741,7 @@ async function getscheduleFromMemoInfo(scheduleID) {
   select scheduleID,
        scheduleName,
        scheduleMemo,
-       scheduleDate,
+       date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
        schedulePick,
     colorInfo
 FROM schedule
