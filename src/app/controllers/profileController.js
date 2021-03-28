@@ -25,7 +25,6 @@ exports.uploadProfileImage = async function (req, res) {
                 code: 100,
                 message: "프로필 사진 업로드 성공"
             });
-
         } 
         else{
             await profileDao.updateProfileImage(s3ProfileImage, userIDInToken);
@@ -98,7 +97,8 @@ exports.getTitleComment = async function (req, res) {
                 isSuccess: true,
                 code: 100,
                 message: "상단 멘트 조회 성공"
-            })
+            });
+
         }else{
             const [getTitleGoalRow] = await profileDao.getTitleGoal(userIDInToken);
 
@@ -110,7 +110,7 @@ exports.getTitleComment = async function (req, res) {
                 isSuccess: true,
                 code: 100,
                 message: "상단 목표 조회 성공"
-            })
+            });
         };
         
     }catch (err) {
@@ -144,7 +144,7 @@ exports.getProfile = async function (req, res){
     }catch (err) {
         logger.error(`Get Profile Query error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
-    }   
+    }
 };
 
 /* 내정보 수정 API */

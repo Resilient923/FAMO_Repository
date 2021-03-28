@@ -15,7 +15,8 @@ async function inserttodayscheduleInfo(inserttodayscheduleParams) {
     inserttodayscheduleParams
   );
   connection.release();
-}
+};
+
 //일정생성
 async function insertscheduleInfo(insertscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -31,7 +32,8 @@ async function insertscheduleInfo(insertscheduleParams) {
     insertscheduleParams
   );
   connection.release();
-}
+};
+
 //일정 생성시 Order값 받기
 async function getOrderInfo(getOrderParams) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -47,15 +49,12 @@ where userID=? and scheduleDate=?;
   );
   connection.release();
   return getOrderRow;
-}
-
-
+};
 
 //일정 수정
 async function updatescheduleInfo(updatescheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const updatescheduleQuery = `
-        
+  const updatescheduleQuery = `        
   update schedule
   set scheduleName=?,
   scheduleDate=?,
@@ -71,31 +70,28 @@ async function updatescheduleInfo(updatescheduleParams) {
   );
   connection.release();
   return updatescheduleRow;
-}
-//일정수정할때 스케쥴날짜 가져오는 Dao
+};
 
+//일정수정할때 스케쥴날짜 가져오는 Dao
 async function getdate(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getdateQuery = `
   select scheduleDate
-       
-from schedule
-
-where scheduleID = '${scheduleID}';
-`; 
+  from schedule
+  where scheduleID = ${scheduleID};
+  `; 
   
   const getdateRow = await connection.query(
-    getdateQuery, 
-    
+    getdateQuery,  
   );
   connection.release();
   return getdateRow;
-}
+};
+
 //유저별전체일정 조회
 async function getscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getscheduleQuery = `
-        
+  const getscheduleQuery = `        
   select scheduleID, 
   date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate', 
   scheduleName,
@@ -108,21 +104,19 @@ async function getscheduleInfo(userID,offset,limit) {
   left join categoryColor ON categoryColor.colorID = category.categoryColor
   where scheduleDelete = 1 and schedule.userID = '${userID}'
   limit ${offset},${limit};
-  ;
   `;
   
   const getscheduleRow = await connection.query(
     getscheduleQuery,
-    //updatescheduleParams 
   );
   connection.release();
   return getscheduleRow;
-}
+};
+
 //유저별오늘일정 조회
 async function getscheduletodayInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getscheduletodayQuery = `
-        
+  const getscheduletodayQuery = `        
   select scheduleID,
        date_format(scheduleDate, '%e %b') as 'scheduleDate',
        scheduleName,
@@ -138,17 +132,17 @@ from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
 where scheduleDelete = 1
-and schedule.userID = '${userID}' and scheduleDate = current_date 
+and schedule.userID = ${userID} and scheduleDate = current_date 
 order by scheduleOrder desc;
   `;
   
   const getscheduletodayRow = await connection.query(
-    getscheduletodayQuery,
-    //updatescheduleParams 
+    getscheduletodayQuery, 
   );
   connection.release();
   return getscheduletodayRow;
-}
+};
+
 //카테고리별 일정 조회
 async function getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -164,38 +158,34 @@ from schedule
     left join category on categoryID = scheduleCategoryID
     left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
-and schedule.userID = '${userID}'
-and scheduleCategoryID = '${schedulecategoryID}'
-limit ${offset},${limit}
-;
+and schedule.userID = ${userID}
+and scheduleCategoryID = ${schedulecategoryID}
+limit ${offset},${limit};
 `; 
   
   const getschedulebycategoryRow = await connection.query(
-    getschedulebycategoryQuery, 
-    //updatescheduleParams 
+    getschedulebycategoryQuery,  
   );
   connection.release();
   return getschedulebycategoryRow;
-}
+};
+
 //일정삭제
 async function deletescheduleInfo(userID,scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const deletescheduleQuery = `
-        
+  const deletescheduleQuery = `        
   update schedule
   set scheduleDelete = -1
-  where scheduleID='${scheduleID}' and userID ='${userID}';
-
-    
-    `;
+  where scheduleID='${scheduleID}' and userID = ${userID};
+  `;
   
   const deletescheduleRow = await connection.query(
     deletescheduleQuery, 
-   
   );
   connection.release();
   return deletescheduleRow;
-}
+};
+
 //일정삭제 순서초기화
 async function orderrefresh1() {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -208,7 +198,7 @@ async function orderrefresh1() {
   );
   connection.release();
   return orderrefresh1Row;
-}
+};
 async function orderrefresh2(userID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefresh2Query = `
@@ -222,7 +212,8 @@ where userID = '${userID}' and scheduleDelete =1 and scheduleDate = '${Date}' or
   );
   connection.release();
   return orderrefresh2Row;
-}
+};
+
 //삭제할때 일정날짜받아오기
 async function orderrefresh3(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -235,59 +226,55 @@ const orderrefresh3Row = await connection.query(
 );
   connection.release();
   return orderrefresh3Row;
-}
+};
+
 async function orderrefresh(userID, scheduleDate, scheduleOrder){
   const connection = await pool.getConnection(async (conn) => conn);
   const orderrefreshQuery = `
   UPDATE schedule
-SET scheduleOrder = scheduleOrder - 1
-WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
-ORDER BY scheduleOrder;
-`;
-
-await connection.query(
-  orderrefreshQuery,
-);
+  SET scheduleOrder = scheduleOrder - 1
+  WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
+  ORDER BY scheduleOrder;
+  `;
+  
+  await connection.query(
+    orderrefreshQuery,
+  );
   connection.release();
-}
+};
+
 //일정 즐겨찾기,즐겨찾기 취소
 async function patchschedulepickInfo(scheduleID,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const patchschedulepickQuery = `
-        
+  const patchschedulepickQuery = `        
   update schedule
   set schedulePick = if(schedulePick = 1, -1, 1)
-  where scheduleID = '${scheduleID}' and userID = '${userID}';
-
-    
-    `;
+  where scheduleID = '${scheduleID}' and userID = ${userID};
+  `;
   
   const patchschedulepickRow = await connection.query(
     patchschedulepickQuery, 
-   
   );
   connection.release();
   return patchschedulepickRow;
-}
+};
+
 //일정완료 , 완료취소
 async function updateachievementscheduleInfo(scheduleID,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const updateachievementscheduleQuery = `
-        
+  const updateachievementscheduleQuery = `        
   update schedule
   set scheduleStatus = if(scheduleStatus = 1, -1, 1)
   where scheduleID = '${scheduleID}' and userID = '${userID}';
-
-    
-    `;
+  `;
   
   const updateachievementscheduleRow = await connection.query(
-    updateachievementscheduleQuery, 
-   
+    updateachievementscheduleQuery,  
   );
   connection.release();
   return updateachievementscheduleRow;
-}
+};
+
 //유저별 해낸 일정 개수 조회
 async function getdoneschedulecountInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -295,47 +282,47 @@ async function getdoneschedulecountInfo(userID) {
   select count(scheduleID) as 'doneScheduleCount'
   from schedule
   where userID ='${userID}' and scheduleStatus = 1 and scheduleDelete = 1
-`; 
+  `; 
   
   const  getdoneschedulecountRow = await connection.query(
-    getdoneschedulecountQuery, 
-    
+    getdoneschedulecountQuery,   
   );
   connection.release();
   return getdoneschedulecountRow;
-}
+};
+
 //남은일정수조회
 async function getremaintotalscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getremainscheduleQuery = `
   select count(scheduleID) as 'remainScheduleCount'
-from schedule
-where userID ='${userID}' and scheduleStatus = -1 and scheduleDelete = 1 ;
-`; 
+  from schedule
+  where userID ='${userID}' and scheduleStatus = -1 and scheduleDelete = 1;
+  `; 
   
-  const  getremainscheduleRow = await connection.query(
+  const getremainscheduleRow = await connection.query(
     getremainscheduleQuery, 
-    
   );
   connection.release();
   return getremainscheduleRow;
-}
+};
+
 //오늘남은일정
 async function getremaintodayscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getremaintodayscheduleQuery = `
   select count(scheduleID) as 'remainScheduleCount'
-from schedule
-where userID ='${userID}' and scheduleStatus = -1 and scheduleDate = current_date() and scheduleDelete = 1;
-`; 
+  from schedule
+  where userID = ${userID} and scheduleStatus = -1 and scheduleDate = current_date() and scheduleDelete = 1;
+  `;
   
   const  getremaintodayscheduleRow = await connection.query(
-    getremaintodayscheduleQuery, 
-    
+    getremaintodayscheduleQuery,   
   );
   connection.release();
   return getremaintodayscheduleRow;
-}
+};
+
 //날짜별일정조회
 async function getschedulebydateInfo(userID,scheduleDate) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -353,17 +340,17 @@ from schedule
          left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
 where scheduleDelete = 1
-and schedule.userID = '${userID}' and scheduleDate = '${scheduleDate}'
+and schedule.userID = ${userID} and scheduleDate = '${scheduleDate}'
 order by scheduleOrder desc;
 `; 
   
   const getschedulebydateRow = await connection.query(
     getschedulebydateQuery, 
-    
   );
   connection.release();
   return getschedulebydateRow;
-}
+};
+
 //월별일정조회
 async function getschedulemonthInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -379,36 +366,36 @@ async function getschedulemonthInfo(userID,month,year) {
 FROM schedule
 left join category  on schedule.scheduleCategoryID = category.categoryID
 left join categoryColor on categoryColor = colorID
-where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
+where schedule.userID = ${userID} and MONTH(scheduleDate) = '${month}' 
 and Year(scheduleDate) = '${year}' and scheduleDelete = 1
 order by scheduleOrder desc;
 `; 
   
   const getschedulemonthRow = await connection.query(
-    getschedulemonthQuery, 
-    
+    getschedulemonthQuery,
   );
   connection.release();
   return getschedulemonthRow;
-}
+};
+
 //월별일정조회시 월별날짜조회
 async function getscheduledayInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduledayQuery = `
   select distinct date_format(scheduleDate,'%Y-%m-%d') as 'date'
-from schedule
-where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
-and Year(scheduleDate) = '${year}' and scheduleDelete = 1
-order by scheduleDate;
-`; 
+  from schedule
+  where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
+  and Year(scheduleDate) = '${year}' and scheduleDelete = 1
+  order by scheduleDate;
+  `; 
   
   const getscheduledayRow = await connection.query(
-    getscheduledayQuery, 
-    
+    getscheduledayQuery,   
   );
   connection.release();
   return getscheduledayRow;
-}
+};
+
 //일정상세조회
 async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -423,32 +410,32 @@ async function getscheduledetailsInfo(scheduleID) {
 from schedule
 left join category  on schedule.scheduleCategoryID = category.categoryID
 left join categoryColor on categoryColor = colorID
-where scheduleID = '${scheduleID}';
-`; 
+where scheduleID = ${scheduleID};
+`;
   
   const getscheduledetailsRow = await connection.query(
-    getscheduledetailsQuery, 
-    
+    getscheduledetailsQuery,   
   );
   connection.release();
   return getscheduledetailsRow;
-}
+};
+
 //월별해낸일정수조회
 async function getdonemonthcountInfo(userID,scheduleDate) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getdoneschedulecountQuery = `
   select count(scheduleID) as 'doneScheduleCount'
-from schedule
-where userID ='${userID}' and scheduleDelete = 1 and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
-`; 
+  from schedule
+  where userID = ${userID} and scheduleDelete = 1 and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
+  `; 
   
   const  getdoneschedulecountRow = await connection.query(
-    getdoneschedulecountQuery, 
-    
+    getdoneschedulecountQuery,   
   );
   connection.release();
   return getdoneschedulecountRow;
-}
+};
+
 //즐겨찾기한일정조회
 async function getpickscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -460,22 +447,21 @@ async function getpickscheduleInfo(userID,offset,limit) {
        schedulePick,
        categoryID,
        colorInfo
-from schedule
-         left join category on category.categoryID = schedule.scheduleCategoryID
+  from schedule
+        left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where schedule.userID = '${userID}' and schedulePick = 1 and scheduleDelete = 1
-order by schedulePick desc 
-limit ${offset},${limit}
-;
-`; 
+  where schedule.userID = '${userID}' and schedulePick = 1 and scheduleDelete = 1
+  order by schedulePick desc 
+  limit ${offset},${limit};
+  `; 
   
-  const  getpickscheduleRow = await connection.query(
+  const getpickscheduleRow = await connection.query(
     getpickscheduleQuery, 
-    
   );
   connection.release();
   return getpickscheduleRow;
-}
+};
+
 //최근 생성일정조회
 async function getrecentscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -487,22 +473,22 @@ async function getrecentscheduleInfo(userID,offset,limit) {
        schedulePick,
        categoryID,
        colorInfo
-from schedule
-         left join category on category.categoryID = schedule.scheduleCategoryID
+  from schedule
+        left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where schedule.userID = '${userID}' and scheduleDelete = 1
-order by scheduleDate desc 
-limit ${offset},${limit};
-`; 
+  where schedule.userID = '${userID}' and scheduleDelete = 1
+  order by scheduleDate desc 
+  limit ${offset},${limit};
+  `; 
   
   const  getrecentscheduleRow = await connection.query(
-    getrecentscheduleQuery, 
-    
+    getrecentscheduleQuery,  
   );
   connection.release();
   return getrecentscheduleRow;
-}
-//카테고리가 미선택된 일정 조회/////////////////////////////////////////////////////////////////////////////////////////////////
+};
+
+//카테고리가 미선택된 일정 조회
 async function getnocategory(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getnocategoryQuery = `
@@ -513,7 +499,7 @@ async function getnocategory(userID,offset,limit) {
        schedulePick
 from schedule
 where scheduleDelete = 1 
-  and schedule.userID = '${userID}'
+  and schedule.userID = ${userID}
   and scheduleCategoryID is NULL
 order by scheduleDate desc
 limit ${offset},${limit};
@@ -524,7 +510,8 @@ limit ${offset},${limit};
   );
   connection.release();
   return getnocategoryRow;
-}
+};
+
 //카테고리별 최신순 정렬 일정 조회
 async function getscategoryrecentInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -539,20 +526,19 @@ from schedule
 left join category on categoryID = scheduleCategoryID
 left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
-  and schedule.userID = '${userID}'
-  and scheduleCategoryID = '${schedulecategoryID}'
+  and schedule.userID = ${userID}
+  and scheduleCategoryID = ${schedulecategoryID}
 order by scheduleDate desc 
-limit ${offset},${limit}
-;
+limit ${offset},${limit};
 `; 
   
-  const  getscategoryrecentRow = await connection.query(
+  const getscategoryrecentRow = await connection.query(
     getscategoryrecentQuery, 
-    
   );
   connection.release();
   return getscategoryrecentRow;
-}
+};
+
 //카테고리별 남은순 정렬 일정 조회
 async function getscategoryleftInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -567,20 +553,19 @@ from schedule
          left join category on categoryID = scheduleCategoryID
          left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
-  and schedule.userID = '${userID}'
-  and scheduleCategoryID = '${schedulecategoryID}'
+  and schedule.userID = ${userID}
+  and scheduleCategoryID = ${schedulecategoryID}
 order by scheduleStatus
-limit ${offset},${limit} 
-;
+limit ${offset},${limit};
 `; 
   
   const  getscategoryleftRow = await connection.query(
-    getscategoryleftQuery, 
-    
+    getscategoryleftQuery,     
   );
   connection.release();
   return getscategoryleftRow;
-}
+};
+
 //카테고리별 완료순 정렬 일정 조회
 async function getscategorydoneInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -595,11 +580,10 @@ from schedule
 left join category on categoryID = scheduleCategoryID
 left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
-  and schedule.userID = '${userID}'
-  and scheduleCategoryID = '${schedulecategoryID}'
+  and schedule.userID = ${userID}
+  and scheduleCategoryID = ${schedulecategoryID}
 order by scheduleStatus desc
-limit ${offset},${limit}
-;
+limit ${offset},${limit};
 `; 
   
   const  getscategorydoneRow = await connection.query(
@@ -608,7 +592,8 @@ limit ${offset},${limit}
   );
   connection.release();
   return getscategorydoneRow;
-}
+};
+
 //카테고리별 즐겨찾기 정렬 일정 조회
 async function getscategorypickInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -623,20 +608,19 @@ from schedule
 left join category on categoryID = scheduleCategoryID
 left join categoryColor on categoryColor = colorID
 where scheduleDelete = 1
-  and schedule.userID = '${userID}'
-  and scheduleCategoryID = '${schedulecategoryID}'
+  and schedule.userID = ${userID}
+  and scheduleCategoryID = ${schedulecategoryID}
 order by scheduleDate desc
 limit ${offset},${limit};
-
 `; 
   
   const  getscategorypickRow = await connection.query(
     getscategorypickQuery, 
-    
   );
   connection.release();
   return getscategorypickRow;
-}
+};
+
 //월별 해낸일정수조회
 async function getdoneschedulemonthInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -646,9 +630,7 @@ async function getdoneschedulemonthInfo(userID) {
   concat((extract(year from scheduleDate)), '-', date_format(scheduleDate,'%m')) as 'yearmonth',
        COUNT(*) as 'scheduleCount'
 FROM schedule
-WHERE scheduleDate
-
-  and userID = '${userID}' and scheduleStatus = 1 and scheduleDelete = 1
+WHERE scheduleDate AND userID = ${userID} AND scheduleStatus = 1 AND scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
 order by extract(year_month from scheduleDate) desc
 limit 6;
@@ -659,7 +641,8 @@ limit 6;
   );
   connection.release();
   return getdoneschedulemonthRow;
-}
+};
+
 //월별 전체일정수조회
 async function getdonescheduletotalInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -669,9 +652,7 @@ async function getdonescheduletotalInfo(userID) {
   concat((extract(year from scheduleDate)), '-', date_format(scheduleDate,'%m')) as 'yearmonth',
        COUNT(*) as 'scheduleCount'
 FROM schedule
-WHERE scheduleDate 
-
-  and userID = '${userID}' and scheduleDelete = 1
+WHERE scheduleDate and userID = ${userID} and scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
 order by extract(year_month from scheduleDate) desc
 limit 6;
@@ -682,14 +663,15 @@ limit 6;
   );
   connection.release();
   return getdonescheduletotalRow;
-}
+};
+
 //전체일정수 조회 6개씩
 async function gettotalscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const gettotalscheduleQuery = `
   select count(scheduleID) as 'totalScheduleCount'
   from schedule
-  where userID='${userID}' and scheduleDelete = 1;
+  where userID= ${userID} and scheduleDelete = 1;
 `; 
   
   const gettotalscheduleRow = await connection.query(
@@ -698,14 +680,15 @@ async function gettotalscheduleInfo(userID) {
   );
   connection.release();
   return gettotalscheduleRow;
-}
+};
+
 //검색 (scheduleID받아오기) 제목으로
 async function getIdFromScheduleNameInfo(searchWord,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getIdFromScheduleNameQuery = `
   select scheduleID
 from schedule
-where scheduleName like concat('%',${searchWord},'%') and userID = '${userID}'
+where scheduleName like concat('%',${searchWord},'%') and userID = ${userID}
 and scheduleDelete = 1;
 `; 
   
@@ -715,7 +698,7 @@ and scheduleDelete = 1;
   );
   connection.release();
   return getIdFromScheduleNameRow;
-}
+};
 
 //검색 (scheduleID받아오기) 내용으로
 async function getIdFromScheduleMemoInfo(searchWord,userID) {
@@ -723,7 +706,7 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%',${searchWord},'%') and userID = '${userID}'
+where scheduleMemo like concat('%','${searchWord}','%') and userID = ${userID}
 and scheduleDelete = 1;
 `; 
   
@@ -733,7 +716,8 @@ and scheduleDelete = 1;
   );
   connection.release();
   return getIdFromScheduleMemoRow;
-}
+};
+
 //검색(schedule정보 받아오기) 
 async function getscheduleFromMemoInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -747,138 +731,123 @@ async function getscheduleFromMemoInfo(scheduleID) {
 FROM schedule
          left join category on schedule.scheduleCategoryID = category.categoryID
          left join categoryColor on categoryColor = colorID
-where scheduleID='${scheduleID}' and scheduleDelete = 1
-
+where scheduleID= ${scheduleID} and scheduleDelete = 1
 `; 
   
   const [getscheduleFromNameRow] = await connection.query(
     getscheduleFromNameQuery, 
-    
   );
   connection.release();
   return getscheduleFromNameRow;
-}
+};
+
 //검색히스토리생성
 async function insertSearchHistoryInfo(userID,searchWord) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertSearchHistoryQuery = `
   insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
-values (${userID},${searchWord},default,default);
+values (${userID},'${searchWord}',default,default);
 `; 
   
   const insertSearchHistoryRow = await connection.query(
-    insertSearchHistoryQuery, 
-    
+    insertSearchHistoryQuery,     
   );
   connection.release();
   return insertSearchHistoryRow;
-}
+};
+
 //유저별검색기록조회
 async function gethistoryInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const gethistoryQuery = `
   select distinct searchHistory
 from searchHistory
-where userID = '${userID}'
+where userID = ${userID}
 order by historyCreatedAt desc
 limit 10;
 `; 
   
   const gethistoryRow = await connection.query(
-    gethistoryQuery, 
-    
+    gethistoryQuery,
   );
   connection.release();
   return gethistoryRow;
-}
+};
+
 //검색기록삭제
 async function deletehistoryInfo(userID,searchHistory) {
   const connection = await pool.getConnection(async (conn) => conn);
   const deletehistoryQuery = `
-  delete from searchHistory where userID='${userID}' and searchHistory =${searchHistory}; 
-`; 
+  delete from searchHistory where userID= ${userID} and searchHistory = '${searchHistory}'; 
+`;
   
   const deletehistoryRow = await connection.query(
-    deletehistoryQuery
-    
+    deletehistoryQuery  
   );
   connection.release();
   return deletehistoryRow;
-}
+};
+
 //일정순서변경 자리생성(x<y)
 async function updateOrder2Info(userID,scheduleID,x,y) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrder2Query = `
   update schedule
 set scheduleOrder = scheduleOrder-1
-where userID='${userID}' and scheduleID !='${scheduleID}' and scheduleOrder>${x} and ${y}>=scheduleOrder;
-`; 
+where userID= ${userID} and scheduleID != ${scheduleID} and scheduleOrder > ${x} and ${y} >= scheduleOrder;
+`;
   
   const updateOrder2Row = await connection.query(
-    updateOrder2Query, 
-    
+    updateOrder2Query,  
   );
   connection.release();
   return updateOrder2Row;
-}
+};
+
 //일정순서변경 자리생성(x>y)
 async function updateOrder1Info(userID,scheduleID,x,scheduleOrder) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrderQuery = `
   update schedule
 set scheduleOrder = scheduleOrder+1
-where userID='${userID}' and scheduleID !='${scheduleID}' and scheduleOrder>='${scheduleOrder}' and '${x}'>scheduleOrder;
+where userID= ${userID} and scheduleID != ${scheduleID} and scheduleOrder >= ${scheduleOrder} and ${x} > scheduleOrder;
 `; 
   
   const updateOrderRow = await connection.query(
     updateOrderQuery, 
-    
   );
   connection.release();
   return updateOrderRow;
-}
+};
+
 async function updateOrder0Info(userID,scheduleID,scheduleOrder) {
   const connection = await pool.getConnection(async (conn) => conn);
   const updateOrder2Query = `
   update schedule
-  set scheduleOrder = '${scheduleOrder}' where userID ='${userID}' and scheduleID ='${scheduleID}';
+  set scheduleOrder = ${scheduleOrder} where userID = ${userID} and scheduleID = ${scheduleID};
 `; 
   
   const updateOrder2Row = await connection.query(
     updateOrder2Query, 
-    
   );
   connection.release();
   return updateOrder2Row;
-}
+};
+
 //순서변경하고자 하는 일정ID 가져오기
 async function getscheduleIDInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getscheduleIDQuery = `
- select scheduleOrder,scheduleDelete from schedule where scheduleID = '${scheduleID}';
+ select scheduleOrder,scheduleDelete from schedule where scheduleID = ${scheduleID};
 `; 
   
   const getscheduleIDRow = await connection.query(
     getscheduleIDQuery, 
-    
   );
   connection.release();
   return getscheduleIDRow;
-}
-async function orderrefresh(userID, scheduleDate, scheduleOrder){
-  const connection = await pool.getConnection(async (conn) => conn);
-  const orderrefreshQuery = `
-  UPDATE schedule
-SET scheduleOrder = scheduleOrder - 1
-WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
-ORDER BY scheduleOrder;
-`;
+};
 
-await connection.query(
-  orderrefreshQuery,
-);
-  connection.release();
-}
 module.exports = {
   getscheduleIDInfo,
   inserttodayscheduleInfo,
@@ -888,7 +857,6 @@ module.exports = {
   orderrefresh1,
   orderrefresh2,
   orderrefresh3,
-  orderrefresh,
   getdate,
   getscheduleInfo,
   getscheduletodayInfo,
@@ -929,6 +897,5 @@ module.exports = {
   updateOrder2Info,
 
   //검색기록삭제
-  deletehistoryInfo
-  
+  deletehistoryInfo  
 };
