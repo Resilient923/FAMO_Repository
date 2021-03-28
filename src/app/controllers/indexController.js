@@ -4,7 +4,6 @@ const {logger} = require('../../../config/winston');
 const indexDao = require('../dao/indexDao');
 const jwtMiddleware = require('../../../config/jwtMiddleware');
 
-
 exports.default = async function (req, res) {
     try {
         const connection = await pool.getConnection(async conn => conn);

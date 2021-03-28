@@ -7,7 +7,6 @@ const multerS3 = require('multer-s3');
 
 var userIDInToken;
 
-
 exports.jwt = async function(req, res, next){
     userIDInToken = req.verifiedToken.userID;
     userIDInToken = userIDInToken.toString();

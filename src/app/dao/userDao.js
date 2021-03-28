@@ -16,6 +16,7 @@ async function checkUserLoginID(loginID) {
   connection.release();
   return [loginIDRows];
 };
+
 /* 휴대폰 번호 유무 확인 */
 async function checkPhoneNumber(phoneNumber) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -32,6 +33,7 @@ async function checkPhoneNumber(phoneNumber) {
   connection.release();
   return [phoneNumberRows];
 };
+
 /* FAMO 회원가입 */
 async function insertUserInfo(insertUserInfoParams) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -47,6 +49,7 @@ async function insertUserInfo(insertUserInfoParams) {
   connection.release();
   return insertUserInfoRow[0].insertId;
 };
+
 /* 카카오 로그인 회원가입 */
 async function insertKakaoUserInfo(insertUserInfoParams){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -60,6 +63,7 @@ async function insertKakaoUserInfo(insertUserInfoParams){
   );
   connection.release();
 };
+
 /* 로그인 ID로 유저 정보 조회 */
 async function selectUserInfo(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -74,6 +78,7 @@ async function selectUserInfo(loginID) {
   connection.release();
   return [userInfoRows];
 };
+
 /* 휴대폰 번호로 유저 정보 조회 */
 async function selectUserInfoByPhone(phoneNumber){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -89,6 +94,7 @@ async function selectUserInfoByPhone(phoneNumber){
   connection.release();
   return [userInfoByPhoneRow];
 };
+
 /* userID 유무 확인 */
 async function checkUserID(userID){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -102,6 +108,7 @@ async function checkUserID(userID){
   connection.release();
   return [checkUserIDRow];
 };
+
 /* 회원 탈퇴 */
 async function deleteUserAccount(userID){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -117,6 +124,7 @@ async function deleteUserAccount(userID){
 
   connection.release();
 };
+
 /* 핸드폰 번호 업데이트 */
 async function updatePhoneNumber(userID, phoneNumber){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -132,6 +140,7 @@ async function updatePhoneNumber(userID, phoneNumber){
 
   connection.release();
 };
+
 /* 비밀번호 업데이트 */
 async function updatePassword(phoneNumber, passwordParams){
   const connection = await pool.getConnection(async (conn) => conn);
@@ -147,7 +156,7 @@ async function updatePassword(phoneNumber, passwordParams){
   );
 
   connection.release();
-}
+};
 
 module.exports = {
   checkUserLoginID,

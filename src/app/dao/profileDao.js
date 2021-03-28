@@ -12,6 +12,7 @@ async function checkUserProfile(userID){
     connection.release();
     return checkUserProfileRow;
 };
+
 /* 유저 프로필 정보 조회 */
 async function getProfileInfo(userID){
     const connection = await pool.getConnection(async (conn) => conn);
@@ -26,6 +27,7 @@ async function getProfileInfo(userID){
     connection.release();
     return [profileInfoRow];
 };
+
 /* 프로필 이미지 삽입 */
 async function insertProfileImage(insertProfileImageParams){
     const connection = await pool.getConnection(async (conn) => conn);
@@ -39,10 +41,10 @@ async function insertProfileImage(insertProfileImageParams){
     );
     connection.release();
 };
+
 /* 프로필 이미지 업데이트 */
 async function updateProfileImage(s3ProfileImage, userIDInToken){
     const connection = await pool.getConnection(async (conn) => conn);
-  
     const updateProfileImageQuery = `
     UPDATE profile
     SET profileImageURL= '${s3ProfileImage}'
@@ -53,10 +55,10 @@ async function updateProfileImage(s3ProfileImage, userIDInToken){
     );
     connection.release();
 };
+
 /* 상단 멘트 조회 */
 async function getTitleComment(userID){
   const connection = await pool.getConnection(async conn => conn);
-
   const getTitleCommentQuery = `
   SELECT nickname, titleComment, goalStatus FROM profile
   INNER JOIN user ON user.userID = profile.userID
@@ -69,6 +71,7 @@ async function getTitleComment(userID){
   connection.release();
   return [getTitleCommentRow];
 };
+
 /* 상단 목표 조회 */
 async function getTitleGoal(userID){
   const connection = await pool.getConnection(async conn => conn);
@@ -84,10 +87,10 @@ async function getTitleGoal(userID){
   connection.release();
   return [getTitleGoalRow];
 };
+
 /* 내정보 조회 */
 async function getUserProfile(userID){
   const connection = await pool.getConnection(async conn => conn);
-
   const getUserProfileQuery = `
   SELECT loginID, method, nickname, profileImageURL, titleComment, goalStatus, goalTitle,
   TIMESTAMPDIFF(DAY, goalDate, current_date()) AS Dday, goalDate
@@ -102,10 +105,10 @@ async function getUserProfile(userID){
   connection.release();
   return [getUserProfileRow];
 };
+
 /* 내정보 수정 */
 async function updateUserProfile(userID, updateProfileParams){
   const connection = await pool.getConnection(async conn => conn);
-
   const updateUserProfileQuery = `
   UPDATE profile
   SET titleComment = ?, 
@@ -121,6 +124,7 @@ async function updateUserProfile(userID, updateProfileParams){
   );
   connection.release();
 };
+
 /* 닉네임 수정 */
 async function updateNickname(userID, nickname){
   const connection = await pool.getConnection(async conn => conn);
