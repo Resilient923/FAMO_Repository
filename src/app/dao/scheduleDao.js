@@ -427,7 +427,7 @@ where scheduleID = '${scheduleID}';
 `; 
   
   const getscheduledetailsRow = await connection.query(
-    getscheduledetailsQuery, 
+    getscheduledetailsQuery
     
   );
   connection.release();
