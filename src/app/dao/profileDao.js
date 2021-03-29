@@ -3,8 +3,9 @@ const { pool } = require("../../../config/database");
 /* 유저 프로필 유무 확인 */
 async function checkUserProfile(userID){
     const connection = await pool.getConnection(async (conn) => conn);
+
     const checkUserProfileQuery = `
-    SELECT EXISTS (SELECT * FROM profile WHERE userID = ${userID}) AS exist;
+      SELECT EXISTS (SELECT * FROM profile WHERE userID = ${userID}) AS exist;
     `;
     const [checkUserProfileRow] = await connection.query(
       checkUserProfileQuery
@@ -91,19 +92,24 @@ async function getTitleGoal(userID){
 /* 내정보 조회 */
 async function getUserProfile(userID){
   const connection = await pool.getConnection(async conn => conn);
-  const getUserProfileQuery = `
-  SELECT loginID, method, nickname, profileImageURL, titleComment, goalStatus, goalTitle,
-  TIMESTAMPDIFF(DAY, goalDate, current_date()) AS Dday, goalDate
-  FROM profile
-  INNER JOIN user ON user.userID = profile.userID
-  WHERE profile.userID = ${userID} AND user.status = 1;
-  `;
 
-  const [getUserProfileRow] = await connection.query(
-    getUserProfileQuery,
-  );
-  connection.release();
-  return [getUserProfileRow];
+  try{
+    const getUserProfileQuery = `
+    SELECT loginID, method, nickname, profileImageURL, titleComment, goalStatus, goalTitle,
+    TIMESTAMPDIFF(DAY, goalDate, current_date()) AS Dday, goalDate
+    FROM profile
+    INNER JOIN user ON user.userID = profile.userID
+    WHERE profile.userID = ${userID} AND user.status = 1;
+    `;
+
+    const [getUserProfileRow] = await connection.query(
+      getUserProfileQuery,
+    );
+    connection.release();
+    return [getUserProfileRow];
+  }catch (err) {
+    connection.release();
+  }
 };
 
 /* 내정보 수정 */

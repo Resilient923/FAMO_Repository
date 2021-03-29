@@ -1,5 +1,6 @@
 const { pool } = require("../../../config/database");
 
+
 /* 로그인ID 유무 확인 */
 async function checkUserLoginID(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -112,17 +113,24 @@ async function checkUserID(userID){
 /* 회원 탈퇴 */
 async function deleteUserAccount(userID){
   const connection = await pool.getConnection(async (conn) => conn);
-  const deleteUserAccountQuery = `
-  UPDATE user
-  SET status = -1
-  WHERE userID = ${userID};
-  `;
 
-  await connection.query(
-    deleteUserAccountQuery,
-  );
+  try{
+    const deleteUserAccountQuery = `
+    UPDATE user
+    SET status = -1
+    WHERE userID = ${userID};
+    `;
 
-  connection.release();
+    await connection.query(
+      deleteUserAccountQuery,
+    );
+    
+    connection.release();
+    
+  }catch (err) {
+    connection.release();
+    return res.status(500).send(`Error: ${err.message}`);
+  }
 };
 
 /* 핸드폰 번호 업데이트 */

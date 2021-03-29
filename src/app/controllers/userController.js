@@ -190,55 +190,70 @@ exports.signIn = async function (req, res) {
     }
 
     try {
-        const [userInfoRows] = await userDao.selectUserInfo(loginID);
+        const connection = await pool.getConnection(async conn => conn);
 
-        if (userInfoRows.length == 0) {
-            return res.json({
-                isSuccess: false,
-                code: 303,
-                message: "아이디를 확인해주세요."
-            });
-        }
+        try {
+            const [userInfoRows] = await userDao.selectUserInfo(loginID);
+    
+            if (userInfoRows.length == 0) {
+                connection.release();
 
-        const passwordHash = crypto.pbkdf2Sync(password, userInfoRows[0].passwordSalt, 101024, 64, 'sha512').toString('base64');
-        
-        if (userInfoRows[0].password != passwordHash) {
-            return res.json({
-                isSuccess: false,
-                code: 304,
-                message: "비밀번호를 확인해주세요."
-            });
-        }
-        if (userInfoRows[0].status === -1) {
-            return res.json({
-                isSuccess: false,
-                code: 305,
-                message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
-            });
-        };
-
-        let token = jwt.sign({
-                userID: userInfoRows[0].userID,
-                method: userInfoRows[0].method
-            },
-            secret_config.jwtsecret,
-            {
-                expiresIn: '7d',
-                subject: 'userInfo',
+                return res.json({
+                    isSuccess: false,
+                    code: 303,
+                    message: "아이디를 확인해주세요."
+                });
             }
-        );
+    
+            const passwordHash = crypto.pbkdf2Sync(password, userInfoRows[0].passwordSalt, 101024, 64, 'sha512').toString('base64');
+            
+            if (userInfoRows[0].password != passwordHash) {
+                connection.release();
 
-        res.json({
-            userID: userInfoRows[0].userID,
-            nickname: userInfoRows[0].nickname,
-            jwt: token,
-            isSuccess: true,
-            code: 100,
-            message: "로그인 성공"
-        })
+                return res.json({
+                    isSuccess: false,
+                    code: 304,
+                    message: "비밀번호를 확인해주세요."
+                });
+            }
+            if (userInfoRows[0].status === -1) {
+                connection.release();
 
-    } catch (err) {
-        logger.error(`SignIn Query error\n: ${JSON.stringify(err)}`);
+                return res.json({
+                    isSuccess: false,
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
+                });
+            };
+    
+            let token = jwt.sign({
+                    userID: userInfoRows[0].userID,
+                    method: userInfoRows[0].method
+                },
+                secret_config.jwtsecret,
+                {
+                    expiresIn: '7d',
+                    subject: 'userInfo',
+                }
+            );
+    
+            res.json({
+                userID: userInfoRows[0].userID,
+                nickname: userInfoRows[0].nickname,
+                jwt: token,
+                isSuccess: true,
+                code: 100,
+                message: "로그인 성공"
+            })
+
+            connection.release();
+        } catch (err) {
+            connection.release();
+            logger.error(`SignIn Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }
+    }catch (err) {
+        logger.error(`SignIn DB error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
     }   
 };
@@ -391,23 +406,34 @@ exports.updatePhoneNumber = async function (req, res) {
     }
 
     try{
-        const [phoneNumberRows] = await userDao.checkPhoneNumber(phoneNumber);
-        
-        if (phoneNumberRows[0].exist == 1) {
-            return res.json({
-                isSuccess: false,
-                code: 402,
-                message: "중복된 휴대폰 번호입니다."
-            });
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const [phoneNumberRows] = await userDao.checkPhoneNumber(phoneNumber);
+            
+            if (phoneNumberRows[0].exist == 1) {
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 402,
+                    message: "중복된 휴대폰 번호입니다."
+                });
+            }
+    
+            await userDao.updatePhoneNumber(userIDInToken, phoneNumber);
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: "핸드폰 번호 업데이트 성공"
+            })
+
+            connection.release();
+    
+        }catch (err) {
+            connection.release();
+            logger.error(`Update phone number Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
         }
-
-        await userDao.updatePhoneNumber(userIDInToken, phoneNumber);
-        res.json({
-            isSuccess: true,
-            code: 100,
-            message: "핸드폰 번호 업데이트 성공"
-        })
-
     }catch (err) {
         logger.error(`Update phone number Query error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
@@ -562,42 +588,57 @@ exports.findLoginID = async function (req, res) {
     const phoneNumber = req.verifiedOtpToken.phoneNumber;
 
     try{
-        const [checkPhoneNumberRow] = await userDao.checkPhoneNumber(phoneNumber);
-        
-        if(checkPhoneNumberRow[0].exist == 0){
-            return res.json({
-                isSuccess: false,
-                code: 406,
-                message: `${phoneNumber}로 가입된 계정이 없습니다.`
-            });
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const [checkPhoneNumberRow] = await userDao.checkPhoneNumber(phoneNumber);
+            
+            if(checkPhoneNumberRow[0].exist == 0){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 406,
+                    message: `${phoneNumber}로 가입된 계정이 없습니다.`
+                });
+            }
+    
+            const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
+    
+            if(getUserAccountInfoRow[0].status == -1){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
+                });
+            }
+    
+            if(getUserAccountInfoRow[0].method == 'K'){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 407,
+                    message: "카카오로 로그인해주세요."
+                });
+            }
+    
+            res.json({
+                userID: getUserAccountInfoRow[0].userID,
+                loginID: getUserAccountInfoRow[0].loginID, 
+                isSuccess: true,
+                code: 100,
+                message: "아이디 조회 성공"
+            })
+
+            connection.release();
+    
+        }catch (err) {
+            connection.release();
+            logger.error(`Find LoginID Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
         }
-
-        const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
-
-        if(getUserAccountInfoRow[0].status == -1){
-            return res.json({
-                isSuccess: false,
-                code: 305,
-                message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
-            });
-        }
-
-        if(getUserAccountInfoRow[0].method == 'K'){
-            return res.json({
-                isSuccess: false,
-                code: 407,
-                message: "카카오로 로그인해주세요."
-            });
-        }
-
-        res.json({
-            userID: getUserAccountInfoRow[0].userID,
-            loginID: getUserAccountInfoRow[0].loginID, 
-            isSuccess: true,
-            code: 100,
-            message: "아이디 조회 성공"
-        })
-
     }catch (err) {
         logger.error(`Find LoginID Query error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
@@ -617,52 +658,69 @@ exports.checkLoginID = async function (req, res) {
     }
 
     try{
-        const [checkLoginIDRow] = await userDao.checkUserLoginID(loginID);
+        const connection = await pool.getConnection(async conn => conn);
+        try{
+            const [checkLoginIDRow] = await userDao.checkUserLoginID(loginID);
+    
+            if(checkLoginIDRow[0].exist == 0){
+                connection.release();
 
-        if(checkLoginIDRow[0].exist == 0){
-            return res.json({
-                isSuccess: false,
-                code: 303,
-                message: "아이디를 확인해주세요."
-            });
-        }
+                return res.json({
+                    isSuccess: false,
+                    code: 303,
+                    message: "아이디를 확인해주세요."
+                });
+            }
+    
+            const [selectUserInfoRow] = await userDao.selectUserInfo(loginID);
+    
+            if(selectUserInfoRow[0].phoneNumber !== phoneNumber){
+                connection.release();
 
-        const [selectUserInfoRow] = await userDao.selectUserInfo(loginID);
+                return res.json({
+                    isSuccess: false,
+                    code: 408,
+                    message: "계정에 등록된 휴대폰 번호가 아닙니다. 휴대폰 번호가 변경되었을 시, 고객센터에 문의해주세요."
+                });
+            }
+    
+            const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
+    
+            if(getUserAccountInfoRow[0].status == -1){
+                connection.release();
 
-        if(selectUserInfoRow[0].phoneNumber !== phoneNumber){
-            return res.json({
-                isSuccess: false,
-                code: 408,
-                message: "계정에 등록된 휴대폰 번호가 아닙니다. 휴대폰 번호가 변경되었을 시, 고객센터에 문의해주세요."
-            });
-        }
+                return res.json({
+                    isSuccess: false,
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
+                });
+            }
+    
+            if(getUserAccountInfoRow[0].method == 'K'){
+                connection.release();
 
-        const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
+                return res.json({
+                    isSuccess: false,
+                    code: 407,
+                    message: "카카오로 로그인해주세요."
+                });
+            }
+            
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: "비밀번호를 재설정할 수 있습니다."
+            })
 
-        if(getUserAccountInfoRow[0].status == -1){
-            return res.json({
-                isSuccess: false,
-                code: 305,
-                message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
-            });
-        }
-
-        if(getUserAccountInfoRow[0].method == 'K'){
-            return res.json({
-                isSuccess: false,
-                code: 407,
-                message: "카카오로 로그인해주세요."
-            });
-        }
-        
-        res.json({
-            isSuccess: true,
-            code: 100,
-            message: "비밀번호를 재설정할 수 있습니다."
-        })
-
-    }catch (err) {
-        logger.error(`Check LoginID Query error\n: ${JSON.stringify(err)}`);
+            connection.release();
+    
+        }catch (err) {
+            connection.release();
+            logger.error(`Check LoginID Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }   
+    }catch (err){
+        logger.error(`Check LoginID DB error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
     }
 };
@@ -687,77 +745,98 @@ exports.updatePassword = async function (req, res) {
         });
     }
 
-    try {
-        const [checkLoginIDRow] = await userDao.checkUserLoginID(loginID);
-
-        if(checkLoginIDRow[0].exist == 0){
-            return res.json({
-                isSuccess: false,
-                code: 303,
-                message: "아이디를 확인해주세요."
-            });
-        }
-
-        const [selectUserInfoRow] = await userDao.selectUserInfo(loginID);
-
-        if(selectUserInfoRow[0].phoneNumber !== phoneNumber){
-            return res.json({
-                isSuccess: false,
-                code: 408,
-                message: "계정에 등록된 휴대폰 번호가 아닙니다. 휴대폰 번호가 변경되었을 시, 고객센터에 문의해주세요."
-            });
-        }
-
-        const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
-
-        if(getUserAccountInfoRow[0].status == -1){
-            return res.json({
-                isSuccess: false,
-                code: 305,
-                message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
-            });
-        }
-
-        if(getUserAccountInfoRow[0].method == 'K'){
-            return res.json({
-                isSuccess: false,
-                code: 407,
-                message: "카카오로 로그인해주세요."
-            });
-        }
-
-        if(password.length < 8){
-            return res.json({
-                isSuccess: false,
-                code: 316,
-                message: "비밀번호는 최소 8자입니다."
-            });
-        }
+    try{
+        const connection = await pool.getConnection(async conn => conn);
+        try {
+            const [checkLoginIDRow] = await userDao.checkUserLoginID(loginID);
     
-        var num = password.search(/[0-9]/g);
-        var eng = password.search(/[a-z]/ig);
-        var spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
+            if(checkLoginIDRow[0].exist == 0){
+                connection.release();
+                
+                return res.json({
+                    isSuccess: false,
+                    code: 303,
+                    message: "아이디를 확인해주세요."
+                });
+            }
     
-        if(num < 0 || eng < 0 || spe < 0){
-            return res.json({
-                isSuccess: false,
-                code: 317,
-                message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 입력해주세요."
-            });
-        }
+            const [selectUserInfoRow] = await userDao.selectUserInfo(loginID);
+    
+            if(selectUserInfoRow[0].phoneNumber !== phoneNumber){
+                connection.release();
 
-        const passwordSalt = crypto.randomBytes(64).toString('base64');
-        const passwordHash = crypto.pbkdf2Sync(password, passwordSalt, 101024, 64, 'sha512').toString('base64');
-        const passwordParams = [passwordHash, passwordSalt];
+                return res.json({
+                    isSuccess: false,
+                    code: 408,
+                    message: "계정에 등록된 휴대폰 번호가 아닙니다. 휴대폰 번호가 변경되었을 시, 고객센터에 문의해주세요."
+                });
+            }
+    
+            const [getUserAccountInfoRow] = await userDao.selectUserInfoByPhone(phoneNumber);
+    
+            if(getUserAccountInfoRow[0].status == -1){
+                connection.release();
 
-        await userDao.updatePassword(phoneNumber, passwordParams);
+                return res.json({
+                    isSuccess: false,
+                    code: 305,
+                    message: "비활성화된 계정입니다. 고객센터에 문의해주세요."
+                });
+            }
+    
+            if(getUserAccountInfoRow[0].method == 'K'){
+                connection.release();
 
-        res.json({
-            isSuccess: true,
-            code: 100,
-            message: "비밀번호가 변경되었습니다."
-        })
+                return res.json({
+                    isSuccess: false,
+                    code: 407,
+                    message: "카카오로 로그인해주세요."
+                });
+            }
+    
+            if(password.length < 8){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 316,
+                    message: "비밀번호는 최소 8자입니다."
+                });
+            }
         
+            var num = password.search(/[0-9]/g);
+            var eng = password.search(/[a-z]/ig);
+            var spe = password.search(/[`~!@@#$%^&*|₩₩₩'₩";:₩/?]/gi);
+        
+            if(num < 0 || eng < 0 || spe < 0){
+                connection.release();
+
+                return res.json({
+                    isSuccess: false,
+                    code: 317,
+                    message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 입력해주세요."
+                });
+            }
+    
+            const passwordSalt = crypto.randomBytes(64).toString('base64');
+            const passwordHash = crypto.pbkdf2Sync(password, passwordSalt, 101024, 64, 'sha512').toString('base64');
+            const passwordParams = [passwordHash, passwordSalt];
+    
+            await userDao.updatePassword(phoneNumber, passwordParams);
+    
+            res.json({
+                isSuccess: true,
+                code: 100,
+                message: "비밀번호가 변경되었습니다."
+            })
+
+            connection.release();
+            
+        }catch (err) {
+            connection.release();
+            logger.error(`Update Password Query error\n: ${JSON.stringify(err)}`);
+            return res.status(500).send(`Error: ${err.message}`);
+        }   
     }catch (err) {
         logger.error(`Update Password Query error\n: ${JSON.stringify(err)}`);
         return res.status(500).send(`Error: ${err.message}`);
