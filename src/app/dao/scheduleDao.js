@@ -91,26 +91,30 @@ async function getdate(scheduleID) {
 //유저별전체일정 조회
 async function getscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getscheduleQuery = `        
-  select scheduleID, 
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate', 
-  scheduleName,
-  scheduleMemo,
-  schedulePick,
-  scheduleStatus,
-  colorInfo
-  from schedule
-  left join category on category.categoryID = schedule.scheduleCategoryID
-  left join categoryColor ON categoryColor.colorID = category.categoryColor
-  where scheduleDelete = 1 and schedule.userID = '${userID}'
-  limit ${offset},${limit};
-  `;
+  try {
+    const getscheduleQuery = `        
+    select scheduleID, 
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate', 
+    scheduleNam,
+    scheduleMemo,
+    schedulePick,
+    scheduleStatus,
+    colorInfo
+    from schedule
+    left join category on category.categoryID = schedule.scheduleCategoryID
+    left join categoryColor ON categoryColor.colorID = category.categoryColor
+    where scheduleDelete = 1 and schedule.userID = '${userID}'
+    limit ${offset},${limit};
+    `;
   
-  const getscheduleRow = await connection.query(
-    getscheduleQuery,
-  );
-  connection.release();
-  return getscheduleRow;
+    const getscheduleRow = await connection.query(
+      getscheduleQuery,
+    );
+    connection.release();
+    return getscheduleRow;
+  }catch (err){
+    connection.release();
+  }
 };
 
 //유저별오늘일정 조회

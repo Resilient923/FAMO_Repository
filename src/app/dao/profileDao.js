@@ -127,6 +127,7 @@ async function updateUserProfile(userID, updateProfileParams){
 
 /* 닉네임 수정 */
 async function updateNickname(userID, nickname){
+
   const connection = await pool.getConnection(async conn => conn);
 
   const updateNicknameQuery = `
