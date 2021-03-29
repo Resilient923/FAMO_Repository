@@ -709,7 +709,7 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%','${searchWord}','%') and userID = ${userID}
+where scheduleMemo like concat('%',${searchWord},'%') and userID = ${userID}
 and scheduleDelete = 1;
 `; 
   
@@ -749,7 +749,7 @@ async function insertSearchHistoryInfo(userID,searchWord) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertSearchHistoryQuery = `
   insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
-values (${userID},'${searchWord}',default,default);
+values (${userID},${searchWord},default,default);
 `; 
   
   const insertSearchHistoryRow = await connection.query(
