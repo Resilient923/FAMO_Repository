@@ -23,15 +23,6 @@ const {logger} = require('./winston');
      dateStrings: 'date'
  });
 
-// const pool = mysql.createPool({
-//     host: 'rp.c4wybh857q9a.ap-northeast-2.rds.amazonaws.com',
-//     user: 'steady',
-//     port: 3306,
-//     password: databaseInfo.rdspwd,
-//     database: 'Real_famo',
-//     dateStrings: 'date'
-// });
-
 /*soi local test DB*/
 // const pool = mysql.createPool({
 //     host: '127.0.0.1',
