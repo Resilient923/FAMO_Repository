@@ -351,17 +351,17 @@ async function updateachievementscheduleInfo(scheduleID,userID) {
 async function getdoneschedulecountInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getdoneschedulecountQuery = `
-  select count(scheduleID) as 'doneScheduleCount'
-  from schedule
-  where userID ='${userID}' and scheduleStatus = 1 and scheduleDelete = 1
-  `; 
+    const getdoneschedulecountQuery = `
+    select count(scheduleID) as 'doneScheduleCount'
+    from schedule
+    where userID ='${userID}' and scheduleStatus = 1 and scheduleDelete = 1
+    `; 
   
-  const  getdoneschedulecountRow = await connection.query(
-    getdoneschedulecountQuery,   
-  );
-  connection.release();
-  return getdoneschedulecountRow;
+    const getdoneschedulecountRow = await connection.query(
+      getdoneschedulecountQuery,   
+    );
+    connection.release();
+    return getdoneschedulecountRow;
   }catch(err){
     connection.release();
   }
@@ -371,17 +371,17 @@ async function getdoneschedulecountInfo(userID) {
 async function getremaintotalscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getremainscheduleQuery = `
-  select count(scheduleID) as 'remainScheduleCount'
-  from schedule
-  where userID ='${userID}' and scheduleStatus = -1 and scheduleDelete = 1;
-  `; 
+    const getremainscheduleQuery = `
+    select count(scheduleID) as 'remainScheduleCount'
+    from schedule
+    where userID ='${userID}' and scheduleStatus = -1 and scheduleDelete = 1;
+    `; 
   
-  const getremainscheduleRow = await connection.query(
-    getremainscheduleQuery, 
-  );
-  connection.release();
-  return getremainscheduleRow;
+    const getremainscheduleRow = await connection.query(
+      getremainscheduleQuery, 
+    );
+    connection.release();
+    return getremainscheduleRow;
   }catch(err){
     connection.release();
   }
@@ -391,17 +391,17 @@ async function getremaintotalscheduleInfo(userID) {
 async function getremaintodayscheduleInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getremaintodayscheduleQuery = `
-  select count(scheduleID) as 'remainScheduleCount'
-  from schedule
-  where userID = ${userID} and scheduleStatus = -1 and scheduleDate = current_date() and scheduleDelete = 1;
-  `;
+    const getremaintodayscheduleQuery = `
+    select count(scheduleID) as 'remainScheduleCount'
+    from schedule
+    where userID = ${userID} and scheduleStatus = -1 and scheduleDate = current_date() and scheduleDelete = 1;
+    `;
   
-  const  getremaintodayscheduleRow = await connection.query(
-    getremaintodayscheduleQuery,   
-  );
-  connection.release();
-  return getremaintodayscheduleRow;
+    const getremaintodayscheduleRow = await connection.query(
+      getremaintodayscheduleQuery,   
+    );
+    connection.release();
+    return getremaintodayscheduleRow;
   }catch(err){
     connection.release();
   }
@@ -411,29 +411,29 @@ async function getremaintodayscheduleInfo(userID) {
 async function getschedulebydateInfo(userID,scheduleDate) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getschedulebydateQuery = `
-  select scheduleID,
-       date_format(scheduleDate, '%e %b') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       categoryID,
-       categoryName,
-       colorInfo,
-       concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate',
-       scheduleOrder
-from schedule
-         left join category on category.categoryID = schedule.scheduleCategoryID
+    const getschedulebydateQuery = `
+    select scheduleID,
+      date_format(scheduleDate, '%e %b') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      categoryID,
+      categoryName,
+      colorInfo,
+      concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate',
+      scheduleOrder
+    from schedule
+        left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where scheduleDelete = 1
-and schedule.userID = ${userID} and scheduleDate = '${scheduleDate}'
-order by scheduleOrder desc;
-`; 
-  
-  const getschedulebydateRow = await connection.query(
-    getschedulebydateQuery, 
-  );
-  connection.release();
-  return getschedulebydateRow;
+    where scheduleDelete = 1
+    and schedule.userID = ${userID} and scheduleDate = '${scheduleDate}'
+    order by scheduleOrder desc;
+    `;
+    
+    const getschedulebydateRow = await connection.query(
+      getschedulebydateQuery, 
+    );
+    connection.release();
+    return getschedulebydateRow;
   }catch(err){
     connection.release();
   }
@@ -443,28 +443,28 @@ order by scheduleOrder desc;
 async function getschedulemonthInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getschedulemonthQuery = `
-  SELECT
+    const getschedulemonthQuery = `
+    SELECT
     date_format(scheduleDate, '%e %b') as 'scheduleDate',
-       scheduleDate as 'scheduleForm',
-       scheduleID,
-       scheduleName,
-       scheduleMemo,
-       colorInfo,
-       scheduleOrder
-FROM schedule
-left join category  on schedule.scheduleCategoryID = category.categoryID
-left join categoryColor on categoryColor = colorID
-where schedule.userID = ${userID} and MONTH(scheduleDate) = '${month}' 
-and Year(scheduleDate) = '${year}' and scheduleDelete = 1
-order by scheduleOrder desc;
-`; 
+      scheduleDate as 'scheduleForm',
+      scheduleID,
+      scheduleName,
+      scheduleMemo,
+      colorInfo,
+      scheduleOrder
+    FROM schedule
+    left join category  on schedule.scheduleCategoryID = category.categoryID
+    left join categoryColor on categoryColor = colorID
+    where schedule.userID = ${userID} and MONTH(scheduleDate) = '${month}' 
+    and Year(scheduleDate) = '${year}' and scheduleDelete = 1
+    order by scheduleOrder desc;
+    `; 
   
-  const getschedulemonthRow = await connection.query(
-    getschedulemonthQuery,
-  );
-  connection.release();
-  return getschedulemonthRow;
+    const getschedulemonthRow = await connection.query(
+      getschedulemonthQuery,
+    );
+    connection.release();
+    return getschedulemonthRow;
   }catch(err){
     connection.release();
   }
@@ -474,19 +474,19 @@ order by scheduleOrder desc;
 async function getscheduledayInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getscheduledayQuery = `
-  select distinct date_format(scheduleDate,'%Y-%m-%d') as 'date'
-  from schedule
-  where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
-  and Year(scheduleDate) = '${year}' and scheduleDelete = 1
-  order by scheduleDate;
-  `; 
+    const getscheduledayQuery = `
+    select distinct date_format(scheduleDate,'%Y-%m-%d') as 'date'
+    from schedule
+    where schedule.userID = '${userID}' and MONTH(scheduleDate) = '${month}' 
+    and Year(scheduleDate) = '${year}' and scheduleDelete = 1
+    order by scheduleDate;
+    `; 
   
-  const getscheduledayRow = await connection.query(
-    getscheduledayQuery,   
-  );
-  connection.release();
-  return getscheduledayRow;
+    const getscheduledayRow = await connection.query(
+      getscheduledayQuery,   
+    );
+    connection.release();
+    return getscheduledayRow;
   }catch(err){
     connection.release();
   }
@@ -496,28 +496,25 @@ async function getscheduledayInfo(userID,month,year) {
 async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getscheduledetailsQuery = `
-  select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
-  scheduleDate as 'scheduleForm',
-       categoryName,
-        scheduleName,
-       scheduleMemo,
-       scheduleTime,
-        colorInfo
-from schedule
-left join category  on schedule.scheduleCategoryID = category.categoryID
-left join categoryColor on categoryColor = colorID
-where scheduleID = ${scheduleID};
-`;
+    const getscheduledetailsQuery = `
+    select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
+    scheduleDate as 'scheduleForm',
+      categoryName,
+      scheduleName,
+      scheduleMemo,
+      scheduleTime,
+      colorInfo
+    from schedule
+    left join category  on schedule.scheduleCategoryID = category.categoryID
+    left join categoryColor on categoryColor = colorID
+    where scheduleID = ${scheduleID};
+    `;
   
-  const getscheduledetailsRow = await connection.query(
-
-    getscheduledetailsQuery
-    
-
-  );
-  connection.release();
-  return getscheduledetailsRow;
+    const getscheduledetailsRow = await connection.query(
+      getscheduledetailsQuery
+    );
+    connection.release();
+    return getscheduledetailsRow;
   }catch(err){
     connection.release();
   }
@@ -527,17 +524,17 @@ where scheduleID = ${scheduleID};
 async function getdonemonthcountInfo(userID,scheduleDate) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getdoneschedulecountQuery = `
-  select count(scheduleID) as 'doneScheduleCount'
-  from schedule
-  where userID = ${userID} and scheduleDelete = 1 and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
-  `; 
+    const getdoneschedulecountQuery = `
+    select count(scheduleID) as 'doneScheduleCount'
+    from schedule
+    where userID = ${userID} and scheduleDelete = 1 and scheduleStatus = -1 and scheduleDate = '${scheduleDate}';
+    `; 
   
-  const  getdoneschedulecountRow = await connection.query(
-    getdoneschedulecountQuery,   
-  );
-  connection.release();
-  return getdoneschedulecountRow;
+    const getdoneschedulecountRow = await connection.query(
+      getdoneschedulecountQuery,   
+    );
+    connection.release();
+    return getdoneschedulecountRow;
   }catch(err){
     connection.release();
   }
@@ -547,27 +544,27 @@ async function getdonemonthcountInfo(userID,scheduleDate) {
 async function getpickscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getpickscheduleQuery = `
-  select scheduleID,
-       date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       categoryID,
-       colorInfo
-  from schedule
-        left join category on category.categoryID = schedule.scheduleCategoryID
-        left join categoryColor ON categoryColor.colorID = category.categoryColor
-  where schedule.userID = '${userID}' and schedulePick = 1 and scheduleDelete = 1
-  order by schedulePick desc 
-  limit ${offset},${limit};
-  `; 
+    const getpickscheduleQuery = `
+    select scheduleID,
+      date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      categoryID,
+      colorInfo
+    from schedule
+      left join category on category.categoryID = schedule.scheduleCategoryID
+      left join categoryColor ON categoryColor.colorID = category.categoryColor
+    where schedule.userID = '${userID}' and schedulePick = 1 and scheduleDelete = 1
+    order by schedulePick desc 
+    limit ${offset},${limit};
+    `; 
   
-  const getpickscheduleRow = await connection.query(
-    getpickscheduleQuery, 
-  );
-  connection.release();
-  return getpickscheduleRow;
+    const getpickscheduleRow = await connection.query(
+      getpickscheduleQuery, 
+    );
+    connection.release();
+    return getpickscheduleRow;
   }catch(err){
     connection.release();
   }
@@ -577,27 +574,27 @@ async function getpickscheduleInfo(userID,offset,limit) {
 async function getrecentscheduleInfo(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getrecentscheduleQuery = `
-  select scheduleID,
-       date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       categoryID,
-       colorInfo
-  from schedule
-        left join category on category.categoryID = schedule.scheduleCategoryID
-        left join categoryColor ON categoryColor.colorID = category.categoryColor
-  where schedule.userID = '${userID}' and scheduleDelete = 1
-  order by scheduleDate desc 
-  limit ${offset},${limit};
-  `; 
+    const getrecentscheduleQuery = `
+    select scheduleID,
+      date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      categoryID,
+      colorInfo
+    from schedule
+      left join category on category.categoryID = schedule.scheduleCategoryID
+      left join categoryColor ON categoryColor.colorID = category.categoryColor
+    where schedule.userID = '${userID}' and scheduleDelete = 1
+    order by scheduleDate desc 
+    limit ${offset},${limit};
+    `; 
   
-  const  getrecentscheduleRow = await connection.query(
-    getrecentscheduleQuery,  
-  );
-  connection.release();
-  return getrecentscheduleRow;
+    const getrecentscheduleRow = await connection.query(
+      getrecentscheduleQuery,  
+    );
+    connection.release();
+    return getrecentscheduleRow;
   }catch(err){
     connection.release();
   }
@@ -607,25 +604,24 @@ async function getrecentscheduleInfo(userID,offset,limit) {
 async function getnocategory(userID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getnocategoryQuery = `
-  select scheduleID,
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick
-from schedule
-where scheduleDelete = 1 
-  and schedule.userID = ${userID}
-  and scheduleCategoryID is NULL
-order by scheduleDate desc
-limit ${offset},${limit};
-`; 
-  const getnocategoryRow = await connection.query(
-    getnocategoryQuery, 
-    
-  );
-  connection.release();
-  return getnocategoryRow;
+    const getnocategoryQuery = `
+    select scheduleID,
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick
+    from schedule
+    where scheduleDelete = 1 
+    and schedule.userID = ${userID}
+    and scheduleCategoryID is NULL
+    order by scheduleDate desc
+    limit ${offset},${limit};
+    `; 
+    const getnocategoryRow = await connection.query(
+      getnocategoryQuery, 
+    );
+    connection.release();
+    return getnocategoryRow;
   }catch(err){
     connection.release();
   }
@@ -635,28 +631,28 @@ limit ${offset},${limit};
 async function getscategoryrecentInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getscategoryrecentQuery = `
-  select scheduleID,
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       colorInfo
-from schedule
-left join category on categoryID = scheduleCategoryID
-left join categoryColor on categoryColor = colorID
-where scheduleDelete = 1
-  and schedule.userID = ${userID}
-  and scheduleCategoryID = ${schedulecategoryID}
-order by scheduleDate desc 
-limit ${offset},${limit};
-`; 
+    const getscategoryrecentQuery = `
+    select scheduleID,
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      colorInfo
+    from schedule
+    left join category on categoryID = scheduleCategoryID
+    left join categoryColor on categoryColor = colorID
+    where scheduleDelete = 1
+    and schedule.userID = ${userID}
+    and scheduleCategoryID = ${schedulecategoryID}
+    order by scheduleDate desc 
+    limit ${offset},${limit};
+    `; 
   
-  const getscategoryrecentRow = await connection.query(
-    getscategoryrecentQuery, 
-  );
-  connection.release();
-  return getscategoryrecentRow;
+    const getscategoryrecentRow = await connection.query(
+      getscategoryrecentQuery, 
+    );
+    connection.release();
+    return getscategoryrecentRow;
   }catch(err){
     connection.release();
   }
@@ -666,28 +662,28 @@ limit ${offset},${limit};
 async function getscategoryleftInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getscategoryleftQuery = `
-  select scheduleID,
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       colorInfo
-from schedule
-         left join category on categoryID = scheduleCategoryID
-         left join categoryColor on categoryColor = colorID
-where scheduleDelete = 1
-  and schedule.userID = ${userID}
-  and scheduleCategoryID = ${schedulecategoryID}
-order by scheduleStatus
-limit ${offset},${limit};
-`; 
+    const getscategoryleftQuery = `
+    select scheduleID,
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      colorInfo
+    from schedule
+        left join category on categoryID = scheduleCategoryID
+        left join categoryColor on categoryColor = colorID
+    where scheduleDelete = 1
+    and schedule.userID = ${userID}
+    and scheduleCategoryID = ${schedulecategoryID}
+    order by scheduleStatus
+    limit ${offset},${limit};
+    `; 
   
-  const  getscategoryleftRow = await connection.query(
-    getscategoryleftQuery,     
-  );
-  connection.release();
-  return getscategoryleftRow;
+    const getscategoryleftRow = await connection.query(
+      getscategoryleftQuery,     
+    );
+    connection.release();
+    return getscategoryleftRow;
   }catch(err){
     connection.release();
   }
@@ -697,29 +693,28 @@ limit ${offset},${limit};
 async function getscategorydoneInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
-  const getscategorydoneQuery = `
-  select scheduleID,
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       colorInfo
-from schedule
-left join category on categoryID = scheduleCategoryID
-left join categoryColor on categoryColor = colorID
-where scheduleDelete = 1
-  and schedule.userID = ${userID}
-  and scheduleCategoryID = ${schedulecategoryID}
-order by scheduleStatus desc
-limit ${offset},${limit};
-`; 
-  
-  const  getscategorydoneRow = await connection.query(
-    getscategorydoneQuery, 
+    const getscategorydoneQuery = `
+    select scheduleID,
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      colorInfo
+    from schedule
+    left join category on categoryID = scheduleCategoryID
+    left join categoryColor on categoryColor = colorID
+    where scheduleDelete = 1
+    and schedule.userID = ${userID}
+    and scheduleCategoryID = ${schedulecategoryID}
+    order by scheduleStatus desc
+    limit ${offset},${limit};
+    `; 
     
-  );
-  connection.release();
-  return getscategorydoneRow;
+    const getscategorydoneRow = await connection.query(
+      getscategorydoneQuery,
+    );
+    connection.release();
+    return getscategorydoneRow;
   }catch(err){
     connection.release();
   }
