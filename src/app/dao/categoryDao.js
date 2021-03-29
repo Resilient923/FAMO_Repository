@@ -12,27 +12,27 @@ async function insertcategoryInfo(insertcategoryParams) {
     insertcategoryQuery,
     insertcategoryParams
   );
-  connection.release();
 
+  connection.release();
   return insertcategoryrows;
-}
+};
+
 //카테고리개수제한 체크
 async function insertcategoryCountCheck(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const insertcategoryCountCheckQuery = `
   select count(categoryID) as 'categoryCount'
   from category
-  where userID = '${userID}';
-                
-                `;
+  where userID = ${userID};
+  `;
  
   const [insertcategoryCountCheckRows] = await connection.query(
     insertcategoryCountCheckQuery,
-  
   );
   connection.release();
   return insertcategoryCountCheckRows;
-}
+};
+
 //카테고리중복체크
 async function insertcategoryCheck(categoryName,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -40,16 +40,17 @@ async function insertcategoryCheck(categoryName,userID) {
                 SELECT categoryName
                 FROM category
                 WHERE categoryName = '${categoryName}'
-                and userID = '${userID}';
+                and userID = ${userID};
                 `;
  
   const [insertcategoryCheckRows] = await connection.query(
     insertcategoryCheckQuery,
-  
   );
+
   connection.release();
   return insertcategoryCheckRows;
-}
+};
+
 //카테고리색상중복체크
 async function insertcategoryColorCheck(categoryColor,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -57,7 +58,7 @@ async function insertcategoryColorCheck(categoryColor,userID) {
                 SELECT categoryColor
                 FROM category
                 WHERE categoryColor = '${categoryColor}'
-                and userID = '${userID}';
+                and userID = ${userID};
                 `;
  
   const [insertcategoryColorCheckRows] = await connection.query(
@@ -66,7 +67,8 @@ async function insertcategoryColorCheck(categoryColor,userID) {
   );
   connection.release();
   return insertcategoryColorCheckRows;
-}
+};
+
 //카테고리수정
 async function updatecategoryInfo(updatecategoryParams) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -80,18 +82,19 @@ async function updatecategoryInfo(updatecategoryParams) {
   const [updatecategoryRows] = await connection.query(
     updatecategoryQuery,
     updatecategoryParams
-  
   );
+
   connection.release();
   return updatecategoryRows;
-}
+};
+
 //카테고리삭제
 async function deletecategoryInfo(categoryID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const deletecategoryQuery = `
   delete
 from category
-where categoryID = '${categoryID}';
+where categoryID = ${categoryID};
                 `;
  
   const [deletecategoryRows] = await connection.query(
@@ -99,7 +102,8 @@ where categoryID = '${categoryID}';
   );
   connection.release();
   return deletecategoryRows;
-}
+};
+
 //카테고리조회
 async function getcategoryInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -116,7 +120,7 @@ async function getcategoryInfo(userID) {
   );
   connection.release();
   return getcategoryRow;
-}
+};
 
 module.exports = {
   insertcategoryInfo,
