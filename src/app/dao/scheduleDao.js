@@ -369,7 +369,7 @@ async function getschedulemonthInfo(userID,month,year) {
   const connection = await pool.getConnection(async (conn) => conn);
   const getschedulemonthQuery = `
   SELECT
-    date_format(scheduleDate, ' %e %b') as 'scheduleDate',
+    date_format(scheduleDate, '%e %b') as 'scheduleDate',
        scheduleDate as 'scheduleForm',
        scheduleID,
        scheduleName,
