@@ -3,89 +3,114 @@ const { pool } = require("../../../config/database");
 // 오늘일정생성
 async function inserttodayscheduleInfo(inserttodayscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const inserttodayscheduleQuery = `
-  insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
+
+  try{
+    const inserttodayscheduleQuery = `
+    insert into schedule(userID,scheduleName,scheduleDate,scheduleTime,
     scheduleCategoryID,scheduleMemo,scheduleStatus,scheduleDelete,
     scheduleCreatedAt,scheduleUpdatedAt,schedulePick,scheduleOrder)
-  values (?,?,?,?,?,?,default,default,default,default,default,?+1);
-  `;
+    values (?,?,?,?,?,?,default,default,default,default,default,?+1);
+    `;
 
-  await connection.query(
-    inserttodayscheduleQuery,
-    inserttodayscheduleParams
-  );
-  connection.release();
+    await connection.query(
+      inserttodayscheduleQuery,
+      inserttodayscheduleParams
+    );
+    connection.release();
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정생성
 async function insertscheduleInfo(insertscheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const insertscheduleQuery = `
-  insert into schedule(userID, scheduleName, scheduleDate, scheduleTime,
+  try{
+    const insertscheduleQuery = `
+    insert into schedule(userID, scheduleName, scheduleDate, scheduleTime,
     scheduleCategoryID, scheduleMemo, scheduleStatus,
     scheduleDelete, scheduleCreatedAt, scheduleUpdatedAt, schedulePick,scheduleOrder)
-  values (?, ?, ?, ?, ?, ?, default, default, default, default, default,?+1);
-  `;
+    values (?, ?, ?, ?, ?, ?, default, default, default, default, default,?+1);
+    `;
 
-  await connection.query(
-    insertscheduleQuery,
-    insertscheduleParams
-  );
-  connection.release();
+    await connection.query(
+      insertscheduleQuery,
+      insertscheduleParams
+    );
+    connection.release();
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정 생성시 Order값 받기
 async function getOrderInfo(getOrderParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getOrderQuery = `
-  select max(scheduleOrder) as 'maxScheduleOrder'
-from schedule
-where userID=? and scheduleDate=?;
-  `;
+  
+  try{
+    const getOrderQuery = `
+    select max(scheduleOrder) as 'maxScheduleOrder'
+    from schedule
+    where userID=? and scheduleDate=?;
+    `;
 
-  const getOrderRow = await connection.query(
-    getOrderQuery,
-    getOrderParams
-  );
-  connection.release();
-  return getOrderRow;
+    const getOrderRow = await connection.query(
+      getOrderQuery,
+      getOrderParams
+    );
+    connection.release();
+    return getOrderRow;
+
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정 수정
 async function updatescheduleInfo(updatescheduleParams) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const updatescheduleQuery = `        
-  update schedule
-  set scheduleName=?,
-  scheduleDate=?,
-  scheduleCategoryID=?,
-  scheduleMemo=?,
-  scheduleUpdatedAt=current_timestamp
-  where scheduleID = ?;
+
+  try{
+    const updatescheduleQuery = `        
+    update schedule
+    set scheduleName=?,
+    scheduleDate=?,
+    scheduleCategoryID=?,
+    scheduleMemo=?,
+    scheduleUpdatedAt=current_timestamp
+    where scheduleID = ?;
     `;
   
-  const updatescheduleRow = await connection.query(
-    updatescheduleQuery, 
-    updatescheduleParams 
-  );
-  connection.release();
-  return updatescheduleRow;
+    const updatescheduleRow = await connection.query(
+      updatescheduleQuery, 
+      updatescheduleParams 
+    );
+    connection.release();
+    return updatescheduleRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정수정할때 스케쥴날짜 가져오는 Dao
 async function getdate(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getdateQuery = `
-  select scheduleDate
-  from schedule
-  where scheduleID = ${scheduleID};
-  `; 
+
+  try{
+    const getdateQuery = `
+    select scheduleDate
+    from schedule
+    where scheduleID = ${scheduleID};
+    `; 
   
-  const getdateRow = await connection.query(
-    getdateQuery,  
-  );
-  connection.release();
-  return getdateRow;
+    const getdateRow = await connection.query(
+      getdateQuery,  
+    );
+    connection.release();
+    return getdateRow; 
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //유저별전체일정 조회
@@ -95,7 +120,7 @@ async function getscheduleInfo(userID,offset,limit) {
     const getscheduleQuery = `        
     select scheduleID, 
     date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate', 
-    scheduleNam,
+    scheduleName,
     scheduleMemo,
     schedulePick,
     scheduleStatus,
@@ -120,163 +145,206 @@ async function getscheduleInfo(userID,offset,limit) {
 //유저별오늘일정 조회
 async function getscheduletodayInfo(userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getscheduletodayQuery = `        
-  select scheduleID,
-       date_format(scheduleDate, '%e %b') as 'scheduleDate',
-       scheduleName,
-       scheduleMemo,
-       schedulePick,
-       scheduleStatus,
-       categoryID,
-       categoryName,
-       colorInfo,
-       scheduleOrder,
-       concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate'
-from schedule
-         left join category on category.categoryID = schedule.scheduleCategoryID
+
+  try{
+    const getscheduletodayQuery = `        
+    select scheduleID,
+      date_format(scheduleDate, '%e %b') as 'scheduleDate',
+      scheduleName,
+      scheduleMemo,
+      schedulePick,
+      scheduleStatus,
+      categoryID,
+      categoryName,
+      colorInfo,
+      scheduleOrder,
+      concat(date_format(scheduleDate, '%Y년 %m월 %d일'), ' ', SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),'요일') as 'scheduleFormDate'
+    from schedule
+        left join category on category.categoryID = schedule.scheduleCategoryID
         left join categoryColor ON categoryColor.colorID = category.categoryColor
-where scheduleDelete = 1
-and schedule.userID = ${userID} and scheduleDate = current_date 
-order by scheduleOrder desc;
-  `;
-  
-  const getscheduletodayRow = await connection.query(
-    getscheduletodayQuery, 
-  );
-  connection.release();
-  return getscheduletodayRow;
+    where scheduleDelete = 1
+    and schedule.userID = ${userID} and scheduleDate = current_date 
+    order by scheduleOrder desc;
+    `;
+    
+    const getscheduletodayRow = await connection.query(
+      getscheduletodayQuery, 
+    );
+    connection.release();
+    return getscheduletodayRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //카테고리별 일정 조회
 async function getschedulebycategoryInfo(userID,schedulecategoryID,offset,limit) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const getschedulebycategoryQuery = `
-        
-  select scheduleID,
-  date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
-  scheduleName,
-  scheduleMemo,
-  schedulePick,
-  colorInfo
-from schedule
+
+  try{
+    const getschedulebycategoryQuery = `
+    select scheduleID,
+    date_format(scheduleDate, '%Y.%m.%d') as 'scheduleDate',
+    scheduleName,
+    scheduleMemo,
+    schedulePick,
+    colorInfo
+    from schedule
     left join category on categoryID = scheduleCategoryID
     left join categoryColor on categoryColor = colorID
-where scheduleDelete = 1
-and schedule.userID = ${userID}
-and scheduleCategoryID = ${schedulecategoryID}
-limit ${offset},${limit};
-`; 
-  
-  const getschedulebycategoryRow = await connection.query(
-    getschedulebycategoryQuery,  
-  );
-  connection.release();
-  return getschedulebycategoryRow;
+    where scheduleDelete = 1
+    and schedule.userID = ${userID}
+    and scheduleCategoryID = ${schedulecategoryID}
+    limit ${offset},${limit};
+    `; 
+    
+    const getschedulebycategoryRow = await connection.query(
+      getschedulebycategoryQuery,  
+    );
+    connection.release();
+    return getschedulebycategoryRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정삭제
 async function deletescheduleInfo(userID,scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const deletescheduleQuery = `        
-  update schedule
-  set scheduleDelete = -1
-  where scheduleID='${scheduleID}' and userID = ${userID};
-  `;
+
+  try{
+    const deletescheduleQuery = `        
+    update schedule
+    set scheduleDelete = -1
+    where scheduleID='${scheduleID}' and userID = ${userID};
+    `;
   
-  const deletescheduleRow = await connection.query(
-    deletescheduleQuery, 
-  );
-  connection.release();
-  return deletescheduleRow;
+    const deletescheduleRow = await connection.query(
+      deletescheduleQuery, 
+    );
+    connection.release();
+    return deletescheduleRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정삭제 순서초기화
 async function orderrefresh1() {
   const connection = await pool.getConnection(async (conn) => conn);
-  const orderrefresh1Query = `
-   select @scheduleOrder:=-1;
-`;
- const orderrefresh1Row = await connection.query(
-    orderrefresh1Query, 
-   
-  );
-  connection.release();
-  return orderrefresh1Row;
+
+  try{
+    const orderrefresh1Query = `
+    select @scheduleOrder:=-1;
+    `;
+    const orderrefresh1Row = await connection.query(
+      orderrefresh1Query,
+    );
+    connection.release();
+    return orderrefresh1Row;
+  }catch (err) {
+    connection.release();
+  }
 };
+
 async function orderrefresh2(userID,Date) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const orderrefresh2Query = `
-  update schedule
-set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
-where userID = '${userID}' and scheduleDelete =1 and scheduleDate = '${Date}' order by scheduleOrder;
-`;
- const orderrefresh2Row = await connection.query(
-  orderrefresh2Query, 
-   
-  );
-  connection.release();
-  return orderrefresh2Row;
+
+  try{
+    const orderrefresh2Query = `
+    update schedule
+    set scheduleOrder=@scheduleOrder := @scheduleOrder + 1
+    where userID = '${userID}' and scheduleDelete =1 and scheduleDate = '${Date}' order by scheduleOrder;
+    `;
+    const orderrefresh2Row = await connection.query(
+      orderrefresh2Query, 
+    );
+    connection.release();
+    return orderrefresh2Row;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //삭제할때 일정날짜받아오기
 async function orderrefresh3(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const orderrefresh3Query = `
-  select scheduleDate, scheduleOrder from schedule where scheduleID = '${scheduleID}';
-`;
 
-const orderrefresh3Row = await connection.query(
-  orderrefresh3Query,   
-);
-  connection.release();
-  return orderrefresh3Row;
+  try{
+    const orderrefresh3Query = `
+    select scheduleDate, scheduleOrder from schedule where scheduleID = '${scheduleID}';
+    `;
+
+    const orderrefresh3Row = await connection.query(
+      orderrefresh3Query,   
+    );
+    connection.release();
+    return orderrefresh3Row;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 async function orderrefresh(userID, scheduleDate, scheduleOrder){
   const connection = await pool.getConnection(async (conn) => conn);
-  const orderrefreshQuery = `
-  UPDATE schedule
-  SET scheduleOrder = scheduleOrder - 1
-  WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
-  ORDER BY scheduleOrder;
-  `;
+
+  try{
+    const orderrefreshQuery = `
+    UPDATE schedule
+    SET scheduleOrder = scheduleOrder - 1
+    WHERE userID = ${userID} AND scheduleDelete = 1 AND scheduleDate = '${scheduleDate}' AND scheduleOrder > ${scheduleOrder}
+    ORDER BY scheduleOrder;
+    `;
   
-  await connection.query(
-    orderrefreshQuery,
-  );
-  connection.release();
+    await connection.query(
+      orderrefreshQuery,
+    );
+    connection.release();
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정 즐겨찾기,즐겨찾기 취소
 async function patchschedulepickInfo(scheduleID,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const patchschedulepickQuery = `        
-  update schedule
-  set schedulePick = if(schedulePick = 1, -1, 1)
-  where scheduleID = '${scheduleID}' and userID = ${userID};
-  `;
+
+  try{
+    const patchschedulepickQuery = `        
+    update schedule
+    set schedulePick = if(schedulePick = 1, -1, 1)
+    where scheduleID = '${scheduleID}' and userID = ${userID};
+    `;
   
-  const patchschedulepickRow = await connection.query(
-    patchschedulepickQuery, 
-  );
-  connection.release();
-  return patchschedulepickRow;
+    const patchschedulepickRow = await connection.query(
+      patchschedulepickQuery, 
+    );
+    connection.release();
+    return patchschedulepickRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //일정완료 , 완료취소
 async function updateachievementscheduleInfo(scheduleID,userID) {
   const connection = await pool.getConnection(async (conn) => conn);
-  const updateachievementscheduleQuery = `        
-  update schedule
-  set scheduleStatus = if(scheduleStatus = 1, -1, 1)
-  where scheduleID = '${scheduleID}' and userID = '${userID}';
-  `;
+
+  try{
+    const updateachievementscheduleQuery = `        
+    update schedule
+    set scheduleStatus = if(scheduleStatus = 1, -1, 1)
+    where scheduleID = '${scheduleID}' and userID = '${userID}';
+    `;
   
-  const updateachievementscheduleRow = await connection.query(
-    updateachievementscheduleQuery,  
-  );
-  connection.release();
-  return updateachievementscheduleRow;
+    const updateachievementscheduleRow = await connection.query(
+      updateachievementscheduleQuery,  
+    );
+    connection.release();
+    return updateachievementscheduleRow;
+  }catch (err) {
+    connection.release();
+  }
 };
 
 //유저별 해낸 일정 개수 조회
