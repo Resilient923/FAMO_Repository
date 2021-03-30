@@ -749,6 +749,7 @@ exports.updatePassword = async function (req, res) {
         const connection = await pool.getConnection(async conn => conn);
         try {
             console.log(loginID);
+            console.log(password);
             const [checkLoginIDRow] = await userDao.checkUserLoginID(loginID);
     
             if(checkLoginIDRow[0].exist == 0){
