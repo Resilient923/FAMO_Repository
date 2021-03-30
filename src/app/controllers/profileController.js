@@ -7,11 +7,12 @@ const { constants } = require('buffer');
 /* 프로필 사진 업로드 API */
 exports.uploadProfileImage = async function (req, res) {
     const userIDInToken = req.verifiedToken.userID;
+    const s3ProfileImage = req.file.location;
 
     try{
         const connection = await pool.getConnection(async conn => conn);
         try{
-            const s3ProfileImage = `https://soibucket.s3.ap-northeast-2.amazonaws.com/FamoProfile/${userIDInToken}`;
+            //const s3ProfileImage = `https://soibucket.s3.ap-northeast-2.amazonaws.com/FamoProfile/${userIDInToken}`;
             
             const checkUserProfileRow = await profileDao.checkUserProfile(userIDInToken);
     
