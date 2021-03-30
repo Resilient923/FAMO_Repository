@@ -1013,6 +1013,25 @@ async function updateOrder0Info(userID,scheduleID,scheduleOrder) {
   }
 };
 
+async function updateOrder3Info(getOrderParams){
+  const connection = await pool.getConnection(async (conn) => conn);
+  try{
+    const updateOrder3Query = `
+    UPDATE schedule
+    SET scheduleOrder = scheduleOrder + 1
+    WHERE userID = ? AND scheduleDate = ?;
+    `;
+
+    await connection.query(
+      updateOrder3Query,
+      getOrderParams,
+    );
+    connection.release();
+  }catch (err) {
+    connection.release();
+  }
+}
+
 //순서변경하고자 하는 일정ID 가져오기
 async function getscheduleIDInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
@@ -1078,6 +1097,7 @@ module.exports = {
   updateOrder0Info,
   updateOrder1Info,
   updateOrder2Info,
+  updateOrder3Info,
 
   //검색기록삭제
   deletehistoryInfo  

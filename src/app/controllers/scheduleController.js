@@ -56,7 +56,7 @@ exports.insertschedule = async function (req, res) {
             var scheduleOrder = -1;
 
             if(getOrderRows[0][0].maxScheduleOrder !== null){
-                scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+                await scheduleDao.updateOrder3Info(getOrderParams);
             };
 
             const inserttodayscheduleParams = [userID, scheduleName, dateFormat, scheduleTime, scheduleCategoryID, scheduleMemo, scheduleOrder];
@@ -76,7 +76,7 @@ exports.insertschedule = async function (req, res) {
             var scheduleOrder = -1;
 
             if(getOrderRows[0][0].maxScheduleOrder !== null){
-                scheduleOrder = getOrderRows[0][0].maxScheduleOrder;
+                await scheduleDao.updateOrder3Info(getOrderParams);
             }
             const insertscheduleParams = [userID, scheduleName, scheduleDate, scheduleTime, scheduleCategoryID, scheduleMemo, scheduleOrder];
 
