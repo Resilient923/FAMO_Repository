@@ -832,7 +832,7 @@ async function getIdFromScheduleNameInfo(searchWord,userID) {
   const getIdFromScheduleNameQuery = `
   select scheduleID
 from schedule
-where scheduleName like concat('%',${searchWord},'%') and userID = ${userID}
+where scheduleName like concat('%','${searchWord}','%') and userID = ${userID}
 and scheduleDelete = 1;
 `; 
   
@@ -902,7 +902,7 @@ async function insertSearchHistoryInfo(userID,searchWord) {
   try{
   const insertSearchHistoryQuery = `
   insert into searchHistory(userID, searchHistory, historyCreatedAt, historyUpdatedAt)
-values (${userID},${searchWord},default,default);
+values (${userID}, '${searchWord}' ,default,default);
 `; 
   
   const insertSearchHistoryRow = await connection.query(

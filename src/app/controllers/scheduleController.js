@@ -750,7 +750,7 @@ exports.gettotalschedule = async function (req, res) {
 };
 //일정검색
 exports.searchSchedule = async function (req, res) {
-    const  searchWord  = req.query.searchWord;
+    const searchWord = req.query.searchWord;
     //유저 인덱스
     const userID = req.verifiedToken.userID;
     let searchscheduleID = [];
@@ -768,7 +768,7 @@ exports.searchSchedule = async function (req, res) {
     const getIdFromScheduleNameRows = await scheduleDao.getIdFromScheduleNameInfo(searchWord,userID);
     
     for(let i=0; i<getIdFromScheduleNameRows.length; i++){
-        searchscheduleID.push(getIdFromScheduleNameRows[i].scheduleID)
+        searchscheduleID.push(getIdFromScheduleNameRows[i].scheduleID);
     }
     
     //검색어로 일정내용에서 인덱스받아오기
