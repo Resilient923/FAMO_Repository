@@ -831,13 +831,13 @@ async function getIdFromScheduleNameInfo(searchWord,userID) {
   try{
   const getIdFromScheduleNameQuery = `
   select scheduleID
-from schedule
-where scheduleName like concat('%','${searchWord}','%') and userID = ${userID}
-and scheduleDelete = 1;
+  from schedule
+  where scheduleName like concat('%','${searchWord}','%') and userID = ${userID}
+  and scheduleDelete = 1;
 `; 
   
   const [getIdFromScheduleNameRow] = await connection.query(
-    getIdFromScheduleNameQuery, 
+    getIdFromScheduleNameQuery,
     
   );
   connection.release();
@@ -854,7 +854,7 @@ async function getIdFromScheduleMemoInfo(searchWord,userID) {
   const getIdFromScheduleMemoQuery = `
   select scheduleID
 from schedule
-where scheduleMemo like concat('%',${searchWord},'%') and userID = ${userID}
+where scheduleMemo like concat('%', '${searchWord}' ,'%') and userID = ${userID}
 and scheduleDelete = 1;
 `; 
   
