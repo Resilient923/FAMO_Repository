@@ -647,7 +647,7 @@ exports.findLoginID = async function (req, res) {
 /* 계정 아이디, 핸드폰 번호 일치 확인 API */
 exports.checkLoginID = async function (req, res) {
     const phoneNumber = req.verifiedOtpToken.phoneNumber;
-    const loginID = req.query.loginid;
+    const loginID = req.query.loginID;
 
     if(!loginID){
         return res.json({
