@@ -497,7 +497,8 @@ async function getscheduledetailsInfo(scheduleID) {
   const connection = await pool.getConnection(async (conn) => conn);
   try{
     const getscheduledetailsQuery = `
-    select date_format(scheduleDate, '%c월 %e일 %a') as 'scheduleDate',
+    select 
+    concat(date_format(scheduleDate, '%c월 %e일' ), ' ', concat('(',SUBSTR( _UTF8'일월화수목금토', DAYOFWEEK( scheduleDate ), 1 ),')')) as 'scheduleDate',
     scheduleDate as 'scheduleForm',
       categoryName,
       scheduleName,
