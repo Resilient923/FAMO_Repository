@@ -6,13 +6,11 @@ async function checkUserLoginID(loginID) {
   const connection = await pool.getConnection(async (conn) => conn);
   const existLoginIDQuery = `
                 SELECT EXISTS ( 
-                SELECT * FROM user WHERE loginID = ?) 
+                SELECT * FROM user WHERE loginID = '${loginID}') 
                 AS exist;
                 `;
-  let loginIDParams = [loginID];
   const [loginIDRows] = await connection.query(
     existLoginIDQuery,
-    loginIDParams
   );
   connection.release();
   return [loginIDRows];
