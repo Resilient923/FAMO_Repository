@@ -164,7 +164,7 @@ async function getscheduletodayInfo(userID) {
         left join categoryColor ON categoryColor.colorID = category.categoryColor
     where scheduleDelete = 1
     and schedule.userID = ${userID} and scheduleDate = current_date 
-    order by scheduleOrder desc;
+    order by scheduleOrder;
     `;
     
     const getscheduletodayRow = await connection.query(
@@ -426,7 +426,7 @@ async function getschedulebydateInfo(userID,scheduleDate) {
         left join categoryColor ON categoryColor.colorID = category.categoryColor
     where scheduleDelete = 1
     and schedule.userID = ${userID} and scheduleDate = '${scheduleDate}'
-    order by scheduleOrder desc;
+    order by scheduleOrder;
     `;
     
     const getschedulebydateRow = await connection.query(
@@ -457,7 +457,7 @@ async function getschedulemonthInfo(userID,month,year) {
     left join categoryColor on categoryColor = colorID
     where schedule.userID = ${userID} and MONTH(scheduleDate) = '${month}' 
     and Year(scheduleDate) = '${year}' and scheduleDelete = 1
-    order by scheduleOrder desc;
+    order by scheduleOrder;
     `; 
   
     const getschedulemonthRow = await connection.query(
