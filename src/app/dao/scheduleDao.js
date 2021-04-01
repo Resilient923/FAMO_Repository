@@ -764,7 +764,7 @@ async function getdoneschedulemonthInfo(userID) {
 FROM schedule
 WHERE scheduleDate AND userID = ${userID} AND scheduleStatus = 1 AND scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
-order by extract(year_month from scheduleDate) desc
+order by extract(year_month from scheduleDate) 
 limit 6;
 `; 
   
@@ -790,7 +790,7 @@ async function getdonescheduletotalInfo(userID) {
 FROM schedule
 WHERE scheduleDate and userID = ${userID} and scheduleDelete = 1
 GROUP by extract(year_month from scheduleDate)
-order by extract(year_month from scheduleDate) desc
+order by extract(year_month from scheduleDate) 
 limit 6;
 `; 
   
