@@ -17,7 +17,7 @@
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1200px-Amazon_Web_Services_Logo.svg.png" width="180" height="100"><img src="https://img1.daumcdn.net/thumb/R800x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2FbnveOL%2FbtqKylNzdtm%2FN9aaEvOxd7Hm0N0KJYg6l0%2Fimg.png" width="180" height="100">
 <img src="https://t1.daumcdn.net/cfile/tistory/998695465BB792B11F">
-<img src="https://media.vlpt.us/images/sue517/post/89f7fe8e-618f-41a6-a98a-69634b73c2d7/img.jpg" width ="200" height ="150>
+<img src="https://media.vlpt.us/images/sue517/post/89f7fe8e-618f-41a6-a98a-69634b73c2d7/img.jpg" width ="200" height ="150">
 <img src="https://media.vlpt.us/images/ayoung0073/post/e736dc61-9be5-4f91-b751-4a1f64bc4a97/rds.png" width="180" height="100">
 <img src="https://media.vlpt.us/images/moongq/post/953eec56-74af-4d03-b293-5e91fc0c51b5/nginx.png" width="200" height="100">
 
