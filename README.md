@@ -9,6 +9,9 @@
 * [박지훈(Blue)](https://github.com/jihoon2651) : 안드로이드 개발
 * 손현주(Sunny) : 앱디자이너
 ---
+## 어플 다운로드 링크
+https://play.google.com/store/apps/details?id=com.softsquared.template.kotlin&hl=ko&gl=US
+
 ## 개발 셋업 환경
 >AWS EC2,Linux,AWS RDS,AWS S3, Node.js, PM2, MySQL,Ngnix
 
