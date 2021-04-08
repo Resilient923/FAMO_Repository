@@ -57,4 +57,5 @@
 ![image](https://user-images.githubusercontent.com/64014651/111032320-f228ae80-844e-11eb-8a6d-c46bfd74930e.png)
 
 
-
+## 앱 시연 영상
+https://softsquarededu.slack.com/files/U01HMKM204T/F01U0P40T2M/famo__________________________________________.mp4
