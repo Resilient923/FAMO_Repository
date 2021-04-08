@@ -58,4 +58,5 @@
 
 
 ## 앱 시연 영상
-https://softsquarededu.slack.com/files/U01HMKM204T/F01U0P40T2M/famo__________________________________________.mp4
+<iframe width="640" height="360" src="https://softsquarededu.slack.com/files/U01HMKM204T/F01U0P40T2M/famo__________________________________________.mp4" frameborder="0" gesture="media" allowfullscreen=""></iframe>
+
