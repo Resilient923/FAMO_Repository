@@ -1,13 +1,13 @@
-# MakeUs 6기 APP 런칭 프로젝트  Famo-server
+# MakeUs 6기 APP 런칭 프로젝트 Famo
 ### Famo앱 개발에 사용된 백엔드 관련 Repository 입니다.
 ---
 ## 팀원
 
-* [오소정(Soi)](https://github.com/sojungoh) : 서버 개발
-* [신규철(Steady)](https://github.com/Resilient923) : 서버 개발
-* [정재원(James)](https://github.com/BingoTop) : 안드로이드 개발
-* [박지훈(Blue)](https://github.com/jihoon2651) : 안드로이드 개발
-* 손현주(Sunny) : 앱디자이너
+* [오소정](https://github.com/sojungoh) : 서버 개발
+* [신규철](https://github.com/Resilient923) : 서버 개발
+* [정재원](https://github.com/BingoTop) : 안드로이드 개발
+* [박지훈](https://github.com/jihoon2651) : 안드로이드 개발
+
 ---
 ## 어플 다운로드 링크
 https://play.google.com/store/apps/details?id=com.softsquared.template.kotlin&hl=ko&gl=US
